@@ -27,4 +27,4 @@ $ python -m pip install -U .
 *Since there is no obvious "first thing to do" with this library, simply refer to the examples folder for all examples.*
 
 # Links
-- [Dress To Impress (2020)](https://impress-2020.now.sh/)
+- [Dress To Impress (2020)](https://impress-2020.openneo.net/)
