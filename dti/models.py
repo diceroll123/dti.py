@@ -140,6 +140,10 @@ class Item(Object):
         appearance_data = data.get("appearanceOn", None)
         self.appearance = appearance_data and ItemAppearance(appearance_data)
 
+    @property
+    def url(self) -> str:
+        return f'http://impress.openneo.net/items/{self.id}-{self.name.replace(" ", "-")}'
+
     def __str__(self):
         return self.name
 
