@@ -279,7 +279,7 @@ class Neopet:
                     raise BrokenAssetImage(
                         f"Layer image broken: <Data species={self.species!r} color={self.color!r} layer={layer!r}>"
                     )
-            finally:
+            else:
                 if foreground.mode == "1":  # bad
                     continue
                 if foreground.mode != "RGBA":
