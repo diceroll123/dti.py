@@ -7,7 +7,6 @@ from .constants import ALL_SPECIES_AND_COLORS
 from .enums import PetPose
 from .errors import InvalidPairBytes
 from .http import HTTPClient
-from .models import Color, Species
 
 
 class _NameDict(dict):
@@ -101,6 +100,7 @@ class State:
     async def _grab_species_and_color(self):
         data = await self.http.query(query=ALL_SPECIES_AND_COLORS)
         data = data["data"]
+        from .models import Color, Species
 
         # colors
         self._colors = _NameDict(
@@ -129,12 +129,12 @@ class State:
             return True
         return self._last_update < time.monotonic() - self._cache_timeout
 
-    async def _get_species(self, species: Union[int, str]) -> Optional[Species]:
+    async def _get_species(self, species: Union[int, str]) -> Optional["Species"]:
         await self.update()
         async with self.lock:
             return self._species[species]
 
-    async def _get_color(self, color: Union[int, str]) -> Optional[Color]:
+    async def _get_color(self, color: Union[int, str]) -> Optional["Color"]:
         await self.update()
         async with self.lock:
             return self._colors[color]

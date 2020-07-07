@@ -1,10 +1,11 @@
 from typing import List, Optional, Union
 
+from .constants import OUTFIT
 from .decorators import _require_state
 from .enums import LayerImageSize, PetPose
 from .errors import InvalidColorSpeciesPair, NoIteratorsFound
 from .iterators import ItemIDSearch, ItemSearch, ItemSearchToFit
-from .models import Color, Species
+from .models import Color, Species, Outfit
 from .neopets import Neopet
 from .state import State
 
@@ -89,8 +90,22 @@ class Client:
             pose=pose or PetPose.ideal(),
         )
 
-    async def get_neopet_by_name(self, pet_name) -> Neopet:
+    async def get_neopet_by_name(self, pet_name: str) -> Neopet:
         return await Neopet.fetch_by_name(self.state, pet_name)
+
+    @_require_state
+    async def get_outfit(
+        self, outfit_id: int, size: Optional[LayerImageSize] = None
+    ) -> Optional[Outfit]:
+        data = await self.state.http.query(
+            OUTFIT,
+            variables={
+                "outfitId": outfit_id,
+                "size": str(size or LayerImageSize.SIZE_600),
+            },
+        )
+
+        return Outfit(state=self.state, **data["data"]["outfit"])
 
     def search(
         self,

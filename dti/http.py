@@ -4,8 +4,6 @@ from typing import Dict, Optional
 
 import aiohttp
 
-from .models import AppearanceLayer
-
 
 class HTTPClient:
     __slots__ = "extra_kwargs"
@@ -28,7 +26,7 @@ class HTTPClient:
                 return await r.content.read()
 
     async def report_broken_asset(
-        self, layer: AppearanceLayer, tries: int = 3, wait_time: float = 3.3
+        self, layer, tries: int = 3, wait_time: float = 3.3
     ) -> Optional[BytesIO]:
         """Reports a broken appearance layer to Dress To Impress, putting it in a queue to be reconverted.
 

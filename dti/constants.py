@@ -4,8 +4,17 @@ from .enums import PetPose
 FRAGMENT_PET_APPEARANCE = """
 fragment PetAppearanceForOutfitPreview on PetAppearance {
   id
-  petStateId
   pose
+  color {
+    id
+    name
+  }
+  species {
+    id
+    name
+  }
+  bodyId
+  petStateId
   layers {
     imageUrl(size: $size)
     zone {
@@ -137,6 +146,53 @@ query($petName: String!) {
     }
     items {
       id
+    }
+  }
+}"""
+
+# grab outfit data
+OUTFIT = """
+query($outfitId: ID!, $size: LayerImageSize!) {
+  outfit(id: $outfitId) {
+    id
+    name
+    wornItems {
+      id
+      name
+      description
+      thumbnailUrl
+      rarityIndex
+      isNc
+    }
+    closetedItems {
+      id
+      name
+      description
+      thumbnailUrl
+      rarityIndex
+      isNc
+    }
+    petAppearance {
+      id
+      pose
+      bodyId
+      petStateId
+      color {
+        id
+        name
+      }
+      species {
+        id
+        name
+      }
+      layers {
+        imageUrl(size: $size)
+        zone {
+          id
+          depth
+          label
+        }
+      }
     }
   }
 }"""

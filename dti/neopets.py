@@ -83,7 +83,7 @@ class Neopet:
         data = data["data"]
         items = [Item(**item) for item in data["items"]]
         appearances = [
-            PetAppearance(appearance) for appearance in data["petAppearances"]
+            PetAppearance(state, appearance) for appearance in data["petAppearances"]
         ]
 
         bit = await state._get_bit(species_id=species.id, color_id=color.id)
