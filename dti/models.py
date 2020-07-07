@@ -178,6 +178,7 @@ class Neopet:
         "items",
         "name",
         "pose",
+        "size",
     )
 
     def __init__(
@@ -190,6 +191,7 @@ class Neopet:
         pose: PetPose,
         appearances: List[PetAppearance],
         items: Optional[List[Item]] = None,
+        size: Optional[LayerImageSize] = None,
         name: Optional[str] = None,
     ):
         self.state = state
@@ -198,6 +200,7 @@ class Neopet:
         self.appearances = appearances
         self.items = items or []
         self.name = name
+        self.size = size
         self.pose = pose
         self._valid_poses = valid_poses
 
@@ -218,13 +221,16 @@ class Neopet:
                 f"The {species} species does not have the color {color}"
             )
 
+        # note: sizes are not editable once the Neopet object is made
+        size = size or LayerImageSize.SIZE_600
+
         data = await state.http.query(
             query=GRAB_PET_APPEARANCES,
             variables={
                 "allItemIds": item_ids or [],
                 "speciesId": species.id,
                 "colorId": color.id,
-                "size": str(size or LayerImageSize.SIZE_600),
+                "size": str(size),
             },
         )
 
@@ -252,6 +258,7 @@ class Neopet:
             items=items,
             appearances=appearances,
             name=name,
+            size=size,
         )
 
     @classmethod
@@ -414,7 +421,15 @@ class Neopet:
         from PIL import Image
         from io import BytesIO
 
-        canvas = Image.new("RGBA", (600, 600))
+        sizes = {
+            LayerImageSize.SIZE_150: 150,
+            LayerImageSize.SIZE_300: 300,
+            LayerImageSize.SIZE_600: 600,
+        }
+
+        img_size = sizes[self.size or LayerImageSize.SIZE_600]
+
+        canvas = Image.new("RGBA", (img_size, img_size))
 
         for layer in await self._render_layers(pose):
             layer_image = BytesIO(
@@ -471,6 +486,7 @@ class Outfit(Object):
         self,
         fp: Union[BinaryIO, PathLike],
         pose: Optional[PetPose] = None,
+        size: Optional[LayerImageSize] = None,
         fix_broken_assets: bool = False,
     ):
         pose = pose or self.pet_appearance.pose
@@ -479,6 +495,7 @@ class Outfit(Object):
             species=self.pet_appearance.species,
             color=self.pet_appearance.color,
             pose=pose,
+            size=size,
             item_ids=[item.id for item in self.worn_items],
         )
         await neopet.render(fp, fix_broken_assets=fix_broken_assets)
