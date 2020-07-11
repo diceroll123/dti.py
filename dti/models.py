@@ -379,12 +379,9 @@ class Neopet:
         temp_items: List[Item] = []
         for item in self.items:
             for temp in temp_items.copy():
-                intersect_1 = set(item.appearance.restricted_zones).intersection(
-                    {layer.zone for layer in temp.appearance.layers}
-                )
-                intersect_2 = set(temp.appearance.restricted_zones).intersection(
-                    {layer.zone for layer in item.appearance.layers}
-                )
+                zones = {layer.zone for layer in temp.appearance.layers}
+                intersect_1 = set(item.appearance.restricted_zones).intersection(zones)
+                intersect_2 = set(temp.appearance.restricted_zones).intersection(zones)
                 if intersect_1 or intersect_2:
                     temp_items.remove(temp)
             temp_items.append(item)
