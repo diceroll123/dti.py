@@ -447,7 +447,7 @@ class Neopet:
 
                 if raise_exception:
                     raise BrokenAssetImage(
-                        f"Layer image broken: <Data species={self.species!r} color={self.color!r} layer={layer!r}>"
+                        f"Layer image broken: <Data species={self.species!r} color={self.color!r} pose={pose!r} layer={layer!r}>"
                     )
             finally:
                 if foreground.mode == "1":  # bad
