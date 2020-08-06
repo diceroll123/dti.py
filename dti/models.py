@@ -410,10 +410,7 @@ class Neopet:
         return [layers[index] for index in sorted(layers.keys())]
 
     async def render(
-        self,
-        fp: Union[BinaryIO, PathLike],
-        pose: Optional[PetPose] = None,
-        fix_broken_assets: bool = False,
+        self, fp: Union[BinaryIO, PathLike], pose: Optional[PetPose] = None,
     ):
         """Outputs the rendered pet with the desired emotion + gender presentation to the file-like object passed.
 
@@ -441,17 +438,9 @@ class Neopet:
             try:
                 foreground = Image.open(layer_image)
             except Exception:
-                raise_exception = True
-                if fix_broken_assets:
-                    attempt = await self.state.http.report_broken_asset(layer)
-                    if attempt is not None:
-                        raise_exception = False
-                        foreground = Image.open(attempt)
-
-                if raise_exception:
-                    raise BrokenAssetImage(
-                        f"Layer image broken: <Data species={self.species!r} color={self.color!r} pose={pose!r} layer={layer!r}>"
-                    )
+                raise BrokenAssetImage(
+                    f"Layer image broken: <Data species={self.species!r} color={self.color!r} pose={pose!r} layer={layer!r}>"
+                )
             finally:
                 if foreground.mode == "1":  # bad
                     continue
@@ -490,7 +479,6 @@ class Outfit(Object):
         fp: Union[BinaryIO, PathLike],
         pose: Optional[PetPose] = None,
         size: Optional[LayerImageSize] = None,
-        fix_broken_assets: bool = False,
     ):
         pose = pose or self.pet_appearance.pose
         neopet = await Neopet.fetch_assets_for(
@@ -501,7 +489,7 @@ class Outfit(Object):
             size=size,
             item_ids=[item.id for item in self.worn_items],
         )
-        await neopet.render(fp, fix_broken_assets=fix_broken_assets)
+        await neopet.render(fp)
 
     def __repr__(self):
         return f"<Outfit id={self.id} appearance={self.pet_appearance!r}>"
