@@ -474,6 +474,20 @@ class Outfit(Object):
     def url(self) -> str:
         return f"https://impress.openneo.net/outfits/{self.id}"
 
+    @property
+    def image_urls(self):
+        new_id = str(self.id).zfill(9)
+        id_folder = new_id[:3] + "/" + new_id[3:6] + "/" + new_id[6:]
+        url = f"https://openneo-uploads.s3.amazonaws.com/outfits/{id_folder}/"
+
+        urls = {
+            "large": url + "preview.png",
+            "medium": url + "medium_preview.png",
+            "small": url + "small_preview.png",
+        }
+
+        return urls
+
     async def render(
         self,
         fp: Union[BinaryIO, PathLike],
