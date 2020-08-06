@@ -105,7 +105,9 @@ class Client:
             },
         )
 
-        return Outfit(state=self.state, **data["data"]["outfit"])
+        outfit_data = data["data"]["outfit"]
+        if outfit_data:
+            return Outfit(state=self.state, **outfit_data)
 
     def search(
         self,
