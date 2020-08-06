@@ -120,6 +120,9 @@ class PetAppearance(Object):
             AppearanceLayer(**layer, asset_type="biology") for layer in data["layers"]
         ]
 
+    def __repr__(self):
+        return f"<PetAppearance species={self.species!r} color={self.color!r} pose={self.pose!r}>"
+
 
 class ItemAppearance:
     __slots__ = ("layers", "restricted_zones")
@@ -499,3 +502,6 @@ class Outfit(Object):
             item_ids=[item.id for item in self.worn_items],
         )
         await neopet.render(fp, fix_broken_assets=fix_broken_assets)
+
+    def __repr__(self):
+        return f"<Outfit id={self.id} appearance={self.pet_appearance!r}>"
