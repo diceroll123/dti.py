@@ -1,13 +1,11 @@
-import asyncio
-from io import BytesIO
-from typing import Dict, Optional
+from typing import Dict
 
 import aiohttp
 
 
 class HTTPClient:
     __slots__ = "extra_kwargs"
-    BASE = "https://impress-2020.now.sh"
+    BASE = "https://impress-2020.openneo.net"
     API_BASE = f"{BASE}/api"
 
     def __init__(self, *, proxy=None, proxy_auth=None):
