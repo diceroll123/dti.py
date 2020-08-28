@@ -14,7 +14,6 @@ fragment PetAppearanceForOutfitPreview on PetAppearance {
     name
   }
   bodyId
-  petStateId
   layers {
     imageUrl(size: $size)
     zone {
@@ -176,7 +175,6 @@ query($outfitId: ID!, $size: LayerImageSize!) {
       id
       pose
       bodyId
-      petStateId
       color {
         id
         name
