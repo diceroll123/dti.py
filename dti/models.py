@@ -219,6 +219,8 @@ class Neopet:
         size: Optional[LayerImageSize] = None,
         name: Optional[str] = None,
     ) -> "Neopet":
+        """Returns the data for a species+color+pose combo, optionally with items, an image size, and a name for internal usage."""
+
         if not await state._check(species_id=species.id, color_id=color.id):
             raise InvalidColorSpeciesPair(
                 f"The {species} species does not have the color {color}"
@@ -268,6 +270,7 @@ class Neopet:
     async def fetch_by_name(
         cls, state: State, pet_name: str, size: Optional[LayerImageSize] = None
     ) -> "Neopet":
+        """Returns the data for a specific neopet, by name."""
         data = await state.http.query(
             query=PET_ON_NEOPETS, variables={"petName": pet_name}
         )
@@ -291,6 +294,7 @@ class Neopet:
 
     @property
     def legacy_closet_url(self) -> str:
+        """Returns the legacy closet URL for a neopet customization."""
         from urllib.parse import urlencode
         from collections import OrderedDict
 
@@ -315,6 +319,7 @@ class Neopet:
 
     @property
     def closet_url(self) -> str:
+        """Returns the closet URL for a neopet customization."""
         from urllib.parse import urlencode
         from collections import OrderedDict
 
@@ -335,15 +340,18 @@ class Neopet:
         return self.state.http.BASE + "/outfits/new?" + urlencode(params, doseq=True)
 
     def get_pet_appearance(self, pose: PetPose) -> Optional[PetAppearance]:
+        """Returns the pet appearance for the provided pet pose."""
         for appearance in self.appearances:
             if appearance.pose == pose:
                 return appearance
         return None
 
     def check(self, pose: PetPose) -> bool:
+        """Returns True if the pet pose provided is valid."""
         return (self._valid_poses & pose) == pose
 
     def valid_poses(self, override_pose: Optional[PetPose] = None) -> List[PetPose]:
+        """Returns a list of valid pet poses."""
         pose = override_pose or self.pose
         return [p for p in CLOSEST_POSES_IN_ORDER[pose] if self.check(pose=p)]
 
@@ -464,10 +472,12 @@ class Outfit(Object):
 
     @property
     def url(self) -> str:
+        """Returns the outfit URL for the ID provided."""
         return f"https://impress.openneo.net/outfits/{self.id}"
 
     @property
     def image_urls(self):
+        """Returns a dict of the different sizes for the rendered image url of an outfit for the ID provided."""
         new_id = str(self.id).zfill(9)
         id_folder = new_id[:3] + "/" + new_id[3:6] + "/" + new_id[6:]
         url = f"https://openneo-uploads.s3.amazonaws.com/outfits/{id_folder}/"
@@ -486,6 +496,7 @@ class Outfit(Object):
         pose: Optional[PetPose] = None,
         size: Optional[LayerImageSize] = None,
     ):
+        """Exports a rendered customization image to the file-like object provided."""
         pose = pose or self.pet_appearance.pose
         neopet = await Neopet.fetch_assets_for(
             self.state,
