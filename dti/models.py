@@ -123,10 +123,11 @@ class PetAppearance(Object):
         return f"<PetAppearance species={self.species!r} color={self.color!r} pose={self.pose!r}>"
 
 
-class ItemAppearance:
-    __slots__ = ("layers", "restricted_zones")
+class ItemAppearance(Object):
+    __slots__ = ("id", "layers", "restricted_zones")
 
     def __init__(self, data: Dict):
+        self.id = data["id"]
         self.layers = [
             AppearanceLayer(**layer, asset_type="object") for layer in data["layers"]
         ]

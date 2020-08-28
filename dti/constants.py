@@ -27,6 +27,7 @@ fragment PetAppearanceForOutfitPreview on PetAppearance {
 
 FRAGMENT_ITEM_APPEARANCE = """
 fragment ItemAppearanceForOutfitPreview on ItemAppearance {
+  id
   restrictedZones {
     id
     depth
