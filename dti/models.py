@@ -114,7 +114,6 @@ class PetAppearance(Object):
         self.color = Color(state, data["color"])
         self.species = Species(state, data["species"])
 
-        self.pet_state_id = int(data["petStateId"])
         self.pose = PetPose(data["pose"])
         self.layers = [
             AppearanceLayer(**layer, asset_type="biology") for layer in data["layers"]
