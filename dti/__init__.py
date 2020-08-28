@@ -8,4 +8,3 @@ from .client import Client
 from .enums import LayerImageSize, PetPose
 from .errors import *
 from .models import *
-from .neopets import Neopet

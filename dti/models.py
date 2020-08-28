@@ -107,7 +107,7 @@ class PetAppearance(Object):
     __slots__ = ("id", "body_id", "species", "color", "pet_state_id", "pose", "layers")
 
     def __init__(self, state, data: Dict):
-        self.id = data["id"]  # formatted "SPECIES-COLOR-POSE"
+        self.id = data["id"]
         self.body_id = data["bodyId"]
 
         # create new, somewhat temporary colors from this data since we don't have async access
@@ -303,9 +303,9 @@ class Neopet:
 
         valid_poses = self.valid_poses()
         if len(valid_poses):
-            pet_state_id = self.get_pet_state_id(valid_poses[0])
-            if pet_state_id:
-                params["state"] = pet_state_id
+            appearance = self.get_pet_appearance(valid_poses[0])
+            if appearance:
+                params["state"] = appearance.id
 
         if self.items:
             params["objects[]"] = [item.id for item in self.items]
@@ -334,15 +334,10 @@ class Neopet:
 
         return self.state.http.BASE + "/outfits/new?" + urlencode(params, doseq=True)
 
-    def get_pet_appearance_id(self, pose: Optional[PetPose] = None) -> str:
-        """Returns the provided pet appearance label"""
-        pose = pose or self.pose
-        return f"{self.species.id}-{self.color.id}-{pose.name}"
-
-    def get_pet_state_id(self, pose: PetPose) -> Optional[int]:
+    def get_pet_appearance(self, pose: PetPose) -> Optional[PetAppearance]:
         for appearance in self.appearances:
             if appearance.pose == pose:
-                return appearance.pet_state_id
+                return appearance
         return None
 
     def check(self, pose: PetPose) -> bool:
@@ -366,15 +361,12 @@ class Neopet:
 
         pose = valid_poses[0]
 
-        pet_appearance = None
-        find = self.get_pet_appearance_id(pose=pose)
-        for appearance in self.appearances:
-            if appearance.id == find:
-                pet_appearance = appearance
-                break
+        pet_appearance = self.get_pet_appearance(pose=pose)
 
         if pet_appearance is None:
-            raise MissingPetAppearance(f'Pet Appearance <"{find}"> does not exist.')
+            raise MissingPetAppearance(
+                f'Pet Appearance <"{self.species.id}-{self.color.id}"> does not exist.'
+            )
 
         layers = {}  # a key-value dict where keys are the depth
 

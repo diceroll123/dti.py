@@ -5,8 +5,7 @@ from .decorators import _require_state
 from .enums import LayerImageSize, PetPose
 from .errors import InvalidColorSpeciesPair, NoIteratorsFound
 from .iterators import ItemIDSearch, ItemSearch, ItemSearchToFit
-from .models import Color, Species, Outfit
-from .neopets import Neopet
+from .models import Color, Species, Outfit, Neopet
 from .state import State
 
 
