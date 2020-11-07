@@ -1,3 +1,4 @@
+import asyncio
 from os import PathLike
 from typing import Dict, List, Optional, Union, BinaryIO
 
@@ -431,11 +432,16 @@ class Neopet:
 
         canvas = Image.new("RGBA", (img_size, img_size))
 
-        for layer in await self._render_layers(pose):
-            layer_image = BytesIO(
-                await self.state.http.get_binary_data(layer.image_url)
-            )
+        layers = await self._render_layers(pose)
+
+        # download images simultaneously
+        images = await asyncio.gather(
+            *[self.state.http.get_binary_data(layer.image_url) for layer in layers]
+        )
+
+        for layer, image in zip(layers, images):
             try:
+                layer_image = BytesIO(image)
                 foreground = Image.open(layer_image)
             except Exception:
                 raise BrokenAssetImage(
