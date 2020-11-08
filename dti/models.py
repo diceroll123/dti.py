@@ -145,6 +145,7 @@ class Item(Object):
         "thumbnail_url",
         "appearance",
         "is_nc",
+        "is_pb",
         "rarity",
     )
 
@@ -154,6 +155,7 @@ class Item(Object):
         self.description = data.get("description")
         self.thumbnail_url = data.get("thumbnailUrl")
         self.is_nc = data.get("isNc")
+        self.is_pb = data.get("isPb")
         self.rarity = data.get("rarityIndex")
 
         appearance_data = data.get("appearanceOn", None)
@@ -169,7 +171,7 @@ class Item(Object):
         return self.name
 
     def __repr__(self):
-        return f"<Item id={self.id} name={self.name!r} is_nc={self.is_nc} rarity={self.rarity}>"
+        return f"<Item id={self.id} name={self.name!r} is_nc={self.is_nc} is_pb={self.is_pb} rarity={self.rarity}>"
 
 
 class Neopet:

@@ -52,6 +52,7 @@ fragment ItemResult on ItemSearchResult {
     thumbnailUrl
     rarityIndex
     isNc
+    isPb
     appearanceOn(speciesId: $speciesId, colorId: $colorId) {
       ...ItemAppearanceForOutfitPreview
     }
@@ -82,6 +83,7 @@ query($itemIds: [ID!]!) {
     thumbnailUrl
     rarityIndex
     isNc
+    isPb
   }
 }"""
 
@@ -106,6 +108,7 @@ query($query: String!) {
       thumbnailUrl
       rarityIndex
       isNc
+      isPb
     }
   }
 }"""
@@ -124,6 +127,7 @@ query ($allItemIds: [ID!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSiz
     thumbnailUrl
     rarityIndex
     isNc
+    isPb
     appearanceOn(speciesId: $speciesId, colorId: $colorId) {
       ...ItemAppearanceForOutfitPreview
     }
@@ -163,6 +167,7 @@ query($outfitId: ID!, $size: LayerImageSize!) {
       thumbnailUrl
       rarityIndex
       isNc
+      isPb
     }
     closetedItems {
       id
@@ -171,6 +176,7 @@ query($outfitId: ID!, $size: LayerImageSize!) {
       thumbnailUrl
       rarityIndex
       isNc
+      isPb
     }
     petAppearance {
       id
