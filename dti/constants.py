@@ -14,6 +14,11 @@ fragment PetAppearanceForOutfitPreview on PetAppearance {
     name
   }
   bodyId
+  restrictedZones {
+    id
+    depth
+    label
+  }
   layers {
     imageUrl(size: $size)
     zone {

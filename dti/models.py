@@ -110,7 +110,16 @@ class AppearanceLayer(Object):
 
 
 class PetAppearance(Object):
-    __slots__ = ("id", "body_id", "species", "color", "pet_state_id", "pose", "layers")
+    __slots__ = (
+        "id",
+        "body_id",
+        "species",
+        "color",
+        "pet_state_id",
+        "pose",
+        "layers",
+        "restricted_zones",
+    )
 
     def __init__(self, state, data: Dict):
         self.id = data["id"]
@@ -123,6 +132,9 @@ class PetAppearance(Object):
         self.pose = PetPose(data["pose"])
         self.layers = [
             AppearanceLayer(**layer, asset_type="biology") for layer in data["layers"]
+        ]
+        self.restricted_zones = [
+            Zone(restricted) for restricted in data["restrictedZones"]
         ]
 
     def __repr__(self):
@@ -409,6 +421,10 @@ class Neopet:
             temp_items.append(item)
 
         restricted_zones = set()  # zone IDs of items going on the pet
+
+        for layer in pet_appearance.restricted_zones:
+            restricted_zones.add(layer.id)
+
         for item in temp_items:
             for restricted_zone in item.appearance.restricted_zones:
                 restricted_zones.add(restricted_zone.id)
