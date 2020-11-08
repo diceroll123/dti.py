@@ -127,13 +127,35 @@ query($names: [String!]!) {
 }"""
 
 # grab pet appearances
-GRAB_PET_APPEARANCES = (
+GRAB_PET_APPEARANCES_BY_IDS = (
     """
 query ($allItemIds: [ID!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSize!) {
   petAppearances(speciesId: $speciesId, colorId: $colorId) {
     ...PetAppearanceForOutfitPreview
   }
   items(ids: $allItemIds) {
+    id
+    name
+    description
+    thumbnailUrl
+    rarityIndex
+    isNc
+    isPb
+    appearanceOn(speciesId: $speciesId, colorId: $colorId) {
+      ...ItemAppearanceForOutfitPreview
+    }
+  }
+}"""
+    + FRAGMENT_PET_APPEARANCE
+    + FRAGMENT_ITEM_APPEARANCE
+)
+GRAB_PET_APPEARANCES_BY_NAMES = (
+    """
+query ($names: [String!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSize!) {
+  petAppearances(speciesId: $speciesId, colorId: $colorId) {
+    ...PetAppearanceForOutfitPreview
+  }
+  itemsByName(names: $names) {
     id
     name
     description

@@ -2,7 +2,12 @@ import asyncio
 from os import PathLike
 from typing import Dict, List, Optional, Union, BinaryIO
 
-from .constants import CLOSEST_POSES_IN_ORDER, GRAB_PET_APPEARANCES, PET_ON_NEOPETS
+from .constants import (
+    CLOSEST_POSES_IN_ORDER,
+    GRAB_PET_APPEARANCES_BY_IDS,
+    PET_ON_NEOPETS,
+    GRAB_PET_APPEARANCES_BY_NAMES,
+)
 from .decorators import _require_state
 from .enums import PetPose, LayerImageSize
 from .errors import (
@@ -219,6 +224,7 @@ class Neopet:
         color: Color,
         pose: PetPose,
         item_ids: Optional[List[Union[str, int]]] = None,
+        item_names: Optional[List[str]] = None,
         size: Optional[LayerImageSize] = None,
         name: Optional[str] = None,
     ) -> "Neopet":
@@ -232,15 +238,22 @@ class Neopet:
         # note: sizes are not editable once the Neopet object is made
         size = size or LayerImageSize.SIZE_600
 
-        data = await state.http.query(
-            query=GRAB_PET_APPEARANCES,
-            variables={
-                "allItemIds": item_ids or [],
-                "speciesId": species.id,
-                "colorId": color.id,
-                "size": str(size),
-            },
-        )
+        variables = {
+            "speciesId": species.id,
+            "colorId": color.id,
+            "size": str(size),
+        }
+
+        if item_names:
+            variables["names"] = item_names or []
+            query = GRAB_PET_APPEARANCES_BY_NAMES
+            key = "itemsByName"
+        else:
+            variables["allItemIds"] = item_ids or []
+            query = GRAB_PET_APPEARANCES_BY_IDS
+            key = "items"
+
+        data = await state.http.query(query=query, variables=variables)
 
         error = data.get("error")
         if error:
@@ -250,7 +263,7 @@ class Neopet:
                 )
 
         data = data["data"]
-        items = [Item(**item) for item in data["items"]]
+        items = [Item(**item) for item in data[key] if item is not None]
         appearances = [
             PetAppearance(state, appearance) for appearance in data["petAppearances"]
         ]
