@@ -131,6 +131,19 @@ query($names: [String!]!) {
   }
 }"""
 
+SEARCH_QUERY_EXACT_SINGLE = """
+query($name: String!) {
+  itemByName(name: $name) {
+    id
+    name
+    description
+    thumbnailUrl
+    rarityIndex
+    isNc
+    isPb
+  }
+}"""
+
 # grab pet appearances
 GRAB_PET_APPEARANCES_BY_IDS = (
     """

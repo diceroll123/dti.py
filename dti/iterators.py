@@ -6,6 +6,7 @@ from .constants import (
     SEARCH_QUERY,
     SEARCH_TO_FIT,
     SEARCH_QUERY_EXACT,
+    SEARCH_QUERY_EXACT_SINGLE,
 )
 from .enums import LayerImageSize
 from .models import Item
@@ -135,10 +136,17 @@ class ItemSearchNames(_DTISearch):
         self.names = names
 
     async def fetch_items(self):
-        data = await self.state.http.query(
-            query=SEARCH_QUERY_EXACT, variables={"names": self.names}
-        )
-        return data["data"]["itemsByName"]
+        if len(self.names) == 1:
+            query = SEARCH_QUERY_EXACT_SINGLE
+            variables = {"name": self.names[0]}
+            key = "itemByName"
+        else:
+            query = SEARCH_QUERY_EXACT
+            variables = {"names": self.names}
+            key = "itemsByName"
+
+        data = await self.state.http.query(query=query, variables=variables)
+        return data["data"][key]
 
 
 class ItemSearch(_DTISearch):
