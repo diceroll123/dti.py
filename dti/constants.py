@@ -5,6 +5,7 @@ FRAGMENT_PET_APPEARANCE = """
 fragment PetAppearanceForOutfitPreview on PetAppearance {
   id
   pose
+  bodyId
   color {
     id
     name
@@ -13,7 +14,6 @@ fragment PetAppearanceForOutfitPreview on PetAppearance {
     id
     name
   }
-  bodyId
   restrictedZones {
     id
     depth
@@ -229,6 +229,11 @@ query($outfitId: ID!, $size: LayerImageSize!) {
       species {
         id
         name
+      }
+      restrictedZones {
+        id
+        depth
+        label
       }
       layers {
         imageUrl(size: $size)
