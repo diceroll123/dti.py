@@ -1,7 +1,12 @@
 import asyncio
 from typing import List, Optional, Union
 
-from .constants import SEARCH_ITEM_IDS, SEARCH_QUERY, SEARCH_TO_FIT
+from .constants import (
+    SEARCH_ITEM_IDS,
+    SEARCH_QUERY,
+    SEARCH_TO_FIT,
+    SEARCH_QUERY_EXACT,
+)
 from .enums import LayerImageSize
 from .models import Item
 from .state import State
@@ -26,7 +31,10 @@ class _DTISearch:
         items = await self.fetch_items()
 
         for item in items:
-            await self._items.put(Item(**item))
+            if item:
+                await self._items.put(Item(**item))
+            else:
+                await self._items.put(None)
 
         self.post_fetch(items)
 
@@ -115,6 +123,22 @@ class ItemSearchToFit(_PaginatedDTISearch):
             },
         )
         return data["data"]["itemSearchToFit"]["items"]
+
+
+class ItemSearchNames(_DTISearch):
+    # an exact-match search for items
+    # not-found items WILL yield None
+    def __init__(
+        self, state: State, *, names: List[str],
+    ):
+        super().__init__(state)
+        self.names = names
+
+    async def fetch_items(self):
+        data = await self.state.http.query(
+            query=SEARCH_QUERY_EXACT, variables={"names": self.names}
+        )
+        return data["data"]["itemsByName"]
 
 
 class ItemSearch(_DTISearch):

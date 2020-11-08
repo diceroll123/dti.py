@@ -4,7 +4,7 @@ from .constants import OUTFIT
 from .decorators import _require_state
 from .enums import LayerImageSize, PetPose
 from .errors import InvalidColorSpeciesPair, NoIteratorsFound
-from .iterators import ItemIDSearch, ItemSearch, ItemSearchToFit
+from .iterators import ItemIDSearch, ItemSearch, ItemSearchToFit, ItemSearchNames
 from .models import Color, Species, Outfit, Neopet
 from .state import State
 
@@ -112,6 +112,8 @@ class Client:
         self,
         *,
         query: Optional[str] = None,
+        name: Optional[str] = None,
+        names: Optional[List[str]] = None,
         species_id: Optional[int] = None,
         color_id: Optional[int] = None,
         item_ids: Optional[List[Union[str, int]]] = None,
@@ -120,6 +122,13 @@ class Client:
     ):
 
         searcher = None
+        _names = []
+
+        if name:
+            _names.append(name)
+
+        if names:
+            _names.extend(names)
 
         if all([query, species_id, color_id]):
             searcher = ItemSearchToFit(
@@ -130,6 +139,8 @@ class Client:
                 size=size,
                 per_page=per_page,
             )
+        elif _names:
+            searcher = ItemSearchNames(state=self.state, names=_names)
         elif query:
             searcher = ItemSearch(state=self.state, query=query)
         elif all([item_ids]):
