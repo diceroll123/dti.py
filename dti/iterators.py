@@ -146,7 +146,14 @@ class ItemSearchNames(_DTISearch):
             key = "itemsByName"
 
         data = await self.state.http.query(query=query, variables=variables)
-        return data["data"][key]
+
+        items = data["data"][key]
+
+        # ensure we're working with iterable lists of items
+        # when we search for a single item, it returns just the item, so we pur it in a list
+        if isinstance(items, list):
+            return items
+        return [items]
 
 
 class ItemSearch(_DTISearch):
