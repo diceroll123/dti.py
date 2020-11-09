@@ -1,7 +1,7 @@
 import pytest
 
 from dti import Client
-from tests import TEST_ITEM, TEST_PET
+from tests import TEST_ITEM, TEST_ITEM_TWO, TEST_PET
 
 
 @pytest.mark.asyncio
@@ -12,6 +12,32 @@ async def test_query_search() -> None:
     async for item in client.search(query=TEST_ITEM.name):
         if item.name == TEST_ITEM.name and item.id == TEST_ITEM.id:
             found = True
+
+    assert found
+
+
+@pytest.mark.asyncio
+async def test_query_exact_search_single() -> None:
+    client = Client()
+    found = False
+
+    async for item in client.search(name=TEST_ITEM.name):
+        if item.name == TEST_ITEM.name and item.id == TEST_ITEM.id:
+            found = True
+
+    assert found
+
+
+@pytest.mark.asyncio
+async def test_query_exact_search_multiple() -> None:
+    client = Client()
+
+    result_ids = []
+
+    async for item in client.search(names=[TEST_ITEM.name, TEST_ITEM_TWO.name]):
+        result_ids.append(item.id)
+
+    found = TEST_ITEM.id in result_ids and TEST_ITEM_TWO.id in result_ids
 
     assert found
 
