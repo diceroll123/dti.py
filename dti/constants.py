@@ -111,7 +111,7 @@ query($query: String!) {
     + FRAGMENT_ITEM_PROPERTIES
 )
 
-SEARCH_QUERY_EXACT = (
+SEARCH_QUERY_EXACT_MULTIPLE = (
     """
 query($names: [String!]!) {
   itemsByName(names: $names) {

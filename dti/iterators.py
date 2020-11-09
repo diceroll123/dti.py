@@ -5,7 +5,7 @@ from .constants import (
     SEARCH_ITEM_IDS,
     SEARCH_QUERY,
     SEARCH_TO_FIT,
-    SEARCH_QUERY_EXACT,
+    SEARCH_QUERY_EXACT_MULTIPLE,
     SEARCH_QUERY_EXACT_SINGLE,
 )
 from .enums import LayerImageSize
@@ -101,7 +101,7 @@ class ItemSearchToFit(_PaginatedDTISearch):
         species_id: int,
         color_id: int,
         per_page: int = 30,
-        size: Optional[LayerImageSize] = None
+        size: Optional[LayerImageSize] = None,
     ):
         super().__init__(state, per_page=per_page)
         self.query = query
@@ -141,7 +141,7 @@ class ItemSearchNames(_DTISearch):
             variables = {"name": self.names[0]}
             key = "itemByName"
         else:
-            query = SEARCH_QUERY_EXACT
+            query = SEARCH_QUERY_EXACT_MULTIPLE
             variables = {"names": self.names}
             key = "itemsByName"
 
