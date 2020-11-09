@@ -1,5 +1,16 @@
-# fragments
 from .enums import PetPose
+
+# fragments
+FRAGMENT_ITEM_PROPERTIES = """
+fragment ItemProperties on Item {
+  id
+  name
+  description
+  thumbnailUrl
+  rarityIndex
+  isNc
+  isPb
+}"""
 
 FRAGMENT_PET_APPEARANCE = """
 fragment PetAppearanceForOutfitPreview on PetAppearance {
@@ -29,7 +40,6 @@ fragment PetAppearanceForOutfitPreview on PetAppearance {
   }
 }"""
 
-
 FRAGMENT_ITEM_APPEARANCE = """
 fragment ItemAppearanceForOutfitPreview on ItemAppearance {
   id
@@ -44,22 +54,6 @@ fragment ItemAppearanceForOutfitPreview on ItemAppearance {
       id
       depth
       label
-    }
-  }
-}"""
-
-FRAGMENT_ITEM_SEARCH_RESULT = """
-fragment ItemResult on ItemSearchResult {
-  items {
-    id
-    name
-    description
-    thumbnailUrl
-    rarityIndex
-    isNc
-    isPb
-    appearanceOn(speciesId: $speciesId, colorId: $colorId) {
-      ...ItemAppearanceForOutfitPreview
     }
   }
 }"""
@@ -79,70 +73,63 @@ ALL_SPECIES_AND_COLORS = """
 }"""
 
 # search
-SEARCH_ITEM_IDS = """
+SEARCH_ITEM_IDS = (
+    """
 query($itemIds: [ID!]!) {
   items(ids: $itemIds) {
-    id
-    name
-    description
-    thumbnailUrl
-    rarityIndex
-    isNc
-    isPb
+    ...ItemProperties
   }
 }"""
+    + FRAGMENT_ITEM_PROPERTIES
+)
 
 SEARCH_TO_FIT = (
     """
 query($query: String!, $speciesId: ID!, $colorId: ID!, $offset: Int, $limit: Int, $size: LayerImageSize!) {
   itemSearchToFit(query: $query, speciesId: $speciesId, colorId: $colorId, offset: $offset, limit: $limit) {
-    ...ItemResult
-  }
-}"""
-    + FRAGMENT_ITEM_APPEARANCE
-    + FRAGMENT_ITEM_SEARCH_RESULT
-)
-
-SEARCH_QUERY = """
-query($query: String!) {
-  itemSearch(query: $query) {
     items {
-      id
-      name
-      description
-      thumbnailUrl
-      rarityIndex
-      isNc
-      isPb
+      ...ItemProperties
+      appearanceOn(speciesId: $speciesId, colorId: $colorId) {
+        ...ItemAppearanceForOutfitPreview
+      } 
     }
   }
 }"""
+    + FRAGMENT_ITEM_APPEARANCE
+    + FRAGMENT_ITEM_PROPERTIES
+)
 
-SEARCH_QUERY_EXACT = """
+SEARCH_QUERY = (
+    """
+query($query: String!) {
+  itemSearch(query: $query) {
+    items {
+      ...ItemProperties
+    }
+  }
+}"""
+    + FRAGMENT_ITEM_PROPERTIES
+)
+
+SEARCH_QUERY_EXACT = (
+    """
 query($names: [String!]!) {
   itemsByName(names: $names) {
-    id
-    name
-    description
-    thumbnailUrl
-    rarityIndex
-    isNc
-    isPb
+    ...ItemProperties
   }
 }"""
+    + FRAGMENT_ITEM_PROPERTIES
+)
 
-SEARCH_QUERY_EXACT_SINGLE = """
+SEARCH_QUERY_EXACT_SINGLE = (
+    """
 query($name: String!) {
   itemByName(name: $name) {
-    id
-    name
-    description
-    thumbnailUrl
-    rarityIndex
-    isNc
-    isPb
+    ...ItemProperties
   }
 }"""
+    + FRAGMENT_ITEM_PROPERTIES
+)
 
 # grab pet appearances
 GRAB_PET_APPEARANCES_BY_IDS = (
@@ -152,21 +139,17 @@ query ($allItemIds: [ID!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSiz
     ...PetAppearanceForOutfitPreview
   }
   items(ids: $allItemIds) {
-    id
-    name
-    description
-    thumbnailUrl
-    rarityIndex
-    isNc
-    isPb
+    ...ItemProperties
     appearanceOn(speciesId: $speciesId, colorId: $colorId) {
       ...ItemAppearanceForOutfitPreview
     }
   }
 }"""
-    + FRAGMENT_PET_APPEARANCE
     + FRAGMENT_ITEM_APPEARANCE
+    + FRAGMENT_ITEM_PROPERTIES
+    + FRAGMENT_PET_APPEARANCE
 )
+
 GRAB_PET_APPEARANCES_BY_NAMES = (
     """
 query ($names: [String!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSize!) {
@@ -174,20 +157,15 @@ query ($names: [String!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSize
     ...PetAppearanceForOutfitPreview
   }
   itemsByName(names: $names) {
-    id
-    name
-    description
-    thumbnailUrl
-    rarityIndex
-    isNc
-    isPb
+    ...ItemProperties
     appearanceOn(speciesId: $speciesId, colorId: $colorId) {
       ...ItemAppearanceForOutfitPreview
     }
   }
 }"""
-    + FRAGMENT_PET_APPEARANCE
     + FRAGMENT_ITEM_APPEARANCE
+    + FRAGMENT_ITEM_PROPERTIES
+    + FRAGMENT_PET_APPEARANCE
 )
 
 # grab pet data
@@ -208,57 +186,26 @@ query($petName: String!) {
 }"""
 
 # grab outfit data
-OUTFIT = """
+OUTFIT = (
+    """
 query($outfitId: ID!, $size: LayerImageSize!) {
   outfit(id: $outfitId) {
     id
     name
     wornItems {
-      id
-      name
-      description
-      thumbnailUrl
-      rarityIndex
-      isNc
-      isPb
+      ...ItemProperties
     }
     closetedItems {
-      id
-      name
-      description
-      thumbnailUrl
-      rarityIndex
-      isNc
-      isPb
+      ...ItemProperties
     }
     petAppearance {
-      id
-      pose
-      bodyId
-      color {
-        id
-        name
-      }
-      species {
-        id
-        name
-      }
-      restrictedZones {
-        id
-        depth
-        label
-      }
-      layers {
-        imageUrl(size: $size)
-        zone {
-          id
-          depth
-          label
-        }
-      }
+      ...PetAppearanceForOutfitPreview
     }
   }
 }"""
+    + FRAGMENT_ITEM_PROPERTIES
+    + FRAGMENT_PET_APPEARANCE
+)
 
 # borrowed from DTI, for ensuring a valid pose
 CLOSEST_POSES_IN_ORDER = {
