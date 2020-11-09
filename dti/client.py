@@ -145,7 +145,7 @@ class Client:
             searcher = ItemSearchNames(state=self.state, names=_names)
         elif query:
             searcher = ItemSearch(state=self.state, query=query)
-        elif all([item_ids]):
+        elif item_ids:
             searcher = ItemIDSearch(state=self.state, item_ids=item_ids)
 
         if searcher is None:
