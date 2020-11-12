@@ -152,11 +152,12 @@ class State:
                 species_id=species_id, color_id=color_id, pose=pose
             )
 
-    async def update(self):
+    async def update(self, force: Optional[bool] = False):
         async with self._update_lock:
             # forces cache, if outdated
-            if not self.is_outdated:
-                return self
+            if force is False:
+                if not self.is_outdated:
+                    return self
 
             self._valid_pairs = None
             self._cached = False

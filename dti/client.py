@@ -15,6 +15,9 @@ class Client:
     def __init__(self, cache_timeout: Optional[int] = None):
         self.state = State(cache_timeout=cache_timeout)
 
+    async def invalidate(self):
+        await self.state.update(force=True)
+
     @_require_state
     async def all_species(self) -> List[Species]:
         return list(self.state._species.values())
