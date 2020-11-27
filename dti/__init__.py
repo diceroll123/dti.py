@@ -5,6 +5,6 @@ __copyright__ = "Copyright 2020 diceroll123"
 __version__ = "0.0.1a"
 
 from .client import Client
-from .enums import LayerImageSize, PetPose
+from .enums import *
 from .errors import *
 from .models import *

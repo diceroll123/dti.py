@@ -16,7 +16,7 @@ from .state import State
 class _DTISearch:
     # this is a base class
     def __init__(self, *, state: State, per_page: Optional[int] = None):
-        self.state = state
+        self._state = state
         self._items = asyncio.Queue(maxsize=per_page or 0)
         self._exhausted = False
 
@@ -74,7 +74,7 @@ class ItemIDSearch(_DTISearch):
         self.item_ids = item_ids
 
     async def fetch_items(self):
-        data = await self.state.http.query(
+        data = await self._state.http.query(
             query=SEARCH_ITEM_IDS, variables={"itemIds": self.item_ids},
         )
         return data["data"]["items"]
@@ -112,7 +112,7 @@ class ItemSearchToFit(_PaginatedDTISearch):
         self.size = size
 
     async def fetch_items(self):
-        data = await self.state.http.query(
+        data = await self._state.http.query(
             query=SEARCH_TO_FIT,
             variables={
                 "query": self.query,
@@ -145,7 +145,7 @@ class ItemSearchNames(_DTISearch):
             variables = {"names": self.names}
             key = "itemsByName"
 
-        data = await self.state.http.query(query=query, variables=variables)
+        data = await self._state.http.query(query=query, variables=variables)
 
         items = data["data"][key]
 
@@ -163,7 +163,7 @@ class ItemSearch(_DTISearch):
         self.query = query
 
     async def fetch_items(self):
-        data = await self.state.http.query(
+        data = await self._state.http.query(
             query=SEARCH_QUERY, variables={"query": self.query},
         )
         return data["data"]["itemSearch"]["items"]

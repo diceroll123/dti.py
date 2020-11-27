@@ -199,7 +199,7 @@ class Item(Object):
 class Neopet:
     __slots__ = (
         "_valid_poses",
-        "state",
+        "_state",
         "species",
         "color",
         "appearances",
@@ -222,7 +222,7 @@ class Neopet:
         name: Optional[str] = None,
         state: State,
     ):
-        self.state = state
+        self._state = state
         self.species = species
         self.color = color
         self.appearances = appearances
@@ -376,7 +376,7 @@ class Neopet:
         if self.items:
             params["objects[]"] = [item.id for item in self.items]
 
-        return self.state.http.BASE + "/outfits/new?" + urlencode(params, doseq=True)
+        return self._state.http.BASE + "/outfits/new?" + urlencode(params, doseq=True)
 
     def get_pet_appearance(self, pose: PetPose) -> Optional[PetAppearance]:
         """Returns the pet appearance for the provided pet pose."""
@@ -483,7 +483,7 @@ class Neopet:
 
         # download images simultaneously
         images = await asyncio.gather(
-            *[self.state.http.get_binary_data(layer.image_url) for layer in layers]
+            *[self._state.http.get_binary_data(layer.image_url) for layer in layers]
         )
 
         for layer, image in zip(layers, images):
@@ -507,7 +507,7 @@ class Neopet:
 
 class Outfit(Object):
     __slots__ = (
-        "state",
+        "_state",
         "id",
         "name",
         "pet_appearance",
@@ -516,7 +516,7 @@ class Outfit(Object):
     )
 
     def __init__(self, *, state: State, **data):
-        self.state = state
+        self._state = state
         self.id = data["id"]
         self.name = data["name"]
         self.pet_appearance = PetAppearance(data=data["petAppearance"], state=state)
@@ -557,7 +557,7 @@ class Outfit(Object):
             pose=pose,
             size=size,
             item_ids=[item.id for item in self.worn_items],
-            state=self.state,
+            state=self._state,
         )
         await neopet.render(fp)
 

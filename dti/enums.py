@@ -1,6 +1,8 @@
 import random
 from enum import Enum, auto
 
+__all__ = ["LayerImageSize", "PetPose"]
+
 
 class _DTIEnum(Enum):
     def _generate_next_value_(name, start, count, last_values):
