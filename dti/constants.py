@@ -31,6 +31,7 @@ fragment PetAppearanceForOutfitPreview on PetAppearance {
     label
   }
   layers {
+    remoteId
     imageUrl(size: $size)
     zone {
       id
@@ -49,6 +50,7 @@ fragment ItemAppearanceForOutfitPreview on ItemAppearance {
     label
   }
   layers {
+    remoteId
     imageUrl(size: $size)
     zone {
       id

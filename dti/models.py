@@ -101,7 +101,7 @@ class AppearanceLayer(Object):
 
     def __init__(self, **data):
         self.image_url = data["imageUrl"]
-        self.asset_remote_id = data["imageUrl"].split("/")[-1].split("_")[0]
+        self.asset_remote_id = data["remoteId"]
         self.zone = Zone(data["zone"])
         self.asset_type = data["asset_type"]
 
