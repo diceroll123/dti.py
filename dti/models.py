@@ -404,42 +404,27 @@ class Neopet:
                 f'Pet Appearance <"{self.species.id}-{self.color.id}"> does not exist.'
             )
 
-        layers = {}  # a key-value dict where keys are the depth
-
-        # make a first-in-first-out for adding items, just to mimic DTI's way of getting rid of item conflicts
-        temp_items: List[Item] = []
+        all_layers = []
+        all_layers.extend(pet_appearance.layers)
+        item_restricted_zone_ids = []
         for item in self.items:
-            for temp in temp_items.copy():
-                intersect_1 = set(item.appearance.restricted_zones).intersection(
-                    {layer.zone for layer in temp.appearance.layers}
-                )
-                intersect_2 = set(temp.appearance.restricted_zones).intersection(
-                    {layer.zone for layer in item.appearance.layers}
-                )
-                if intersect_1 or intersect_2:
-                    temp_items.remove(temp)
-            temp_items.append(item)
+            all_layers.extend(item.appearance.layers)
 
-        restricted_zones = set()  # zone IDs of items going on the pet
+            item_restricted_zone_ids.extend(
+                [zone.id for zone in item.appearance.restricted_zones]
+            )
 
-        for layer in pet_appearance.restricted_zones:
-            restricted_zones.add(layer.id)
+        pet_restricted_zone_ids = [zone.id for zone in pet_appearance.restricted_zones]
 
-        for item in temp_items:
-            for restricted_zone in item.appearance.restricted_zones:
-                restricted_zones.add(restricted_zone.id)
+        all_restricted_zone_ids = set(
+            item_restricted_zone_ids + pet_restricted_zone_ids
+        )
 
-            for layer in item.appearance.layers:
-                layers[layer.zone.depth] = layer
+        visible_layers = filter(
+            lambda layer: layer.zone.id not in all_restricted_zone_ids, all_layers
+        )
 
-        for layer in pet_appearance.layers:
-            if layer.zone.id in restricted_zones:
-                # don't add something that is covered/etc by an item
-                continue
-
-            layers[layer.zone.depth] = layer
-
-        return [layers[index] for index in sorted(layers.keys())]
+        return sorted(visible_layers, key=lambda layer: layer.zone.depth)
 
     async def render(
         self, fp: Union[BinaryIO, PathLike], pose: Optional[PetPose] = None,
