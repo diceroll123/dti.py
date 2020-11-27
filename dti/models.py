@@ -116,7 +116,6 @@ class PetAppearance(Object):
         "body_id",
         "species",
         "color",
-        "pet_state_id",
         "pose",
         "layers",
         "restricted_zones",
