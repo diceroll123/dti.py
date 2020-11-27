@@ -173,21 +173,20 @@ query ($names: [String!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSize
 )
 
 # grab pet data
-PET_ON_NEOPETS = """
-query($petName: String!) {
+PET_ON_NEOPETS = (
+    """
+query($petName: String!, $size: LayerImageSize!) {
   petOnNeopetsDotCom(petName: $petName) {
-    pose
-    species {
-      id
+    petAppearance {
+      ...PetAppearanceForOutfitPreview
     }
-    color {
-      id
-    }
-    items {
+    wornItems {
       id
     }
   }
 }"""
+    + FRAGMENT_PET_APPEARANCE
+)
 
 # grab outfit data
 OUTFIT = (

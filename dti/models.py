@@ -305,8 +305,11 @@ class Neopet:
         cls, *, state: State, pet_name: str, size: Optional[LayerImageSize] = None
     ) -> "Neopet":
         """Returns the data for a specific neopet, by name."""
+
+        size = size or LayerImageSize.SIZE_600
+
         data = await state.http.query(
-            query=PET_ON_NEOPETS, variables={"petName": pet_name}
+            query=PET_ON_NEOPETS, variables={"petName": pet_name, "size": str(size)},
         )
 
         error = data.get("errors")
@@ -315,11 +318,13 @@ class Neopet:
 
         data = data["data"]["petOnNeopetsDotCom"]
 
+        pet_appearance = PetAppearance(data=data["petAppearance"], state=state)
+
         neopet = await Neopet.fetch_assets_for(
-            species=await state._get_species(data["species"]["id"]),
-            color=await state._get_color(data["color"]["id"]),
-            item_ids=[item["id"] for item in data["items"]],
-            pose=PetPose(data["pose"]),
+            species=pet_appearance.species,
+            color=pet_appearance.color,
+            pose=pet_appearance.pose,
+            item_ids=[item["id"] for item in data["wornItems"]],
             size=size,
             name=pet_name,
             state=state,
