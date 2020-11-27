@@ -147,6 +147,7 @@ class State:
     async def _check(
         self, *, species_id: int, color_id: int, pose: Optional[PetPose] = None
     ) -> bool:
+        await self.update()
         async with self.lock:
             return self._valid_pairs.check(
                 species_id=species_id, color_id=color_id, pose=pose
