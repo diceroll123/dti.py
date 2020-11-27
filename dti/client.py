@@ -117,8 +117,8 @@ class Client:
         self,
         *,
         query: Optional[str] = None,
-        name: Optional[str] = None,
-        names: Optional[List[str]] = None,
+        item_name: Optional[str] = None,
+        item_names: Optional[List[str]] = None,
         species_id: Optional[int] = None,
         color_id: Optional[int] = None,
         item_ids: Optional[List[Union[str, int]]] = None,
@@ -129,11 +129,11 @@ class Client:
         searcher = None
         _names = []
 
-        if name:
-            _names.append(name)
+        if item_name:
+            _names.append(item_name)
 
-        if names:
-            _names.extend(names)
+        if item_names:
+            _names.extend(item_names)
 
         if all([query, species_id, color_id]):
             searcher = ItemSearchToFit(
