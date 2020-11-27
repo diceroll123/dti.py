@@ -153,6 +153,11 @@ class ItemAppearance(Object):
             Zone(restricted) for restricted in data["restrictedZones"]
         ]
 
+    @property
+    def occupies(self) -> List[Zone]:
+        """A convenience property to return the zones of each layer for the item appearance."""
+        return [layer.zone for layer in self.layers]
+
 
 class Item(Object):
     __slots__ = (
@@ -383,6 +388,30 @@ class Neopet:
         pose = override_pose or self.pose
         return [p for p in CLOSEST_POSES_IN_ORDER[pose] if self.check(pose=p)]
 
+    def _render_items(self):
+        """Returns the items in a valid wearable FIFO manner. Mimics DTI's method of getting rid of item conflicts, if you consider the internal list of items to be the closet of this object."""
+        temp_items: List[Item] = []
+        for item in self.items:
+            for temp in self.items:
+                if item == temp:
+                    continue
+
+                if temp not in temp_items:
+                    continue
+
+                intersect_1 = set(item.appearance.occupies).intersection(
+                    temp.appearance.occupies + temp.appearance.restricted_zones
+                )
+                intersect_2 = set(temp.appearance.occupies).intersection(
+                    item.appearance.occupies + item.appearance.restricted_zones
+                )
+
+                if intersect_1 or intersect_2:
+                    temp_items.remove(temp)
+            temp_items.append(item)
+
+        return temp_items
+
     async def _render_layers(
         self, pose: Optional[PetPose] = None
     ) -> List[AppearanceLayer]:
@@ -407,7 +436,7 @@ class Neopet:
         all_layers = []
         all_layers.extend(pet_appearance.layers)
         item_restricted_zone_ids = []
-        for item in self.items:
+        for item in self._render_items():
             all_layers.extend(item.appearance.layers)
 
             item_restricted_zone_ids.extend(
