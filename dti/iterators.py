@@ -15,7 +15,7 @@ from .state import State
 
 class _DTISearch:
     # this is a base class
-    def __init__(self, state: State, per_page: Optional[int] = None):
+    def __init__(self, *, state: State, per_page: Optional[int] = None):
         self.state = state
         self._items = asyncio.Queue(maxsize=per_page or 0)
         self._exhausted = False
@@ -70,7 +70,7 @@ class ItemIDSearch(_DTISearch):
     # this WILL crash if you search an item ID that doesn't correspond to an item in the database
     # TODO: might need to be tweaked to be paginated in the future
     def __init__(self, state: State, item_ids: List[Union[str, int]]):
-        super().__init__(state)
+        super().__init__(state=state)
         self.item_ids = item_ids
 
     async def fetch_items(self):
@@ -95,15 +95,15 @@ class ItemSearchToFit(_PaginatedDTISearch):
     # a regular search query that fits the species/color given
     def __init__(
         self,
-        state: State,
         *,
         query: str,
         species_id: int,
         color_id: int,
         per_page: int = 30,
         size: Optional[LayerImageSize] = None,
+        state: State,
     ):
-        super().__init__(state, per_page=per_page)
+        super().__init__(state=state, per_page=per_page)
         self.query = query
         self.species_id = species_id
         self.color_id = color_id
@@ -130,9 +130,9 @@ class ItemSearchNames(_DTISearch):
     # an exact-match search for items
     # not-found items WILL yield None
     def __init__(
-        self, state: State, *, names: List[str],
+        self, *, state: State, names: List[str],
     ):
-        super().__init__(state)
+        super().__init__(state=state)
         self.names = names
 
     async def fetch_items(self):
@@ -158,8 +158,8 @@ class ItemSearchNames(_DTISearch):
 
 class ItemSearch(_DTISearch):
     # a regular search query
-    def __init__(self, state: State, *, query: str):
-        super().__init__(state)
+    def __init__(self, *, state: State, query: str):
+        super().__init__(state=state)
         self.query = query
 
     async def fetch_items(self):

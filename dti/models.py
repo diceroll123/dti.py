@@ -21,22 +21,22 @@ from .state import State
 
 
 class Species(Object):
-    __slots__ = ("state", "id", "name")
+    __slots__ = ("_state", "id", "name")
 
-    def __init__(self, state, data: Dict):
-        self.state = state
+    def __init__(self, *, state: State, data: Dict):
+        self._state = state
         self.id = int(data["id"])
         self.name = data["name"]
 
     @_require_state
     async def _color_iterator(self, valid: bool = True) -> List["Color"]:
         found = []
-        for color_id in range(1, self.state._valid_pairs.color_count + 1):
-            is_valid = self.state._valid_pairs.check(
+        for color_id in range(1, self._state._valid_pairs.color_count + 1):
+            is_valid = self._state._valid_pairs.check(
                 species_id=self.id, color_id=color_id
             )
             if is_valid == valid:
-                found.append(self.state._colors[color_id])
+                found.append(self._state._colors[color_id])
         return found
 
     async def colors(self) -> List["Color"]:
@@ -53,22 +53,22 @@ class Species(Object):
 
 
 class Color(Object):
-    __slots__ = ("state", "id", "name")
+    __slots__ = ("_state", "id", "name")
 
-    def __init__(self, state, data: Dict):
-        self.state = state
+    def __init__(self, *, state: State, data: Dict):
+        self._state = state
         self.id = int(data["id"])
         self.name = data["name"]
 
     @_require_state
     async def _species_iterator(self, valid: bool = True) -> List["Species"]:
         found = []
-        for species_id in range(1, self.state._valid_pairs.species_count + 1):
-            is_valid = self.state._valid_pairs.check(
+        for species_id in range(1, self._state._valid_pairs.species_count + 1):
+            is_valid = self._state._valid_pairs.check(
                 species_id=species_id, color_id=self.id
             )
             if is_valid == valid:
-                found.append(self.state._species[species_id])
+                found.append(self._state._species[species_id])
         return found
 
     async def species(self) -> List["Species"]:
@@ -122,13 +122,13 @@ class PetAppearance(Object):
         "restricted_zones",
     )
 
-    def __init__(self, state, data: Dict):
+    def __init__(self, *, state: State, data: Dict):
         self.id = data["id"]
         self.body_id = data["bodyId"]
 
         # create new, somewhat temporary colors from this data since we don't have async access
-        self.color = Color(state, data["color"])
-        self.species = Species(state, data["species"])
+        self.color = Color(data=data["color"], state=state)
+        self.species = Species(data=data["species"], state=state)
 
         self.pose = PetPose(data["pose"])
         self.layers = [
@@ -212,7 +212,6 @@ class Neopet:
 
     def __init__(
         self,
-        state: State,
         *,
         species: Species,
         color: Color,
@@ -222,6 +221,7 @@ class Neopet:
         items: Optional[List[Item]] = None,
         size: Optional[LayerImageSize] = None,
         name: Optional[str] = None,
+        state: State,
     ):
         self.state = state
         self.species = species
@@ -236,7 +236,6 @@ class Neopet:
     @classmethod
     async def fetch_assets_for(
         cls,
-        state,
         *,
         species: Species,
         color: Color,
@@ -245,6 +244,7 @@ class Neopet:
         item_names: Optional[List[str]] = None,
         size: Optional[LayerImageSize] = None,
         name: Optional[str] = None,
+        state: State,
     ) -> "Neopet":
         """Returns the data for a species+color+pose combo, optionally with items, an image size, and a name for internal usage."""
 
@@ -283,13 +283,13 @@ class Neopet:
         data = data["data"]
         items = [Item(**item) for item in data[key] if item is not None]
         appearances = [
-            PetAppearance(state, appearance) for appearance in data["petAppearances"]
+            PetAppearance(data=appearance, state=state)
+            for appearance in data["petAppearances"]
         ]
 
         bit = await state._get_bit(species_id=species.id, color_id=color.id)
 
         return Neopet(
-            state,
             species=species,
             color=color,
             pose=pose,
@@ -298,11 +298,12 @@ class Neopet:
             appearances=appearances,
             name=name,
             size=size,
+            state=state,
         )
 
     @classmethod
     async def fetch_by_name(
-        cls, state: State, pet_name: str, size: Optional[LayerImageSize] = None
+        cls, *, state: State, pet_name: str, size: Optional[LayerImageSize] = None
     ) -> "Neopet":
         """Returns the data for a specific neopet, by name."""
         data = await state.http.query(
@@ -316,13 +317,13 @@ class Neopet:
         data = data["data"]["petOnNeopetsDotCom"]
 
         neopet = await Neopet.fetch_assets_for(
-            state,
             species=await state._get_species(data["species"]["id"]),
             color=await state._get_color(data["color"]["id"]),
             item_ids=[item["id"] for item in data["items"]],
             pose=PetPose(data["pose"]),
             size=size,
             name=pet_name,
+            state=state,
         )
         return neopet
 
@@ -510,11 +511,11 @@ class Outfit(Object):
         "closeted_items",
     )
 
-    def __init__(self, state, **data):
+    def __init__(self, *, state: State, **data):
         self.state = state
         self.id = data["id"]
         self.name = data["name"]
-        self.pet_appearance = PetAppearance(state, data["petAppearance"])
+        self.pet_appearance = PetAppearance(data=data["petAppearance"], state=state)
         self.worn_items = [Item(**item_data) for item_data in data["wornItems"]]
         self.closeted_items = [Item(**item_data) for item_data in data["closetedItems"]]
 
@@ -547,12 +548,12 @@ class Outfit(Object):
         """Exports a rendered customization image to the file-like object provided."""
         pose = pose or self.pet_appearance.pose
         neopet = await Neopet.fetch_assets_for(
-            self.state,
             species=self.pet_appearance.species,
             color=self.pet_appearance.color,
             pose=pose,
             size=size,
             item_ids=[item.id for item in self.worn_items],
+            state=self.state,
         )
         await neopet.render(fp)
 

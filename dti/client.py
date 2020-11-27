@@ -10,29 +10,29 @@ from .state import State
 
 
 class Client:
-    __slots__ = "state"
+    __slots__ = ["_state"]
 
     def __init__(self, cache_timeout: Optional[int] = None):
-        self.state = State(cache_timeout=cache_timeout)
+        self._state = State(cache_timeout=cache_timeout)
 
     async def invalidate(self):
-        await self.state.update(force=True)
+        await self._state.update(force=True)
 
     @_require_state
     async def all_species(self) -> List[Species]:
-        return list(self.state._species.values())
+        return list(self._state._species.values())
 
     @_require_state
     async def all_colors(self) -> List[Color]:
-        return list(self.state._colors.values())
+        return list(self._state._colors.values())
 
     @_require_state
     async def get_species(self, name_or_id: Union[int, str]) -> Optional[Species]:
-        return self.state._species[name_or_id]
+        return self._state._species[name_or_id]
 
     @_require_state
     async def get_color(self, name_or_id: Union[int, str]) -> Optional[Color]:
-        return self.state._colors[name_or_id]
+        return self._state._colors[name_or_id]
 
     async def get_bit(
         self, *, species: Union[int, str, Species], color: Union[int, str, Color],
@@ -44,7 +44,7 @@ class Client:
         if not isinstance(color, Color):
             color = await self.get_color(color)
 
-        return await self.state._get_bit(species_id=species.id, color_id=color.id)
+        return await self._state._get_bit(species_id=species.id, color_id=color.id)
 
     async def check(
         self,
@@ -60,7 +60,7 @@ class Client:
         if not isinstance(color, Color):
             color = await self.get_color(color)
 
-        return await self.state._check(
+        return await self._state._check(
             species_id=species.id, color_id=color.id, pose=pose
         )
 
@@ -85,23 +85,23 @@ class Client:
             raise InvalidColorSpeciesPair("Invalid Species/Color provided")
 
         return await Neopet.fetch_assets_for(
-            state=self.state,
             species=species,
             color=color,
             item_names=item_names,
             item_ids=item_ids,
             size=size,
             pose=pose or PetPose.ideal(),
+            state=self._state,
         )
 
     async def get_neopet_by_name(self, pet_name: str) -> Neopet:
-        return await Neopet.fetch_by_name(self.state, pet_name)
+        return await Neopet.fetch_by_name(pet_name=pet_name, state=self._state)
 
     @_require_state
     async def get_outfit(
         self, outfit_id: int, size: Optional[LayerImageSize] = None
     ) -> Optional[Outfit]:
-        data = await self.state.http.query(
+        data = await self._state.http.query(
             OUTFIT,
             variables={
                 "outfitId": outfit_id,
@@ -111,7 +111,7 @@ class Client:
 
         outfit_data = data["data"]["outfit"]
         if outfit_data:
-            return Outfit(state=self.state, **outfit_data)
+            return Outfit(**outfit_data, state=self._state)
 
     def search(
         self,
@@ -137,19 +137,19 @@ class Client:
 
         if all([query, species_id, color_id]):
             searcher = ItemSearchToFit(
-                state=self.state,
                 query=query,
                 species_id=species_id,
                 color_id=color_id,
                 size=size,
                 per_page=per_page,
+                state=self._state,
             )
         elif _names:
-            searcher = ItemSearchNames(state=self.state, names=_names)
+            searcher = ItemSearchNames(names=_names, state=self._state)
         elif query:
-            searcher = ItemSearch(state=self.state, query=query)
+            searcher = ItemSearch(query=query, state=self._state)
         elif item_ids:
-            searcher = ItemIDSearch(state=self.state, item_ids=item_ids)
+            searcher = ItemIDSearch(item_ids=item_ids, state=self._state)
 
         if searcher is None:
             raise NoIteratorsFound(

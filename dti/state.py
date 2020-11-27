@@ -104,13 +104,13 @@ class State:
 
         # colors
         self._colors = _NameDict(
-            {color["id"]: Color(state=self, data=color) for color in data["allColors"]}
+            {color["id"]: Color(data=color, state=self) for color in data["allColors"]}
         )
 
         # species
         self._species = _NameDict(
             {
-                species["id"]: Species(state=self, data=species)
+                species["id"]: Species(data=species, state=self)
                 for species in data["allSpecies"]
             }
         )

@@ -12,8 +12,8 @@ def _require_state(func):
 
     @functools.wraps(func)
     async def wrapper(self, *args, **kwargs):
-        async with self.state.lock:
-            await self.state.update()
+        async with self._state.lock:
+            await self._state.update()
             return await func(self, *args, **kwargs)
 
     return wrapper

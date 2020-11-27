@@ -7,9 +7,9 @@ from dti import Client, InvalidColorSpeciesPair, NeopetNotFound
 async def test_uncached_call() -> None:
     client = Client()
 
-    cacheless_before = client.state.is_cached is False
+    cacheless_before = client._state.is_cached is False
     await client.get_species("Red")
-    assert cacheless_before and client.state.is_cached
+    assert cacheless_before and client._state.is_cached
 
 
 @pytest.mark.asyncio
