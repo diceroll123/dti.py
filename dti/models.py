@@ -435,22 +435,18 @@ class Neopet:
 
         all_layers = []
         all_layers.extend(pet_appearance.layers)
-        item_restricted_zone_ids = []
+        item_restricted_zones = []
         for item in self._render_items():
             all_layers.extend(item.appearance.layers)
 
-            item_restricted_zone_ids.extend(
-                [zone.id for zone in item.appearance.restricted_zones]
-            )
+            item_restricted_zones.extend(item.appearance.restricted_zones)
 
-        pet_restricted_zone_ids = [zone.id for zone in pet_appearance.restricted_zones]
-
-        all_restricted_zone_ids = set(
-            item_restricted_zone_ids + pet_restricted_zone_ids
+        all_restricted_zones = set(
+            item_restricted_zones + pet_appearance.restricted_zones
         )
 
         visible_layers = filter(
-            lambda layer: layer.zone.id not in all_restricted_zone_ids, all_layers
+            lambda layer: layer.zone not in all_restricted_zones, all_layers
         )
 
         return sorted(visible_layers, key=lambda layer: layer.zone.depth)
