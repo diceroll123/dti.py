@@ -97,9 +97,10 @@ class Zone(Object):
 
 
 class AppearanceLayer(Object):
-    __slots__ = ("zone", "image_url", "asset_type", "asset_remote_id")
+    __slots__ = ("id", "zone", "image_url", "asset_type", "asset_remote_id")
 
     def __init__(self, **data):
+        self.id = data["id"]
         self.image_url = data["imageUrl"]
         self.asset_remote_id = data["remoteId"]
         self.zone = Zone(data["zone"])
