@@ -184,6 +184,10 @@ class Item(Object):
         self.appearance = appearance_data and ItemAppearance(appearance_data)
 
     @property
+    def is_np(self) -> bool:
+        return not self.is_nc and not self.is_pb
+
+    @property
     def url(self) -> str:
         return (
             f'http://impress.openneo.net/items/{self.id}-{self.name.replace(" ", "-")}'
