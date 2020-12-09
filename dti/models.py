@@ -1,6 +1,6 @@
 import asyncio
 from os import PathLike
-from typing import Dict, List, Optional, Union, BinaryIO
+from typing import Dict, List, Optional, Union, BinaryIO, Tuple
 from urllib.parse import urlencode
 
 from .constants import (
@@ -354,8 +354,9 @@ class Neopet:
                 params["state"] = appearance.id
 
         if self.items:
-            params["objects[]"] = [item.id for item in self.items]
-            params["closet[]"] = [item.id for item in self.items]
+            objects, closet = self._render_items()
+            params["objects[]"] = [item.id for item in objects]
+            params["closet[]"] = [item.id for item in closet]
 
         return "https://impress.openneo.net/wardrobe#" + urlencode(params, doseq=True)
 
@@ -375,7 +376,9 @@ class Neopet:
             params["pose"] = valid_poses[0]
 
         if self.items:
-            params["objects[]"] = [item.id for item in self.items]
+            objects, closet = self._render_items()
+            params["objects[]"] = [item.id for item in objects]
+            params["closet[]"] = [item.id for item in closet]
 
         return self._state.http.BASE + "/outfits/new?" + urlencode(params, doseq=True)
 
@@ -395,9 +398,10 @@ class Neopet:
         pose = override_pose or self.pose
         return [p for p in CLOSEST_POSES_IN_ORDER[pose] if self.check(pose=p)]
 
-    def _render_items(self):
-        """Returns the items in a valid wearable FIFO manner. Mimics DTI's method of getting rid of item conflicts, if you consider the internal list of items to be the closet of this object."""
+    def _render_items(self) -> Tuple[List[Item], List[Item]]:
+        """Separates all items into what's wearable and what's in the closet. Mimics DTI's method of getting rid of item conflicts in a FIFO manner. Any conflicts go to the closet list."""
         temp_items: List[Item] = []
+        temp_closet: List[Item] = []
         for item in self.items:
             for temp in self.items:
                 if item == temp:
@@ -414,10 +418,11 @@ class Neopet:
                 )
 
                 if intersect_1 or intersect_2:
+                    temp_closet.append(temp)
                     temp_items.remove(temp)
             temp_items.append(item)
 
-        return temp_items
+        return temp_items, temp_closet
 
     async def _render_layers(
         self, pose: Optional[PetPose] = None
@@ -443,7 +448,8 @@ class Neopet:
         all_layers = []
         all_layers.extend(pet_appearance.layers)
         item_restricted_zones = []
-        for item in self._render_items():
+        render_items, _ = self._render_items()
+        for item in render_items:
             all_layers.extend(item.appearance.layers)
 
             item_restricted_zones.extend(item.appearance.restricted_zones)
