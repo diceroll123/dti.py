@@ -1,6 +1,7 @@
 import asyncio
 from os import PathLike
 from typing import Dict, List, Optional, Union, BinaryIO
+from urllib.parse import urlencode
 
 from .constants import (
     CLOSEST_POSES_IN_ORDER,
@@ -338,10 +339,8 @@ class Neopet:
     @property
     def legacy_closet_url(self) -> str:
         """Returns the legacy closet URL for a neopet customization."""
-        from urllib.parse import urlencode
-        from collections import OrderedDict
 
-        params = OrderedDict()
+        params = {}
         if self.name:
             params["name"] = self.name
 
@@ -363,10 +362,8 @@ class Neopet:
     @property
     def closet_url(self) -> str:
         """Returns the closet URL for a neopet customization."""
-        from urllib.parse import urlencode
-        from collections import OrderedDict
 
-        params = OrderedDict()
+        params = {}
         if self.name:
             params["name"] = self.name
 
