@@ -143,7 +143,7 @@ class PetAppearance(Object):
 
 
 class ItemAppearance(Object):
-    __slots__ = ("id", "layers", "restricted_zones")
+    __slots__ = ("id", "layers", "restricted_zones", "occupies")
 
     def __init__(self, data: Dict):
         self.id = data["id"]
@@ -153,11 +153,7 @@ class ItemAppearance(Object):
         self.restricted_zones = [
             Zone(restricted) for restricted in data["restrictedZones"]
         ]
-
-    @property
-    def occupies(self) -> List[Zone]:
-        """A convenience property to return the zones of each layer for the item appearance."""
-        return [layer.zone for layer in self.layers]
+        self.occupies = [layer.zone for layer in self.layers]
 
 
 class Item(Object):
