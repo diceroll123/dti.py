@@ -38,3 +38,9 @@ class BrokenAssetImage(DTIException):
     """An exception that is thrown when the biology/object image is broken and must be reported to fix."""
 
     pass
+
+
+class InvalidItemID(DTIException):
+    """An exception that is thrown when an invalid item ID is searched. The whole search query fails."""
+
+    pass

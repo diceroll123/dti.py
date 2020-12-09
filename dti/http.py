@@ -15,15 +15,15 @@ class HTTPClient:
             if proxy_auth is not None:
                 self.extra_kwargs["proxy_auth"] = proxy_auth
 
-    async def get_valid_pet_poses(self) -> bytes:
-        return await self.get_binary_data(self.API_BASE + "/validPetPoses")
+    async def _get_valid_pet_poses(self) -> bytes:
+        return await self._get_binary_data(self.API_BASE + "/validPetPoses")
 
-    async def get_binary_data(self, url: str) -> bytes:
+    async def _get_binary_data(self, url: str) -> bytes:
         async with aiohttp.ClientSession() as session:
             async with session.get(url, **self.extra_kwargs) as r:
                 return await r.content.read()
 
-    async def query(self, query, variables=None, **kwargs) -> Dict:
+    async def _query(self, query, variables=None, **kwargs) -> Dict:
         # for graphql queries
         kwargs["headers"] = {
             "Content-Type": "application/json",

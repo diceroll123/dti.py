@@ -2,6 +2,8 @@ import asyncio
 from os import PathLike
 from typing import Dict, List, Optional, Union, BinaryIO, Tuple
 from urllib.parse import urlencode
+from PIL import Image
+from io import BytesIO
 
 from .constants import (
     CLOSEST_POSES_IN_ORDER,
@@ -22,6 +24,34 @@ from .state import State
 
 
 class Species(Object):
+    """Represents a Neopets species.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two species are equal.
+
+        .. describe:: x != y
+
+            Checks if two species are not equal.
+
+        .. describe:: hash(x)
+
+            Returns the species' hash.
+
+        .. describe:: str(x)
+
+            Returns the species' name.
+
+    Attributes
+    -----------
+    name: :class:`str`
+        The species name.
+    id: :class:`int`
+        The species ID.
+    """
+
     __slots__ = ("_state", "id", "name")
 
     def __init__(self, *, state: State, data: Dict):
@@ -33,7 +63,7 @@ class Species(Object):
     async def _color_iterator(self, valid: bool = True) -> List["Color"]:
         found = []
         for color_id in range(1, self._state._valid_pairs.color_count + 1):
-            is_valid = self._state._valid_pairs.check(
+            is_valid = self._state._valid_pairs._check(
                 species_id=self.id, color_id=color_id
             )
             if is_valid == valid:
@@ -41,9 +71,17 @@ class Species(Object):
         return found
 
     async def colors(self) -> List["Color"]:
+        """|coro|
+
+        List[:class:`Color`]: Returns all colors this species can be painted.
+        """
         return await self._color_iterator()
 
     async def missing_colors(self) -> List["Color"]:
+        """|coro|
+
+        List[:class:`Color`]: Returns all colors this species can not be painted.
+        """
         return await self._color_iterator(valid=False)
 
     def __str__(self):
@@ -54,6 +92,34 @@ class Species(Object):
 
 
 class Color(Object):
+    """Represents a Neopets color.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two colors are equal.
+
+        .. describe:: x != y
+
+            Checks if two colors are not equal.
+
+        .. describe:: hash(x)
+
+            Returns the color' hash.
+
+        .. describe:: str(x)
+
+            Returns the color' name.
+
+    Attributes
+    -----------
+    name: :class:`str`
+        The color name.
+    id: :class:`int`
+        The color ID.
+    """
+
     __slots__ = ("_state", "id", "name")
 
     def __init__(self, *, state: State, data: Dict):
@@ -65,7 +131,7 @@ class Color(Object):
     async def _species_iterator(self, valid: bool = True) -> List["Species"]:
         found = []
         for species_id in range(1, self._state._valid_pairs.species_count + 1):
-            is_valid = self._state._valid_pairs.check(
+            is_valid = self._state._valid_pairs._check(
                 species_id=species_id, color_id=self.id
             )
             if is_valid == valid:
@@ -73,9 +139,17 @@ class Color(Object):
         return found
 
     async def species(self) -> List["Species"]:
+        """|coro|
+
+        List[:class:`Species`]: Returns all species this color can be painted on.
+        """
         return await self._species_iterator()
 
     async def missing_species(self) -> List["Species"]:
+        """|coro|
+
+        List[:class:`Species`]: Returns all species this color can not be painted on.
+        """
         return await self._species_iterator(valid=False)
 
     def __str__(self):
@@ -86,6 +160,32 @@ class Color(Object):
 
 
 class Zone(Object):
+    """Represents a wearable zone.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two zones are equal.
+
+        .. describe:: x != y
+
+            Checks if two zones are not equal.
+
+        .. describe:: hash(x)
+
+            Returns the zone's hash.
+
+    Attributes
+    -----------
+    label: :class:`str`
+        The zone label.
+    id: :class:`int`
+        The zone ID.
+    depth: :class:`int`
+        The zone depth.
+    """
+
     __slots__ = ("id", "depth", "label")
 
     def __init__(self, data: Dict):
@@ -98,6 +198,39 @@ class Zone(Object):
 
 
 class AppearanceLayer(Object):
+    """Represents a wearable appearance layer. Literally, it is one of the image layers of a rendered customization.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two appearance layers are equal.
+
+        .. describe:: x != y
+
+            Checks if two appearance layers are not equal.
+
+        .. describe:: hash(x)
+
+            Returns the appearance layer's hash.
+
+    Attributes
+    -----------
+    image_url: :class:`str`
+        The appearance layer's DTI image url.
+    id: :class:`str`
+        The appearance layer's DTI ID. Guaranteed unique across all layers of all types.
+    asset_remote_id: :class:`str`
+        The appearance layer's Neopets ID. Guaranteed unique across layers of the *same* type, but
+        not of different types. That is, it's allowed and common for an item
+        layer and a pet layer to have the same asset_remote_id.
+    asset_type: :class:`str`
+        The appearance layer's asset type. The only values this can have currently are `biology` and `object`,
+        to differentiate between layers of a pet and layers of items respectively.
+    zone: :class:`Zone`
+        The appearance layer's zone.
+    """
+
     __slots__ = ("id", "zone", "image_url", "asset_type", "asset_remote_id")
 
     def __init__(self, **data):
@@ -112,6 +245,40 @@ class AppearanceLayer(Object):
 
 
 class PetAppearance(Object):
+    """Represents the renderable state of a Neopet.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two pet appearances are equal.
+
+        .. describe:: x != y
+
+            Checks if two pet appearances are not equal.
+
+        .. describe:: hash(x)
+
+            Returns the pet appearance's hash.
+
+    Attributes
+    -----------
+    id: :class:`str`
+        The pet appearance's ID.
+    body_id: :class:`str`
+        The pet appearance's body ID.
+    color: :class:`Color`
+        The color of the pet appearance.
+    species: :class:`Species`
+        The species of the pet appearance.
+    pose: :class:`PetPose`
+        The pose of the pet appearance.
+    layers: List[:class:`AppearanceLayer`]
+        The appearance layers of the pet appearance.
+    restricted_zones: List[:class:`Zone`]
+        The restricted zones of the pet appearance. Outfits can't have conflicting restricted zones.
+    """
+
     __slots__ = (
         "id",
         "body_id",
@@ -143,6 +310,34 @@ class PetAppearance(Object):
 
 
 class ItemAppearance(Object):
+    """Represents the renderable state of an item.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two item appearances are equal.
+
+        .. describe:: x != y
+
+            Checks if two item appearances are not equal.
+
+        .. describe:: hash(x)
+
+            Returns the item appearance's hash.
+
+    Attributes
+    -----------
+    id: :class:`str`
+        The item appearance's ID.
+    layers: List[:class:`AppearanceLayer`]
+        The appearance layers of the item appearance.
+    restricted_zones: List[:class:`Zone`]
+        The restricted zones of the item appearance. Outfits can't have conflicting restricted zones.
+    occupies: List[:class:`Zone`]
+        The zones that this item appearance occupies.
+    """
+
     __slots__ = ("id", "layers", "restricted_zones", "occupies")
 
     def __init__(self, data: Dict):
@@ -157,6 +352,46 @@ class ItemAppearance(Object):
 
 
 class Item(Object):
+    """Represents a Neopets item.
+
+    .. container:: operations
+
+        .. describe:: x == y
+
+            Checks if two items are equal.
+
+        .. describe:: x != y
+
+            Checks if two items are not equal.
+
+        .. describe:: hash(x)
+
+            Returns the item's hash.
+
+        .. describe:: str(x)
+
+            Returns the item's name.
+
+    Attributes
+    -----------
+    id: :class:`int`
+        The item's Neopets ID.
+    name: :class:`str`
+        The item's name.
+    description: :class:`str`
+        The description of the item.
+    thumbnail_url: :class:`str`
+        The item image URL.
+    is_nc: :class:`bool`
+        Whether or not the item is an NC-only item.
+    is_pb: :class:`bool`
+        Whether or not the item is a paintbrush color item, such as an Aisha's collar.
+    rarity: :class:`int`
+        The item's rarity on Neopets.
+    appearance: Optional[:class:`ItemAppearance`]
+        The item appearance object for this item on a particular PetAppearance. Can be `None`.
+    """
+
     __slots__ = (
         "id",
         "name",
@@ -175,17 +410,19 @@ class Item(Object):
         self.thumbnail_url = data.get("thumbnailUrl")
         self.is_nc = data.get("isNc")
         self.is_pb = data.get("isPb")
-        self.rarity = data.get("rarityIndex")
+        self.rarity = int(data.get("rarityIndex"))
 
         appearance_data = data.get("appearanceOn", None)
         self.appearance = appearance_data and ItemAppearance(appearance_data)
 
     @property
     def is_np(self) -> bool:
+        """:class:`bool`: Whether or not the item is an NP-only item."""
         return not self.is_nc and not self.is_pb
 
     @property
     def url(self) -> str:
+        """:class:`str`: Returns the DTI URL for the item."""
         return (
             f'http://impress.openneo.net/items/{self.id}-{self.name.replace(" ", "-")}'
         )
@@ -194,10 +431,30 @@ class Item(Object):
         return self.name
 
     def __repr__(self):
-        return f"<Item id={self.id} name={self.name!r} is_nc={self.is_nc} is_pb={self.is_pb} rarity={self.rarity}>"
+        return f"<Item id={self.id} name={self.name!r} is_np={self.is_np} is_nc={self.is_nc} is_pb={self.is_pb} rarity={self.rarity}>"
 
 
 class Neopet:
+    """Represents a customizable Neopet.
+
+    Attributes
+    -----------
+    species: :class:`Species`
+        The Neopets' species.
+    color: :class:`Color`
+        The Neopets' color.
+    pose: :class:`PetPose`
+        The Neopets' pose.
+    appearances: List[:class:`PetAppearance`]
+        A list of the pet's appearances. This is essentially just a PetAppearance for each valid PetPose
+    items: List[:class:`Item`]
+        A list of the items that will be applied to the pet. Can be empty.
+    size: Optional[:class:`LayerImageSize`]
+        The desired size of the rendered image, or `None`.
+    name: Optional[:class:`str`]
+        The name of the Neopet, if one is supplied.
+    """
+
     __slots__ = (
         "_valid_poses",
         "_state",
@@ -234,7 +491,7 @@ class Neopet:
         self._valid_poses = valid_poses
 
     @classmethod
-    async def fetch_assets_for(
+    async def _fetch_assets_for(
         cls,
         *,
         species: Species,
@@ -253,7 +510,6 @@ class Neopet:
                 f"The {species} species does not have the color {color}"
             )
 
-        # note: sizes are not editable once the Neopet object is made
         size = size or LayerImageSize.SIZE_600
 
         variables = {
@@ -271,7 +527,7 @@ class Neopet:
             query = GRAB_PET_APPEARANCES_BY_IDS
             key = "items"
 
-        data = await state.http.query(query=query, variables=variables)
+        data = await state._http._query(query=query, variables=variables)
 
         error = data.get("error")
         if error:
@@ -302,14 +558,14 @@ class Neopet:
         )
 
     @classmethod
-    async def fetch_by_name(
+    async def _fetch_by_name(
         cls, *, state: State, pet_name: str, size: Optional[LayerImageSize] = None
     ) -> "Neopet":
         """Returns the data for a specific neopet, by name."""
 
         size = size or LayerImageSize.SIZE_600
 
-        data = await state.http.query(
+        data = await state._http._query(
             query=PET_ON_NEOPETS, variables={"petName": pet_name, "size": str(size)},
         )
 
@@ -321,7 +577,7 @@ class Neopet:
 
         pet_appearance = PetAppearance(data=data["petAppearance"], state=state)
 
-        neopet = await Neopet.fetch_assets_for(
+        neopet = await Neopet._fetch_assets_for(
             species=pet_appearance.species,
             color=pet_appearance.color,
             pose=pet_appearance.pose,
@@ -334,14 +590,13 @@ class Neopet:
 
     @property
     def legacy_closet_url(self) -> str:
-        """Returns the legacy closet URL for a neopet customization."""
+        """:class:`str`: Returns the legacy closet URL for a Neopet customization."""
 
-        params = {}
-        if self.name:
-            params["name"] = self.name
-
-        params["species"] = self.species.id
-        params["color"] = self.color.id
+        params = {
+            "name": self.name or "",
+            "species": self.species.id,
+            "color": self.color.id,
+        }
 
         valid_poses = self.valid_poses()
         if len(valid_poses):
@@ -358,14 +613,13 @@ class Neopet:
 
     @property
     def closet_url(self) -> str:
-        """Returns the closet URL for a neopet customization."""
+        """:class:`str`: Returns the closet URL for a Neopet customization."""
 
-        params = {}
-        if self.name:
-            params["name"] = self.name
-
-        params["species"] = self.species.id
-        params["color"] = self.color.id
+        params = {
+            "name": self.name or "",
+            "species": self.species.id,
+            "color": self.color.id,
+        }
 
         valid_poses = self.valid_poses()
         if len(valid_poses):
@@ -376,26 +630,29 @@ class Neopet:
             params["objects[]"] = [item.id for item in objects]
             params["closet[]"] = [item.id for item in closet]
 
-        return self._state.http.BASE + "/outfits/new?" + urlencode(params, doseq=True)
+        return self._state._http.BASE + "/outfits/new?" + urlencode(params, doseq=True)
 
     def get_pet_appearance(self, pose: PetPose) -> Optional[PetAppearance]:
-        """Returns the pet appearance for the provided pet pose."""
+        """Optional[:class:`PetAppearance`]: Returns the pet appearance for the provided pet pose."""
         for appearance in self.appearances:
             if appearance.pose == pose:
                 return appearance
         return None
 
     def check(self, pose: PetPose) -> bool:
-        """Returns True if the pet pose provided is valid."""
+        """:class:`bool`: Returns True if the pet pose provided is valid for the current species+color."""
         return (self._valid_poses & pose) == pose
 
     def valid_poses(self, override_pose: Optional[PetPose] = None) -> List[PetPose]:
-        """Returns a list of valid pet poses."""
+        """List[:class:`PetPose`]: Returns a list of valid pet poses for the current species+color."""
         pose = override_pose or self.pose
         return [p for p in CLOSEST_POSES_IN_ORDER[pose] if self.check(pose=p)]
 
     def _render_items(self) -> Tuple[List[Item], List[Item]]:
-        """Separates all items into what's wearable and what's in the closet. Mimics DTI's method of getting rid of item conflicts in a FIFO manner. Any conflicts go to the closet list."""
+        # Separates all items into what's wearable and what's in the closet.
+        # Mimics DTI's method of getting rid of item conflicts in a FIFO manner.
+        # Any conflicts go to the closet list.
+
         temp_items: List[Item] = []
         temp_closet: List[Item] = []
         for item in self.items:
@@ -423,7 +680,8 @@ class Neopet:
     async def _render_layers(
         self, pose: Optional[PetPose] = None
     ) -> List[AppearanceLayer]:
-        """Returns the image layers' images in order from bottom to top. You may override the pose."""
+        # Returns the image layers' images in order from bottom to top.
+        # You may override the pose here.
 
         valid_poses = self.valid_poses(pose)
 
@@ -461,16 +719,36 @@ class Neopet:
         return sorted(visible_layers, key=lambda layer: layer.zone.depth)
 
     async def render(
-        self, fp: Union[BinaryIO, PathLike], pose: Optional[PetPose] = None,
+        self,
+        fp: Union[BinaryIO, PathLike],
+        pose: Optional[PetPose] = None,
+        size: Optional[LayerImageSize] = None,
     ):
-        """Outputs the rendered pet with the desired emotion + gender presentation to the file-like object passed.
+        """|coro|
 
-        It is suggested to use something like BytesIO as the object, since this function can take a second or so since it downloads every layer.
+        Outputs the rendered pet with the desired emotion + gender presentation to the file-like object passed.
+
+        It is suggested to use something like BytesIO as the object, since this function can take a second or
+        so since it downloads every layer, and you'd be keeping a file object open on the disk
+        for an indeterminate amount of time.
+
+        Parameters
+        -----------
+        fp: :class:`io.BufferedIOBase`
+            A file-like object opened in binary mode and write mode (`wb`).
+        pose: Optional[:class:`PetPose`]
+            The desired pet pose for the render. Defaults to the current neopets' pose.
+        size: Optional[:class:`LayerImageSize`]
+            The desired size for the render. Defaults to the current neopets' pose if there is one,
+            otherwise defaults to LayerImageSize.SIZE_600.
+
+        Raises
+        -------
+        ~dti.BrokenAssetImage
+            A layer's asset image is broken somehow on DTI's side.
         """
-        pose = pose or self.pose
 
-        from PIL import Image
-        from io import BytesIO
+        pose = pose or self.pose
 
         sizes = {
             LayerImageSize.SIZE_150: 150,
@@ -478,7 +756,7 @@ class Neopet:
             LayerImageSize.SIZE_600: 600,
         }
 
-        img_size = sizes[self.size or LayerImageSize.SIZE_600]
+        img_size = sizes[size or self.size or LayerImageSize.SIZE_600]
 
         canvas = Image.new("RGBA", (img_size, img_size))
 
@@ -486,7 +764,7 @@ class Neopet:
 
         # download images simultaneously
         images = await asyncio.gather(
-            *[self._state.http.get_binary_data(layer.image_url) for layer in layers]
+            *[self._state._http._get_binary_data(layer.image_url) for layer in layers]
         )
 
         for layer, image in zip(layers, images):
@@ -509,6 +787,22 @@ class Neopet:
 
 
 class Outfit(Object):
+    """Represents a DTI Outfit.
+
+    Attributes
+    -----------
+    id: :class:`int`
+        The outfit's DTI ID.
+    name: :class:`str`
+        The outfit's name on DTI.
+    pet_appearance: :class:`PetAppearance`
+        The outfit's Neopets' pet appearance.
+    worn_items: List[:class:`Item`]
+        The items the Neopet is wearing.
+    closeted_items: List[:class:`Item`]
+        The items in the closet of the outfit.
+    """
+
     __slots__ = (
         "_state",
         "id",
@@ -528,12 +822,12 @@ class Outfit(Object):
 
     @property
     def url(self) -> str:
-        """Returns the outfit URL for the ID provided."""
+        """:class:`str`: Returns the outfit URL for the ID provided."""
         return f"https://impress.openneo.net/outfits/{self.id}"
 
     @property
     def image_urls(self):
-        """Returns a dict of the different sizes for the rendered image url of an outfit for the ID provided."""
+        """:class:`Dict[str]`: Returns a dict of the different sizes for the rendered image url of an outfit for the ID provided."""
         new_id = str(self.id).zfill(9)
         id_folder = new_id[:3] + "/" + new_id[3:6] + "/" + new_id[6:]
         url = f"https://openneo-uploads.s3.amazonaws.com/outfits/{id_folder}/"
@@ -552,9 +846,8 @@ class Outfit(Object):
         pose: Optional[PetPose] = None,
         size: Optional[LayerImageSize] = None,
     ):
-        """Exports a rendered customization image to the file-like object provided."""
         pose = pose or self.pet_appearance.pose
-        neopet = await Neopet.fetch_assets_for(
+        neopet = await Neopet._fetch_assets_for(
             species=self.pet_appearance.species,
             color=self.pet_appearance.color,
             pose=pose,
@@ -563,6 +856,8 @@ class Outfit(Object):
             state=self._state,
         )
         await neopet.render(fp)
+
+    render.__doc__ = Neopet.render.__doc__
 
     def __repr__(self):
         return f"<Outfit id={self.id} appearance={self.pet_appearance!r}>"

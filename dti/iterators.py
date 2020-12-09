@@ -1,6 +1,7 @@
 import asyncio
 from typing import List, Optional, Union
 
+from .errors import InvalidItemID
 from .constants import (
     SEARCH_ITEM_IDS,
     SEARCH_QUERY,
@@ -67,17 +68,18 @@ class _DTISearch:
 
 class ItemIDSearch(_DTISearch):
     # an item-ID search
-    # this WILL crash if you search an item ID that doesn't correspond to an item in the database
     # TODO: might need to be tweaked to be paginated in the future
     def __init__(self, state: State, item_ids: List[Union[str, int]]):
         super().__init__(state=state)
         self.item_ids = item_ids
 
     async def fetch_items(self):
-        data = await self._state.http.query(
+        data = await self._state._http._query(
             query=SEARCH_ITEM_IDS, variables={"itemIds": self.item_ids},
         )
-        return data["data"]["items"]
+        if data["data"]:
+            return data["data"]["items"]
+        raise InvalidItemID("An item ID that was searched is invalid.")
 
 
 class _PaginatedDTISearch(_DTISearch):
@@ -112,7 +114,7 @@ class ItemSearchToFit(_PaginatedDTISearch):
         self.size = size
 
     async def fetch_items(self):
-        data = await self._state.http.query(
+        data = await self._state._http._query(
             query=SEARCH_TO_FIT,
             variables={
                 "query": self.query,
@@ -145,7 +147,7 @@ class ItemSearchNames(_DTISearch):
             variables = {"names": self.names}
             key = "itemsByName"
 
-        data = await self._state.http.query(query=query, variables=variables)
+        data = await self._state._http._query(query=query, variables=variables)
 
         items = data["data"][key]
 
@@ -163,7 +165,7 @@ class ItemSearch(_DTISearch):
         self.query = query
 
     async def fetch_items(self):
-        data = await self._state.http.query(
+        data = await self._state._http._query(
             query=SEARCH_QUERY, variables={"query": self.query},
         )
         return data["data"]["itemSearch"]["items"]

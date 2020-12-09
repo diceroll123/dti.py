@@ -1,6 +1,6 @@
 import pytest
 
-from dti import Client
+from dti import Client, InvalidItemID
 from tests import TEST_ITEM, TEST_ITEM_TWO, TEST_PET
 
 
@@ -52,6 +52,15 @@ async def test_item_id_search() -> None:
             found = True
 
     assert found
+
+
+@pytest.mark.asyncio
+async def test_item_id_search_broken() -> None:
+    client = Client()
+
+    with pytest.raises(InvalidItemID):
+        async for item in client.search(item_ids=[1]):
+            print(item)
 
 
 @pytest.mark.asyncio

@@ -2,7 +2,7 @@
 An async API wrapper for Dress To Impress written in Python.
 
 Some notes:
-- *For the time being*, there are no front-facing docs for this beyond some light commenting in the code itself
+- *For the time being*, there are no front-facing docs for this beyond docstrings in the code itself
 - Breaking changes are very likely to happen until this lib + DTI2020 are considered stable
 - Until the lib is stable, I may push code with little-to-no decent commit messages 🤪
 
@@ -28,3 +28,4 @@ $ python -m pip install -U .
 
 # Links
 - [Dress To Impress (2020)](https://impress-2020.openneo.net/)
+- [DTI's Github Repo](https://github.com/matchu/impress-2020/)

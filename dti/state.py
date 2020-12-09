@@ -47,7 +47,7 @@ class ValidField:
         color_id -= 1
         return self._data[species_id * self.color_count + color_id]
 
-    def check(
+    def _check(
         self, *, species_id: int, color_id: int, pose: Optional[PetPose] = None,
     ) -> bool:
         bit = self._get_bit(species_id, color_id)
@@ -61,8 +61,8 @@ class ValidField:
 
 class State:
     __slots__ = (
-        "http",
-        "lock",
+        "_http",
+        "_lock",
         "_update_lock",
         "_valid_pairs",
         "_colors",
@@ -90,15 +90,15 @@ class State:
         self._valid_pairs = None
 
         # this lock is so only one thing accesses the state at a time between checking if updates are needed + updating
-        self.lock = asyncio.Lock()
+        self._lock = asyncio.Lock()
 
         # this lock is so updating only happens once at a time, since it can be manually called
         self._update_lock = asyncio.Lock()
 
-        self.http = HTTPClient()
+        self._http = HTTPClient()
 
     async def _grab_species_and_color(self):
-        data = await self.http.query(query=ALL_SPECIES_AND_COLORS)
+        data = await self._http._query(query=ALL_SPECIES_AND_COLORS)
         data = data["data"]
         from .models import Color, Species
 
@@ -130,30 +130,30 @@ class State:
         return self._last_update < time.monotonic() - self._cache_timeout
 
     async def _get_species(self, species: Union[int, str]) -> Optional["Species"]:
-        await self.update()
-        async with self.lock:
+        await self._update()
+        async with self._lock:
             return self._species[species]
 
     async def _get_color(self, color: Union[int, str]) -> Optional["Color"]:
-        await self.update()
-        async with self.lock:
+        await self._update()
+        async with self._lock:
             return self._colors[color]
 
     async def _get_bit(self, *, species_id: int, color_id: int) -> int:
-        await self.update()
-        async with self.lock:
+        await self._update()
+        async with self._lock:
             return self._valid_pairs._get_bit(species_id=species_id, color_id=color_id)
 
     async def _check(
         self, *, species_id: int, color_id: int, pose: Optional[PetPose] = None
     ) -> bool:
-        await self.update()
-        async with self.lock:
-            return self._valid_pairs.check(
+        await self._update()
+        async with self._lock:
+            return self._valid_pairs._check(
                 species_id=species_id, color_id=color_id, pose=pose
             )
 
-    async def update(self, force: Optional[bool] = False):
+    async def _update(self, force: Optional[bool] = False):
         async with self._update_lock:
             # forces cache, if outdated
             if force is False:
@@ -165,7 +165,7 @@ class State:
             self._colors.clear()
             self._species.clear()
 
-            self._valid_pairs = ValidField(await self.http.get_valid_pet_poses())
+            self._valid_pairs = ValidField(await self._http._get_valid_pet_poses())
             await self._grab_species_and_color()
 
             self._cached = True
