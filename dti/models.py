@@ -20,7 +20,7 @@ from .errors import (
     BrokenAssetImage,
 )
 from .mixins import Object
-from .state import State
+from .state import State, BitField
 
 
 class Species(Object):
@@ -472,7 +472,7 @@ class Neopet:
         *,
         species: Species,
         color: Color,
-        valid_poses: int,
+        valid_poses: BitField,
         pose: PetPose,
         appearances: List[PetAppearance],
         items: Optional[List[Item]] = None,
@@ -641,7 +641,7 @@ class Neopet:
 
     def check(self, pose: PetPose) -> bool:
         """:class:`bool`: Returns True if the pet pose provided is valid for the current species+color."""
-        return (self._valid_poses & pose) == pose
+        return self._valid_poses.check(pose)
 
     def valid_poses(self, override_pose: Optional[PetPose] = None) -> List[PetPose]:
         """List[:class:`PetPose`]: Returns a list of valid pet poses for the current species+color."""

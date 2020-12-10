@@ -29,6 +29,59 @@ class _NameDict(dict):
         return None
 
 
+class BitField(int):
+    """Represents the bit field of a color+species combo. This number holds the data of whether
+    or not the associated color+species has specific :class:`PetPose`s. The poses each have a
+    power-of-two value, which are bitwise OR'd together to make this object's value.
+    """
+
+    __slots__ = ()
+
+    def check(self, pose: Union[PetPose, int]) -> bool:
+        """:class:`bool`: Returns whether or not this bit field contains the supplied pose."""
+        return (self & pose) == pose
+
+    @property
+    def happy_masc(self) -> bool:
+        """:class:`bool`: Returns whether or not this bit field contains the HAPPY_MASC pose."""
+        return (self & 1) == 1
+
+    @property
+    def sad_masc(self) -> bool:
+        """:class:`bool`: Returns whether or not this bit field contains the SAD_MASC pose."""
+        return (self & 2) == 2
+
+    @property
+    def sick_masc(self) -> bool:
+        """:class:`bool`: Returns whether or not this bit field contains the SICK_MASC pose."""
+        return (self & 4) == 4
+
+    @property
+    def happy_fem(self) -> bool:
+        """:class:`bool`: Returns whether or not this bit field contains the HAPPY_FEM pose."""
+        return (self & 8) == 8
+
+    @property
+    def sad_fem(self) -> bool:
+        """:class:`bool`: Returns whether or not this bit field contains the SAD_FEM pose."""
+        return (self & 16) == 16
+
+    @property
+    def sick_fem(self) -> bool:
+        """:class:`bool`: Returns whether or not this bit field contains the SICK_FEM pose."""
+        return (self & 32) == 32
+
+    @property
+    def unconverted(self) -> bool:
+        """:class:`bool`: Returns whether or not this bit field contains the UNCONVERTED pose."""
+        return (self & 64) == 64
+
+    @property
+    def unknown(self) -> bool:
+        """:class:`bool`: Returns whether or not this bit field contains the UNKNOWN pose."""
+        return (self & 128) == 128
+
+
 class ValidField:
     __slots__ = ("species_count", "color_count", "_data")
 
@@ -42,10 +95,10 @@ class ValidField:
         if self.species_count * self.color_count != len(self._data):
             raise InvalidPairBytes("Invalid Pet-Pose bit table")
 
-    def _get_bit(self, species_id: int, color_id: int) -> int:
+    def _get_bit(self, species_id: int, color_id: int) -> BitField:
         species_id -= 1
         color_id -= 1
-        return self._data[species_id * self.color_count + color_id]
+        return BitField(self._data[species_id * self.color_count + color_id])
 
     def _check(
         self, *, species_id: int, color_id: int, pose: Optional[PetPose] = None,
@@ -55,8 +108,7 @@ class ValidField:
         if pose is None:
             return bit > 0
 
-        find = int(pose)
-        return (bit & find) == find
+        return bit.check(pose)
 
 
 class State:
@@ -139,7 +191,7 @@ class State:
         async with self._lock:
             return self._colors[color]
 
-    async def _get_bit(self, *, species_id: int, color_id: int) -> int:
+    async def _get_bit(self, *, species_id: int, color_id: int) -> BitField:
         await self._update()
         async with self._lock:
             return self._valid_pairs._get_bit(species_id=species_id, color_id=color_id)

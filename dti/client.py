@@ -6,7 +6,7 @@ from .enums import LayerImageSize, PetPose
 from .errors import InvalidColorSpeciesPair, NoIteratorsFound
 from .iterators import ItemIDSearch, ItemSearch, ItemSearchToFit, ItemSearchNames
 from .models import Color, Species, Outfit, Neopet
-from .state import State
+from .state import State, BitField
 
 
 class Client:
@@ -77,7 +77,7 @@ class Client:
 
     async def get_bit(
         self, *, species: Union[int, str, Species], color: Union[int, str, Color],
-    ) -> int:
+    ) -> BitField:
         """|coro|
 
         The integer returned from this function represents the currently available pet poses
@@ -94,7 +94,7 @@ class Client:
 
         Returns
         --------
-        :class:`int`: Returns the bit array field for a given pet species/color.
+        :class:`BitField`: Returns the bit array field for a given pet species/color.
         """
 
         if not isinstance(species, Species):
