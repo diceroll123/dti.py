@@ -20,6 +20,9 @@ class _DTIEnum(Enum):
 
 
 class LayerImageSize(_DTIEnum):
+    """Represents the desired render size of a customization, in pixels.
+    """
+
     SIZE_600 = auto()
     SIZE_300 = auto()
     SIZE_150 = auto()
@@ -29,6 +32,7 @@ class PetPose(int, _DTIEnum):
     """Represents a single pet pose. Each pose has an associated power-of-two value to easily
     create :class:`BitField` objects. This object acts like an :class:`int`.
     """
+
     HAPPY_MASC = 1
     SAD_MASC = 2
     SICK_MASC = 4
