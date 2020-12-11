@@ -732,6 +732,10 @@ class Neopet:
         so since it downloads every layer, and you'd be keeping a file object open on the disk
         for an indeterminate amount of time.
 
+        .. note::
+
+            Only supports PNG output.
+
         Parameters
         -----------
         fp: :class:`io.BufferedIOBase`
