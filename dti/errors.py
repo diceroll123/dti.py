@@ -11,7 +11,7 @@ class NeopetNotFound(DTIException):
 
 
 class MissingPetAppearance(DTIException):
-    """An exception that is thrown when a pet appearance does not exist"""
+    """An exception that is thrown when a pet appearance (species + color + pose) does not exist"""
 
     pass
 
