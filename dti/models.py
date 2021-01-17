@@ -216,10 +216,12 @@ class AppearanceLayer(Object):
 
     Attributes
     -----------
-    image_url: :class:`str`
-        The appearance layer's DTI image url.
     id: :class:`str`
         The appearance layer's DTI ID. Guaranteed unique across all layers of all types.
+    parent: Union[:class:`ItemAppearance`, :class:`PetAppearance`]
+        The respective owner of this layer, an ItemAppearance or a PetAppearance.
+    image_url: :class:`str`
+        The appearance layer's DTI image url.
     asset_remote_id: :class:`str`
         The appearance layer's Neopets ID. Guaranteed unique across layers of the *same* type, but
         not of different types. That is, it's allowed and common for an item
@@ -231,17 +233,22 @@ class AppearanceLayer(Object):
         The appearance layer's zone.
     """
 
-    __slots__ = ("id", "zone", "image_url", "asset_type", "asset_remote_id")
+    __slots__ = ("id", "parent", "zone", "image_url", "asset_type", "asset_remote_id")
 
-    def __init__(self, **data):
+    def __init__(self, parent: Union["ItemAppearance", "PetAppearance"], **data):
         self.id = data["id"]
+        self.parent = parent
         self.image_url = data["imageUrl"]
         self.asset_remote_id = data["remoteId"]
         self.zone = Zone(data["zone"])
         self.asset_type = data["asset_type"]
 
+        # make sure the image url on DTI is valid
+        if self.image_url is None:
+            raise BrokenAssetImage(f"Layer image broken: {self!r}")
+
     def __repr__(self):
-        return f"<AppearanceLayer zone={self.zone!r} url={self.image_url!r} asset_type={self.asset_type!r}>"
+        return f"<AppearanceLayer zone={self.zone!r} url={self.image_url!r} parent={self.parent!r}>"
 
 
 class PetAppearance(Object):
@@ -299,7 +306,8 @@ class PetAppearance(Object):
 
         self.pose = PetPose(data["pose"])
         self.layers = [
-            AppearanceLayer(**layer, asset_type="biology") for layer in data["layers"]
+            AppearanceLayer(self, **layer, asset_type="biology")
+            for layer in data["layers"]
         ]
         self.restricted_zones = [
             Zone(restricted) for restricted in data["restrictedZones"]
@@ -330,6 +338,8 @@ class ItemAppearance(Object):
     -----------
     id: :class:`str`
         The item appearance's ID.
+    item: :class:`Item`
+        The item that owns this appearance.
     layers: List[:class:`AppearanceLayer`]
         The appearance layers of the item appearance.
     restricted_zones: List[:class:`Zone`]
@@ -338,17 +348,22 @@ class ItemAppearance(Object):
         The zones that this item appearance occupies.
     """
 
-    __slots__ = ("id", "layers", "restricted_zones", "occupies")
+    __slots__ = ("id", "item", "layers", "restricted_zones", "occupies")
 
-    def __init__(self, data: Dict):
+    def __init__(self, data: Dict, item: "Item"):
         self.id = data["id"]
+        self.item = item
         self.layers = [
-            AppearanceLayer(**layer, asset_type="object") for layer in data["layers"]
+            AppearanceLayer(self, **layer, asset_type="object")
+            for layer in data["layers"]
         ]
         self.restricted_zones = [
             Zone(restricted) for restricted in data["restrictedZones"]
         ]
         self.occupies = [layer.zone for layer in self.layers]
+
+    def __repr__(self):
+        return f"<ItemAppearance id={self.id!r} item={self.item!r}>"
 
 
 class Item(Object):
@@ -413,7 +428,7 @@ class Item(Object):
         self.rarity = int(data.get("rarityIndex"))
 
         appearance_data = data.get("appearanceOn", None)
-        self.appearance = appearance_data and ItemAppearance(appearance_data)
+        self.appearance = appearance_data and ItemAppearance(appearance_data, self)
 
     @property
     def is_np(self) -> bool:
@@ -776,6 +791,7 @@ class Neopet:
                 layer_image = BytesIO(image)
                 foreground = Image.open(layer_image)
             except Exception:
+                # for when the image itself is corrupted somehow
                 raise BrokenAssetImage(
                     f"Layer image broken: <Data species={self.species!r} color={self.color!r} pose={pose!r} layer={layer!r}>"
                 )
