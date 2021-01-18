@@ -243,10 +243,6 @@ class AppearanceLayer(Object):
         self.zone = Zone(data["zone"])
         self.asset_type = data["asset_type"]
 
-        # make sure the image url on DTI is valid
-        if self.image_url is None:
-            raise BrokenAssetImage(f"Layer image broken: {self!r}")
-
     def __repr__(self):
         return f"<AppearanceLayer zone={self.zone!r} url={self.image_url!r} parent={self.parent!r}>"
 
@@ -783,7 +779,10 @@ class Neopet:
 
         # download images simultaneously
         images = await asyncio.gather(
-            *[self._state._http._get_binary_data(layer.image_url) for layer in layers]
+            *[
+                self._state._http._get_binary_data(_raise_if_none(layer))
+                for layer in layers
+            ]
         )
 
         for layer, image in zip(layers, images):
@@ -881,3 +880,11 @@ class Outfit(Object):
 
     def __repr__(self):
         return f"<Outfit id={self.id} appearance={self.pet_appearance!r}>"
+
+
+#  utility functions below
+def _raise_if_none(layer: AppearanceLayer):
+    url = layer.image_url
+    if url is None:
+        raise BrokenAssetImage(f"Layer image broken: {layer!r}")
+    return url
