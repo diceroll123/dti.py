@@ -134,8 +134,7 @@ class State:
 
         # 1h by default, 10s minimum to be kind to the API
         cache_timeout = cache_timeout or 3600
-        if cache_timeout < 10:
-            cache_timeout = 10
+        cache_timeout = max(cache_timeout, 10)
         self._cache_timeout = cache_timeout
 
         # _valid_pairs is (going to be) a bit array field of sorts.
@@ -208,9 +207,8 @@ class State:
     async def _update(self, force: Optional[bool] = False):
         async with self._update_lock:
             # forces cache, if outdated
-            if force is False:
-                if not self.is_outdated:
-                    return self
+            if force is False and not self.is_outdated:
+                return self
 
             self._valid_pairs = None
             self._cached = False

@@ -710,8 +710,7 @@ class Neopet:
                 f'Pet Appearance <"{self.species.id}-{self.color.id}"> does not exist.'
             )
 
-        all_layers = []
-        all_layers.extend(pet_appearance.layers)
+        all_layers = list(pet_appearance.layers)
         item_restricted_zones = []
         render_items, _ = self._render_items()
         for item in render_items:
@@ -851,13 +850,11 @@ class Outfit(Object):
         id_folder = new_id[:3] + "/" + new_id[3:6] + "/" + new_id[6:]
         url = f"https://openneo-uploads.s3.amazonaws.com/outfits/{id_folder}/"
 
-        urls = {
+        return {
             "large": url + "preview.png",
             "medium": url + "medium_preview.png",
             "small": url + "small_preview.png",
         }
-
-        return urls
 
     async def render(
         self,
