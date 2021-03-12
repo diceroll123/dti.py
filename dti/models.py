@@ -541,11 +541,10 @@ class Neopet:
         data = await state._http._query(query=query, variables=variables)
 
         error = data.get("error")
-        if error:
-            if "it is undefined" in error["message"]:
-                raise InvalidColorSpeciesPair(
-                    f"The {species} species does not have the color {color}"
-                )
+        if error and "it is undefined" in error["message"]:
+            raise InvalidColorSpeciesPair(
+                f"The {species} species does not have the color {color}"
+            )
 
         data = data["data"]
         items = [Item(**item) for item in data[key] if item is not None]
@@ -798,6 +797,10 @@ class Neopet:
                     continue
                 if foreground.mode != "RGBA":
                     foreground = foreground.convert("RGBA")
+
+                # force proper size if not already
+                if foreground.size != (img_size, img_size):
+                    foreground = foreground.resize((img_size, img_size))
                 canvas = Image.alpha_composite(canvas, foreground)
 
         canvas.save(fp, format="PNG")
