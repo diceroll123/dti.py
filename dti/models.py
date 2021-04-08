@@ -401,6 +401,9 @@ class Item(Object):
         The item's rarity on Neopets.
     appearance: Optional[:class:`ItemAppearance`]
         The item appearance object for this item on a particular PetAppearance. Can be `None`.
+    waka_value: Optional[:class:`str`]
+        The value of the item on waka's guide, according to wakaguide.com. Will be None is the value is unknown,
+        or if there's an error getting the data.
     """
 
     __slots__ = (
@@ -412,6 +415,7 @@ class Item(Object):
         "is_nc",
         "is_pb",
         "rarity",
+        "waka_value",
     )
 
     def __init__(self, **data):
@@ -422,6 +426,7 @@ class Item(Object):
         self.is_nc = data.get("isNc")
         self.is_pb = data.get("isPb")
         self.rarity = int(data.get("rarityIndex"))
+        self.waka_value = data.get("wakaValueText")
 
         appearance_data = data.get("appearanceOn", None)
         self.appearance = appearance_data and ItemAppearance(appearance_data, self)
@@ -576,7 +581,8 @@ class Neopet:
         size = size or LayerImageSize.SIZE_600
 
         data = await state._http._query(
-            query=PET_ON_NEOPETS, variables={"petName": pet_name, "size": str(size)},
+            query=PET_ON_NEOPETS,
+            variables={"petName": pet_name, "size": str(size)},
         )
 
         error = data.get("errors")

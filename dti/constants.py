@@ -10,6 +10,7 @@ fragment ItemProperties on Item {
   rarityIndex
   isNc
   isPb
+  wakaValueText
 }"""
 
 FRAGMENT_PET_APPEARANCE = """
