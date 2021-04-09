@@ -1,7 +1,7 @@
 import random
 from enum import Enum, auto
 
-__all__ = ["LayerImageSize", "PetPose"]
+__all__ = ("LayerImageSize", "PetPose")
 
 
 class _DTIEnum(Enum):
@@ -20,8 +20,7 @@ class _DTIEnum(Enum):
 
 
 class LayerImageSize(_DTIEnum):
-    """Represents the desired render size of a customization, in pixels.
-    """
+    """Represents the desired render size of a customization, in pixels."""
 
     SIZE_600 = auto()
     SIZE_300 = auto()

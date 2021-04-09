@@ -76,7 +76,10 @@ class Client:
         return self._state._colors[name_or_id]
 
     async def get_bit(
-        self, *, species: Union[int, str, Species], color: Union[int, str, Color],
+        self,
+        *,
+        species: Union[int, str, Species],
+        color: Union[int, str, Color],
     ) -> BitField:
         """|coro|
 
@@ -194,7 +197,7 @@ class Client:
             state=self._state,
         )
 
-    async def get_neopet_by_name(self, pet_name: str) -> Optional[Neopet]:
+    async def get_neopet_by_name(self, pet_name: str) -> Neopet:
         """|coro|
 
         Creates a :class:`Neopet` using the name of a real Neopet.
@@ -286,10 +289,6 @@ class Client:
         -------
         ~dti.InvalidItemID
             An invalid item ID was passed to `item_ids`.
-
-        Returns
-        --------
-        :class:`Neopet`: The Neopet with the options applied to it.
         """
 
         searcher = None

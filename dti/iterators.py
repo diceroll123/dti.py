@@ -14,7 +14,7 @@ from .models import Item
 from .state import State
 
 
-class _DTISearch:
+class DTISearch:
     # this is a base class
     def __init__(self, *, state: State, per_page: Optional[int] = None):
         self._state = state
@@ -66,7 +66,7 @@ class _DTISearch:
         return await self.next()
 
 
-class ItemIDSearch(_DTISearch):
+class ItemIDSearch(DTISearch):
     # an item-ID search
     # TODO: might need to be tweaked to be paginated in the future
     def __init__(self, state: State, item_ids: List[Union[str, int]]):
@@ -75,14 +75,15 @@ class ItemIDSearch(_DTISearch):
 
     async def fetch_items(self):
         data = await self._state._http._query(
-            query=SEARCH_ITEM_IDS, variables={"itemIds": self.item_ids},
+            query=SEARCH_ITEM_IDS,
+            variables={"itemIds": self.item_ids},
         )
         if data["data"]:
             return data["data"]["items"]
         raise InvalidItemID("An item ID that was searched is invalid.")
 
 
-class _PaginatedDTISearch(_DTISearch):
+class PaginatedDTISearch(DTISearch):
     async def fetch_items(self):
         raise NotImplementedError
 
@@ -93,7 +94,7 @@ class _PaginatedDTISearch(_DTISearch):
         self._exhausted = len(items) < self.per_page
 
 
-class ItemSearchToFit(_PaginatedDTISearch):
+class ItemSearchToFit(PaginatedDTISearch):
     # a regular search query that fits the species/color given
     def __init__(
         self,
@@ -128,11 +129,14 @@ class ItemSearchToFit(_PaginatedDTISearch):
         return data["data"]["itemSearchToFit"]["items"]
 
 
-class ItemSearchNames(_DTISearch):
+class ItemSearchNames(DTISearch):
     # an exact-match search for items
     # not-found items WILL yield None
     def __init__(
-        self, *, state: State, names: List[str],
+        self,
+        *,
+        state: State,
+        names: List[str],
     ):
         super().__init__(state=state)
         self.names = names
@@ -158,7 +162,7 @@ class ItemSearchNames(_DTISearch):
         return [items]
 
 
-class ItemSearch(_DTISearch):
+class ItemSearch(DTISearch):
     # a regular search query
     def __init__(self, *, state: State, query: str):
         super().__init__(state=state)
@@ -166,6 +170,7 @@ class ItemSearch(_DTISearch):
 
     async def fetch_items(self):
         data = await self._state._http._query(
-            query=SEARCH_QUERY, variables={"query": self.query},
+            query=SEARCH_QUERY,
+            variables={"query": self.query},
         )
         return data["data"]["itemSearch"]["items"]
