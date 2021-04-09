@@ -87,6 +87,9 @@ class Species(Object):
     def __str__(self):
         return self.name
 
+    def __int__(self):
+        return self.id
+
     def __repr__(self):
         return f"<Species id={self.id} name={self.name!r}>"
 
@@ -154,6 +157,9 @@ class Color(Object):
 
     def __str__(self):
         return self.name
+
+    def __int__(self):
+        return self.id
 
     def __repr__(self):
         return f"<Color id={self.id} name={self.name!r}>"
