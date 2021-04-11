@@ -4,7 +4,13 @@ from .constants import OUTFIT
 from .decorators import _require_state
 from .enums import LayerImageSize, PetPose
 from .errors import InvalidColorSpeciesPair, NoIteratorsFound
-from .iterators import ItemIDSearch, ItemSearch, ItemSearchToFit, ItemSearchNames
+from .iterators import (
+    ItemIDSearch,
+    ItemSearch,
+    ItemSearchToFit,
+    ItemSearchNames,
+    DTISearch,
+)
 from .models import Color, Species, Outfit, Neopet
 from .state import State, BitField
 
@@ -106,7 +112,10 @@ class Client:
         if not isinstance(color, Color):
             color = await self.get_color(color)
 
-        return await self._state._get_bit(species_id=species.id, color_id=color.id)
+        if isinstance(species, Species) and isinstance(color, Color):
+            return await self._state._get_bit(species_id=species.id, color_id=color.id)
+
+        return BitField(0)
 
     async def check(
         self,
@@ -139,9 +148,12 @@ class Client:
         if not isinstance(color, Color):
             color = await self.get_color(color)
 
-        return await self._state._check(
-            species_id=species.id, color_id=color.id, pose=pose
-        )
+        if isinstance(species, Species) and isinstance(color, Color):
+            return await self._state._check(
+                species_id=species.id, color_id=color.id, pose=pose
+            )
+
+        return False
 
     async def get_neopet(
         self,
@@ -149,7 +161,7 @@ class Client:
         species: Union[int, str, Species],
         color: Union[int, str, Color],
         item_names: Optional[List[str]] = None,
-        item_ids: Optional[List[int]] = None,
+        item_ids: Optional[List[Union[str, int]]] = None,
         size: Optional[LayerImageSize] = None,
         pose: Optional[PetPose] = None,
     ) -> Neopet:
@@ -166,7 +178,7 @@ class Client:
             The name, or ID, or Color object of the desired Color. Case-insensitive.
         item_names: Optional[List[:class:`str`]]
             A list of item names to search for + add to the items of the Neopet.
-        item_ids: Optional[List[:class:`int`]]
+        item_ids: Optional[List[Union[:class:`str`, :class:`int`]]]
             A list of item IDs to search for + add to the items of the Neopet.
         size: Optional[:class:`LayerImageSize`]
             The desired size for the render. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
@@ -184,7 +196,7 @@ class Client:
         if not isinstance(color, Color):
             color = await self.get_color(color)
 
-        if not species or not color:
+        if not isinstance(species, Species) or not isinstance(color, Color):
             raise InvalidColorSpeciesPair("Invalid Species/Color provided")
 
         return await Neopet._fetch_assets_for(
@@ -249,6 +261,7 @@ class Client:
         outfit_data = data["data"]["outfit"]
         if outfit_data:
             return Outfit(**outfit_data, state=self._state)
+        return None
 
     def search(
         self,
@@ -291,7 +304,7 @@ class Client:
             An invalid item ID was passed to `item_ids`.
         """
 
-        searcher = None
+        searcher: Optional[DTISearch] = None
         _names = []
 
         per_page = per_page or 30
@@ -302,7 +315,7 @@ class Client:
         if item_names:
             _names.extend(item_names)
 
-        if all([query, species_id, color_id]):
+        if query is not None and species_id is not None and color_id is not None:
             searcher = ItemSearchToFit(
                 query=query,
                 species_id=species_id,

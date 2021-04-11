@@ -741,7 +741,7 @@ class Neopet:
 
     async def render(
         self,
-        fp: Union[BinaryIO, PathLike],
+        fp: BinaryIO,
         pose: Optional[PetPose] = None,
         size: Optional[LayerImageSize] = None,
     ):
@@ -759,7 +759,7 @@ class Neopet:
 
         Parameters
         -----------
-        fp: :class:`io.BufferedIOBase`
+        fp: BinaryIO
             A file-like object opened in binary mode and write mode (`wb`).
         pose: Optional[:class:`PetPose`]
             The desired pet pose for the render. Defaults to the current neopets' pose.
@@ -873,7 +873,7 @@ class Outfit(Object):
 
     async def render(
         self,
-        fp: Union[BinaryIO, PathLike],
+        fp: BinaryIO,
         pose: Optional[PetPose] = None,
         size: Optional[LayerImageSize] = None,
     ):

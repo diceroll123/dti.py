@@ -1,12 +1,15 @@
 import asyncio
 import contextlib
 import time
-from typing import Optional, Union
+from typing import Optional, Union, TYPE_CHECKING
 
 from .constants import ALL_SPECIES_AND_COLORS
 from .enums import PetPose
 from .errors import InvalidPairBytes
 from .http import HTTPClient
+
+if TYPE_CHECKING:
+    from . import Color, Species
 
 
 class _NameDict(dict):
@@ -85,7 +88,11 @@ class BitField(int):
 class ValidField:
     __slots__ = ("species_count", "color_count", "_data")
 
-    def __init__(self, data: bytes):
+    def __init__(self, data: Optional[bytes] = None):
+        if data is None:
+            self.species_count = 0
+            self.color_count = 0
+            return
         # the first byte is the amount of species
         # the second byte is the amount of colors
         # this pops them off the data table so we can cleanly search later :)
@@ -101,7 +108,11 @@ class ValidField:
         return BitField(self._data[species_id * self.color_count + color_id])
 
     def _check(
-        self, *, species_id: int, color_id: int, pose: Optional[PetPose] = None,
+        self,
+        *,
+        species_id: int,
+        color_id: int,
+        pose: Optional[PetPose] = None,
     ) -> bool:
         bit = self._get_bit(species_id, color_id)
 
@@ -130,7 +141,7 @@ class State:
         self._colors = _NameDict()
         self._species = _NameDict()
         self._cached = False
-        self._last_update = None
+        self._last_update = 0.0
 
         # 1h by default, 10s minimum to be kind to the API
         cache_timeout = cache_timeout or 3600
@@ -138,7 +149,7 @@ class State:
         self._cache_timeout = cache_timeout
 
         # _valid_pairs is (going to be) a bit array field of sorts.
-        self._valid_pairs = None
+        self._valid_pairs = ValidField()
 
         # this lock is so only one thing accesses the state at a time between checking if updates are needed + updating
         self._lock = asyncio.Lock()
@@ -210,7 +221,7 @@ class State:
             if force is False and not self.is_outdated:
                 return self
 
-            self._valid_pairs = None
+            self._valid_pairs = ValidField()
             self._cached = False
             self._colors.clear()
             self._species.clear()

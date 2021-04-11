@@ -18,7 +18,7 @@ class DTISearch:
     # this is a base class
     def __init__(self, *, state: State, per_page: Optional[int] = None):
         self._state = state
-        self._items = asyncio.Queue(maxsize=per_page or 0)
+        self._items: asyncio.Queue = asyncio.Queue(maxsize=per_page or 0)
         self._exhausted = False
 
     async def fetch_items(self):
@@ -84,6 +84,11 @@ class ItemIDSearch(DTISearch):
 
 
 class PaginatedDTISearch(DTISearch):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.offset = 0
+        self.per_page = 0
+
     async def fetch_items(self):
         raise NotImplementedError
 
