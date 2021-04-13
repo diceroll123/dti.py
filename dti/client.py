@@ -187,7 +187,8 @@ class Client:
 
         Returns
         --------
-        :class:`Neopet`: The Neopet with the options applied to it.
+        :class:`Neopet`
+            The Neopet with the options applied to it.
         """
 
         if not isinstance(species, Species):
@@ -226,7 +227,8 @@ class Client:
 
         Returns
         --------
-        :class:`Neopet`: The corresponding Neopet that matches the name provided.
+        :class:`Neopet`
+            The corresponding Neopet that matches the name provided.
         """
 
         return await Neopet._fetch_by_name(pet_name=pet_name, state=self._state)
@@ -248,7 +250,8 @@ class Client:
 
         Returns
         --------
-        Optional[:class:`Outfit`]: The corresponding outfit that matches the ID. Can be `None` if it's not found.
+        Optional[:class:`Outfit`]
+            The corresponding outfit that matches the ID. Can be `None` if it's not found.
         """
         data = await self._state._http._query(
             OUTFIT,
@@ -274,7 +277,7 @@ class Client:
         item_ids: Optional[List[Union[str, int]]] = None,
         size: Optional[LayerImageSize] = None,
         per_page: Optional[int] = None,
-    ):
+    ) -> DTISearch:
         """|coro|
 
         This is a one-size-fits-most search function. Most of the parameters cannot be mixed and matched.
@@ -302,6 +305,10 @@ class Client:
         -------
         ~dti.InvalidItemID
             An invalid item ID was passed to `item_ids`.
+
+        Returns
+        --------
+        :class:`.DTISearch`: The async Search iterator
         """
 
         searcher: Optional[DTISearch] = None
