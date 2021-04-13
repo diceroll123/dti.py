@@ -1,5 +1,4 @@
 import asyncio
-from os import PathLike
 from typing import Dict, List, Optional, Union, BinaryIO, Tuple
 from urllib.parse import urlencode
 from PIL import Image
@@ -790,7 +789,7 @@ class Neopet:
         # download images simultaneously
         images = await asyncio.gather(
             *[
-                self._state._http._get_binary_data(_raise_if_none(layer))
+                self._state._http._fetch_binary_data(_raise_if_none(layer))
                 for layer in layers
             ]
         )

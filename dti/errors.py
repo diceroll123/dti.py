@@ -10,6 +10,12 @@ class NeopetNotFound(DTIException):
     pass
 
 
+class OutfitNotFound(DTIException):
+    """An exception that is thrown when searching a DTI outfit by ID returns nothing"""
+
+    pass
+
+
 class MissingPetAppearance(DTIException):
     """An exception that is thrown when a pet appearance (species + color + pose) does not exist"""
 

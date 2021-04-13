@@ -15,10 +15,10 @@ class HTTPClient:
             if proxy_auth is not None:
                 self.extra_kwargs["proxy_auth"] = proxy_auth
 
-    async def _get_valid_pet_poses(self) -> bytes:
-        return await self._get_binary_data(self.API_BASE + "/validPetPoses")
+    async def _fetch_valid_pet_poses(self) -> bytes:
+        return await self._fetch_binary_data(self.API_BASE + "/validPetPoses")
 
-    async def _get_binary_data(self, url: str) -> bytes:
+    async def _fetch_binary_data(self, url: str) -> bytes:
         async with aiohttp.ClientSession() as session:
             async with session.get(url, **self.extra_kwargs) as r:
                 return await r.content.read()

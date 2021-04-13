@@ -8,7 +8,7 @@ async def main():
     dti_client = Client()
 
     try:
-        pet = await dti_client.get_neopet_by_name("diceroll123456789")
+        pet = await dti_client.fetch_neopet_by_name("diceroll123456789")
 
         with open("./pet.png", "wb") as fp:
             await pet.render(fp)

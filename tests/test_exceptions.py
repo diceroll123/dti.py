@@ -16,11 +16,11 @@ async def test_uncached_call() -> None:
 async def test_impossible_pet() -> None:
     client = Client()
     with pytest.raises(InvalidColorSpeciesPair):
-        await client.get_neopet(color="Apple", species="Aisha")
+        await client.fetch_neopet(color="Apple", species="Aisha")
 
 
 @pytest.mark.asyncio
 async def test_impossible_pet_name() -> None:
     client = Client()
     with pytest.raises(NeopetNotFound):
-        await client.get_neopet_by_name("thyassa_thyassa_thyassa")  # too long!
+        await client.fetch_neopet_by_name("thyassa_thyassa_thyassa")  # too long!

@@ -13,6 +13,6 @@ async def test_statefulness() -> None:
         if item.name == TEST_ITEM.name and item.id == TEST_ITEM.id:
             found = True
 
-    pet = await client.get_neopet(color=TEST_PET.color, species=TEST_PET.species)
+    pet = await client.fetch_neopet(color=TEST_PET.color, species=TEST_PET.species)
 
     assert found and pet

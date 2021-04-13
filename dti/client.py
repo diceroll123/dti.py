@@ -3,7 +3,7 @@ from typing import List, Optional, Union
 from .constants import OUTFIT
 from .decorators import _require_state
 from .enums import LayerImageSize, PetPose
-from .errors import InvalidColorSpeciesPair, NoIteratorsFound
+from .errors import InvalidColorSpeciesPair, NoIteratorsFound, OutfitNotFound
 from .iterators import (
     ItemIDSearch,
     ItemSearch,
@@ -155,7 +155,7 @@ class Client:
 
         return False
 
-    async def get_neopet(
+    async def fetch_neopet(
         self,
         *,
         species: Union[int, str, Species],
@@ -210,7 +210,7 @@ class Client:
             state=self._state,
         )
 
-    async def get_neopet_by_name(self, pet_name: str) -> Neopet:
+    async def fetch_neopet_by_name(self, pet_name: str) -> Neopet:
         """|coro|
 
         Creates a :class:`Neopet` using the name of a real Neopet.
@@ -234,9 +234,9 @@ class Client:
         return await Neopet._fetch_by_name(pet_name=pet_name, state=self._state)
 
     @_require_state
-    async def get_outfit(
+    async def fetch_outfit(
         self, outfit_id: int, size: Optional[LayerImageSize] = None
-    ) -> Optional[Outfit]:
+    ) -> Outfit:
         """|coro|
 
         This function grabs an outfit from DTI by ID.
@@ -248,10 +248,15 @@ class Client:
         size: Optional[:class:`LayerImageSize`]
             The desired size for the render. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
 
+        Raises
+        -------
+        ~dti.OutfitNotFound
+            The Outfit is not found on DTI.
+
         Returns
         --------
-        Optional[:class:`Outfit`]
-            The corresponding outfit that matches the ID. Can be `None` if it's not found.
+        :class:`Outfit`
+            The corresponding outfit that matches the ID.
         """
         data = await self._state._http._query(
             OUTFIT,
@@ -262,9 +267,11 @@ class Client:
         )
 
         outfit_data = data["data"]["outfit"]
-        if outfit_data:
-            return Outfit(**outfit_data, state=self._state)
-        return None
+
+        if outfit_data is None:
+            raise OutfitNotFound(f"Outfit (ID: {outfit_id}) not found.")
+
+        return Outfit(**outfit_data, state=self._state)
 
     def search(
         self,
