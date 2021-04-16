@@ -5,8 +5,7 @@ import aiohttp
 
 class HTTPClient:
     __slots__ = "extra_kwargs"
-    BASE = "https://impress-2020.openneo.net"
-    API_BASE = f"{BASE}/api"
+    API_BASE = "https://impress-2020.openneo.net/api"
 
     def __init__(self, *, proxy=None, proxy_auth=None):
         self.extra_kwargs = {}
