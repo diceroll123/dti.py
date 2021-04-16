@@ -442,11 +442,16 @@ class Item(Object):
         return not self.is_nc and not self.is_pb
 
     @property
-    def url(self) -> str:
-        """:class:`str`: Returns the DTI URL for the item."""
+    def legacy_url(self) -> str:
+        """:class:`str`: Returns the legacy DTI URL for the item."""
         return (
             f'http://impress.openneo.net/items/{self.id}-{self.name.replace(" ", "-")}'
         )
+
+    @property
+    def url(self) -> str:
+        """:class:`str`: Returns the DTI URL for the item."""
+        return f"https://impress-2020.openneo.net/items/{self.id}"
 
     def __str__(self):
         return self.name
@@ -651,7 +656,9 @@ class Neopet:
             params["objects[]"] = [item.id for item in objects]
             params["closet[]"] = [item.id for item in closet]
 
-        return self._state._http.BASE + "/outfits/new?" + urlencode(params, doseq=True)
+        return "https://impress-2020.openneo.net/outfits/new?" + urlencode(
+            params, doseq=True
+        )
 
     def get_pet_appearance(self, pose: PetPose) -> Optional[PetAppearance]:
         """Optional[:class:`PetAppearance`]: Returns the pet appearance for the provided pet pose."""
@@ -853,9 +860,14 @@ class Outfit(Object):
         self.closeted_items = [Item(**item_data) for item_data in data["closetedItems"]]
 
     @property
+    def legacy_url(self) -> str:
+        """:class:`str`: Returns the legacy outfit URL for the ID provided."""
+        return f"https://impress.openneo.net/outfits/{self.id}"
+
+    @property
     def url(self) -> str:
         """:class:`str`: Returns the outfit URL for the ID provided."""
-        return f"https://impress.openneo.net/outfits/{self.id}"
+        return f"https://impress-2020.openneo.net/outfits/{self.id}"
 
     @property
     def image_urls(self):
