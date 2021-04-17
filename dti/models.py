@@ -1,5 +1,7 @@
 import asyncio
-from typing import Dict, List, Optional, Union, BinaryIO, Tuple
+import io
+import os
+from typing import Dict, List, Optional, Union, Tuple
 from urllib.parse import urlencode
 from PIL import Image
 from io import BytesIO
@@ -774,9 +776,11 @@ class Neopet:
 
     async def render(
         self,
-        fp: BinaryIO,
+        fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
         pose: Optional[PetPose] = None,
         size: Optional[LayerImageSize] = None,
+        *,
+        seek_begin: bool = True,
     ):
         """|coro|
 
@@ -792,13 +796,15 @@ class Neopet:
 
         Parameters
         -----------
-        fp: BinaryIO
+        fp: Union[:class:`io.BufferedIOBase`, :class:`os.PathLike`]
             A file-like object opened in binary mode and write mode (`wb`).
         pose: Optional[:class:`PetPose`]
             The desired pet pose for the render. Defaults to the current neopets' pose.
         size: Optional[:class:`LayerImageSize`]
             The desired size for the render. Defaults to the current neopets' pose if there is one,
             otherwise defaults to LayerImageSize.SIZE_600.
+        seek_begin: :class:`bool`
+            Whether to seek to the beginning of the file after saving is successfully done.
 
         Raises
         -------
@@ -849,7 +855,8 @@ class Neopet:
                 canvas = Image.alpha_composite(canvas, foreground)
 
         canvas.save(fp, format="PNG")
-        fp.seek(0)
+        if seek_begin and isinstance(fp, io.BufferedIOBase):
+            fp.seek(0)
 
 
 class Outfit(Object):
@@ -915,9 +922,11 @@ class Outfit(Object):
 
     async def render(
         self,
-        fp: BinaryIO,
+        fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
         pose: Optional[PetPose] = None,
         size: Optional[LayerImageSize] = None,
+        *,
+        seek_begin: bool = True,
     ):
         pose = pose or self.pet_appearance.pose
         neopet = await Neopet._fetch_assets_for(
@@ -928,7 +937,7 @@ class Outfit(Object):
             item_ids=[item.id for item in self.worn_items],
             state=self._state,
         )
-        await neopet.render(fp)
+        await neopet.render(fp, seek_begin=seek_begin)
 
     render.__doc__ = Neopet.render.__doc__
 
