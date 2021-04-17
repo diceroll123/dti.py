@@ -888,11 +888,7 @@ class Outfit(Object):
         self.pet_appearance = PetAppearance(data=data["petAppearance"], state=state)
         self.worn_items = [Item(**item_data) for item_data in data["wornItems"]]
         self.closeted_items = [Item(**item_data) for item_data in data["closetedItems"]]
-
-        if data["creator"]:
-            self.creator = User(**data["creator"])
-        else:
-            self.creator = None
+        self.creator = User(**data["creator"]) if data["creator"] else None
 
     @property
     def legacy_url(self) -> str:
