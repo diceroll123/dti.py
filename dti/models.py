@@ -460,6 +460,30 @@ class Item(Object):
         return f"<Item id={self.id} name={self.name!r} is_np={self.is_np} is_nc={self.is_nc} is_pb={self.is_pb} rarity={self.rarity}>"
 
 
+class User(Object):
+    """Represents a Dress To Impress user.
+
+    Attributes
+    -----------
+    id: :class:`int`
+        The user's ID.
+    username: :class:`str`
+        The user's username.
+    """
+
+    __slots__ = (
+        "id",
+        "username",
+    )
+
+    def __init__(self, **data):
+        self.id = data["id"]
+        self.username = data["username"]
+
+    def __repr__(self):
+        return f"<User id={self.id} username={self.username}>"
+
+
 class Neopet:
     """Represents a customizable Neopet.
 
@@ -834,6 +858,8 @@ class Outfit(Object):
         The outfit's DTI ID.
     name: :class:`str`
         The outfit's name on DTI.
+    creator: Optional[:class:`User`]
+        The outfit's creator. Can be None if the outfit was made anonymously.
     pet_appearance: :class:`PetAppearance`
         The outfit's Neopets' pet appearance.
     worn_items: List[:class:`Item`]
@@ -846,6 +872,7 @@ class Outfit(Object):
         "_state",
         "id",
         "name",
+        "creator",
         "pet_appearance",
         "worn_items",
         "closeted_items",
@@ -858,6 +885,11 @@ class Outfit(Object):
         self.pet_appearance = PetAppearance(data=data["petAppearance"], state=state)
         self.worn_items = [Item(**item_data) for item_data in data["wornItems"]]
         self.closeted_items = [Item(**item_data) for item_data in data["closetedItems"]]
+
+        if data["creator"]:
+            self.creator = User(**data["creator"])
+        else:
+            self.creator = None
 
     @property
     def legacy_url(self) -> str:

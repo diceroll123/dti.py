@@ -13,6 +13,12 @@ fragment ItemProperties on Item {
   wakaValueText
 }"""
 
+FRAGMENT_USER_PROPERTIES = """
+fragment UserProperties on User {
+  id
+  username
+}"""
+
 FRAGMENT_PET_APPEARANCE = """
 fragment PetAppearanceForOutfitPreview on PetAppearance {
   id
@@ -196,6 +202,9 @@ query($outfitId: ID!, $size: LayerImageSize!) {
   outfit(id: $outfitId) {
     id
     name
+    creator {
+      ...UserProperties
+    }
     wornItems {
       ...ItemProperties
     }
@@ -209,6 +218,7 @@ query($outfitId: ID!, $size: LayerImageSize!) {
 }"""
     + FRAGMENT_ITEM_PROPERTIES
     + FRAGMENT_PET_APPEARANCE
+    + FRAGMENT_USER_PROPERTIES
 )
 
 # borrowed from DTI, for ensuring a valid pose
