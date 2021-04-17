@@ -856,8 +856,8 @@ class Outfit(Object):
     -----------
     id: :class:`int`
         The outfit's DTI ID.
-    name: :class:`str`
-        The outfit's name on DTI.
+    name: Optional[:class:`str`]
+        The outfit's name on DTI. Can be None.
     creator: Optional[:class:`User`]
         The outfit's creator. Can be None if the outfit was made anonymously.
     pet_appearance: :class:`PetAppearance`
