@@ -8,3 +8,6 @@ from .client import Client
 from .enums import *
 from .errors import *
 from .models import *
+import logging
+
+logging.getLogger(__name__).addHandler(logging.NullHandler())

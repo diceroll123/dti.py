@@ -1,5 +1,6 @@
 import asyncio
 import io
+import logging
 import os
 from typing import Dict, List, Optional, Union, Tuple
 from urllib.parse import urlencode
@@ -22,6 +23,9 @@ from .errors import (
 )
 from .mixins import Object
 from .state import State, BitField
+
+
+log = logging.getLogger(__name__)
 
 
 class Species(Object):
@@ -589,6 +593,11 @@ class Neopet:
             raise InvalidColorSpeciesPair(
                 f"According to DTI, the {species} species does not have the color {color}. If it's newly released, it must be modeled first!"
             )
+
+        if "data" not in data:
+            # an error we were not prepared for has occurred, let's find it!
+            log.critical("Unknown pet appearance data returned", data)
+            raise NeopetNotFound("An error occurred while trying to gather this pet's data.")
 
         data = data["data"]
         items = [Item(**item) for item in data[key] if item is not None]
