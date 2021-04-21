@@ -589,15 +589,23 @@ class Neopet:
         data = await state._http._query(query=query, variables=variables)
 
         error = data.get("error")
-        if error and "it is undefined" in error["message"]:
-            raise InvalidColorSpeciesPair(
-                f"According to DTI, the {species} species does not have the color {color}. If it's newly released, it must be modeled first!"
+        if error:
+            if "it is undefined" in error["message"]:
+                raise InvalidColorSpeciesPair(
+                    f"According to DTI, the {species} species does not have the color {color}. If it's newly released, it must be modeled first!"
+                )
+
+            log.critical("Unhandled error occurred in data:", data)
+            raise NeopetNotFound(
+                "An error occurred while trying to gather this pet's data."
             )
 
         if "data" not in data:
             # an error we were not prepared for has occurred, let's find it!
-            log.critical("Unknown pet appearance data returned", data)
-            raise NeopetNotFound("An error occurred while trying to gather this pet's data.")
+            log.critical("Unknown pet appearance data returned:", data)
+            raise NeopetNotFound(
+                "An error occurred while trying to gather this pet's data."
+            )
 
         data = data["data"]
         items = [Item(**item) for item in data[key] if item is not None]
@@ -633,19 +641,33 @@ class Neopet:
             variables={"petName": pet_name, "size": str(size)},
         )
 
+        # the API responds with an error AND with [data][petOnNeopetsDotCom] being null,
+        # so let's just check the latter first
+        if "data" not in data:
+            # an error we were not prepared for has occurred, let's find it!
+            log.critical("Unknown pet appearance data returned:", data)
+            raise NeopetNotFound(
+                "An error occurred while trying to gather this pet's data."
+            )
+
+        pet_on_neo = data["data"]["petOnNeopetsDotCom"]
+        if pet_on_neo is None:
+            raise NeopetNotFound("This pet does not seem to exist.")
+
         error = data.get("errors")
         if error:
-            raise NeopetNotFound(error[0]["message"])
+            log.critical("Unhandled error occurred in data:", data)
+            raise NeopetNotFound(
+                "An error occurred while trying to gather this pet's data."
+            )
 
-        data = data["data"]["petOnNeopetsDotCom"]
-
-        pet_appearance = PetAppearance(data=data["petAppearance"], state=state)
+        pet_appearance = PetAppearance(data=pet_on_neo["petAppearance"], state=state)
 
         neopet = await Neopet._fetch_assets_for(
             species=pet_appearance.species,
             color=pet_appearance.color,
             pose=pet_appearance.pose,
-            item_ids=[item["id"] for item in data["wornItems"]],
+            item_ids=[item["id"] for item in pet_on_neo["wornItems"]],
             size=size,
             name=pet_name,
             state=state,
