@@ -562,7 +562,7 @@ class Neopet:
 
         if not await state._check(species_id=species.id, color_id=color.id):
             raise InvalidColorSpeciesPair(
-                f"The {species} species does not have the color {color}"
+                f"According to DTI, the {species} species does not have the color {color}. If it's newly released, it must be modeled first!"
             )
 
         size = size or LayerImageSize.SIZE_600
@@ -587,7 +587,7 @@ class Neopet:
         error = data.get("error")
         if error and "it is undefined" in error["message"]:
             raise InvalidColorSpeciesPair(
-                f"The {species} species does not have the color {color}"
+                f"According to DTI, the {species} species does not have the color {color}. If it's newly released, it must be modeled first!"
             )
 
         data = data["data"]
