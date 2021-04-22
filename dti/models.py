@@ -595,14 +595,14 @@ class Neopet:
                     f"According to DTI, the {species} species does not have the color {color}. If it's newly released, it must be modeled first!"
                 )
 
-            log.critical("Unhandled error occurred in data:" + data)
+            log.critical("Unhandled error occurred in data: " + str(data))
             raise NeopetNotFound(
                 "An error occurred while trying to gather this pet's data."
             )
 
         if "data" not in data:
             # an error we were not prepared for has occurred, let's find it!
-            log.critical("Unknown pet appearance data returned:" + data)
+            log.critical("Unknown pet appearance data returned: " + str(data))
             raise NeopetNotFound(
                 "An error occurred while trying to gather this pet's data."
             )
@@ -645,7 +645,7 @@ class Neopet:
         # so let's just check the latter first
         if "data" not in data:
             # an error we were not prepared for has occurred, let's find it!
-            log.critical("Unknown pet appearance data returned:" + data)
+            log.critical("Unknown pet appearance data returned: " + str(data))
             raise NeopetNotFound(
                 "An error occurred while trying to gather this pet's data."
             )
@@ -656,7 +656,7 @@ class Neopet:
 
         error = data.get("errors")
         if error:
-            log.critical("Unhandled error occurred in data:" + data)
+            log.critical("Unhandled error occurred in data: " + str(data))
             raise NeopetNotFound(
                 "An error occurred while trying to gather this pet's data."
             )
