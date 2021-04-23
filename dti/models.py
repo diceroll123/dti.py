@@ -990,7 +990,14 @@ class Outfit(Object):
     render.__doc__ = Neopet.render.__doc__
 
     def __repr__(self):
-        return f"<Outfit id={self.id} appearance={self.pet_appearance!r}>"
+        attrs = [
+            ("id", self.id),
+            ("appearance", self.pet_appearance),
+            ("created_at", self.created_at),
+            ("updated_at", self.updated_at),
+        ]
+        joined = " ".join("%s=%r" % t for t in attrs)
+        return f"<Outfit {joined}>"
 
 
 #  utility functions below
