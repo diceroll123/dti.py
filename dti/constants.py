@@ -202,6 +202,8 @@ query($outfitId: ID!, $size: LayerImageSize!) {
   outfit(id: $outfitId) {
     id
     name
+    createdAt
+    updatedAt
     creator {
       ...UserProperties
     }

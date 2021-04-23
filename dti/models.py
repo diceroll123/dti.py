@@ -2,6 +2,7 @@ import asyncio
 import io
 import logging
 import os
+import datetime
 from typing import Dict, List, Optional, Union, Tuple
 from urllib.parse import urlencode
 from PIL import Image
@@ -907,6 +908,10 @@ class Outfit(Object):
         The items the Neopet is wearing.
     closeted_items: List[:class:`Item`]
         The items in the closet of the outfit.
+    created_at: :class:`datetime.datetime`
+        The outfit's creation time in UTC.
+    updated_at: :class:`datetime.datetime`
+        The outfit's last updated time in UTC.
     """
 
     __slots__ = (
@@ -917,6 +922,8 @@ class Outfit(Object):
         "pet_appearance",
         "worn_items",
         "closeted_items",
+        "created_at",
+        "updated_at",
     )
 
     def __init__(self, *, state: State, **data):
@@ -927,6 +934,16 @@ class Outfit(Object):
         self.worn_items = [Item(**item_data) for item_data in data["wornItems"]]
         self.closeted_items = [Item(**item_data) for item_data in data["closetedItems"]]
         self.creator = User(**data["creator"]) if data["creator"] else None
+
+        # in an effort to cut down on dependencies, at a small performance cost,
+        # we will simply truncate the trailing "Z" from the timestamps
+        # for more info see https://discuss.python.org/t/parse-z-timezone-suffix-in-datetime/2220
+        self.created_at = datetime.datetime.fromisoformat(
+            data["createdAt"][:-1]
+        ).replace(tzinfo=datetime.timezone.utc)
+        self.updated_at = datetime.datetime.fromisoformat(
+            data["updatedAt"][:-1]
+        ).replace(tzinfo=datetime.timezone.utc)
 
     @property
     def legacy_url(self) -> str:
