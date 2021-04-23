@@ -75,6 +75,11 @@ class BitField(int):
         return (self & 32) == 32
 
     @property
+    def valid_poses(self) -> bool:
+        """:class:`bool`: Returns whether or not this bit field contains all valid poses, ignoring unconverted."""
+        return (self & 63) == 63
+
+    @property
     def unconverted(self) -> bool:
         """:class:`bool`: Returns whether or not this bit field contains the UNCONVERTED pose."""
         return (self & 64) == 64
