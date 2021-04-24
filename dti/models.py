@@ -58,7 +58,11 @@ class Species(Object):
         The species ID.
     """
 
-    __slots__ = ("_state", "id", "name")
+    __slots__ = (
+        "_state",
+        "id",
+        "name",
+    )
 
     def __init__(self, *, state: State, data: Dict):
         self._state = state
@@ -129,7 +133,11 @@ class Color(Object):
         The color ID.
     """
 
-    __slots__ = ("_state", "id", "name")
+    __slots__ = (
+        "_state",
+        "id",
+        "name",
+    )
 
     def __init__(self, *, state: State, data: Dict):
         self._state = state
@@ -198,7 +206,11 @@ class Zone(Object):
         The zone depth.
     """
 
-    __slots__ = ("id", "depth", "label")
+    __slots__ = (
+        "id",
+        "depth",
+        "label",
+    )
 
     def __init__(self, data: Dict):
         self.id = int(data["id"])
@@ -374,7 +386,13 @@ class ItemAppearance(Object):
         The zones that this item appearance occupies.
     """
 
-    __slots__ = ("id", "item", "layers", "restricted_zones", "occupies")
+    __slots__ = (
+        "id",
+        "item",
+        "layers",
+        "restricted_zones",
+        "occupies",
+    )
 
     def __init__(self, data: Dict, item: "Item"):
         self.id = data["id"]
