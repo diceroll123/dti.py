@@ -15,7 +15,7 @@ from .constants import (
     GRAB_PET_APPEARANCES_BY_NAMES,
 )
 from .decorators import _require_state
-from .enums import PetPose, LayerImageSize
+from .enums import PetPose, LayerImageSize, try_enum, AppearanceLayerKnownGlitch
 from .errors import (
     MissingPetAppearance,
     InvalidColorSpeciesPair,
@@ -243,9 +243,19 @@ class AppearanceLayer(Object):
         to differentiate between layers of a pet and layers of items respectively.
     zone: :class:`Zone`
         The appearance layer's zone.
+    known_glitches: Optional[List[:class:`AppearanceLayerKnownGlitch`]]
+        Known glitches for this appearance layer. Returns None if the list is empty.
     """
 
-    __slots__ = ("id", "parent", "zone", "image_url", "asset_type", "asset_remote_id")
+    __slots__ = (
+        "id",
+        "parent",
+        "zone",
+        "image_url",
+        "asset_type",
+        "asset_remote_id",
+        "known_glitches",
+    )
 
     def __init__(self, parent: Union["ItemAppearance", "PetAppearance"], **data):
         self.id = data["id"]
@@ -254,6 +264,10 @@ class AppearanceLayer(Object):
         self.asset_remote_id = data["remoteId"]
         self.zone = Zone(data["zone"])
         self.asset_type = data["asset_type"]
+        self.known_glitches = [
+            try_enum(AppearanceLayerKnownGlitch, glitch)
+            for glitch in data["knownGlitches"]
+        ] or None
 
     def __repr__(self):
         return f"<AppearanceLayer zone={self.zone!r} url={self.image_url!r} parent={self.parent!r}>"
@@ -310,7 +324,7 @@ class PetAppearance(Object):
     def __init__(self, *, state: State, data: Dict):
         self.id = data["id"]
         self.body_id = data["bodyId"]
-        self.is_glitched = data['isGlitched']
+        self.is_glitched = data["isGlitched"]
 
         # create new, somewhat temporary colors from this data since we don't have async access
         self.color = Color(data=data["color"], state=state)

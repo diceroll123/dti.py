@@ -42,6 +42,7 @@ fragment PetAppearanceForOutfitPreview on PetAppearance {
     id
     remoteId
     imageUrl(size: $size)
+    knownGlitches
     zone {
       id
       depth
@@ -62,6 +63,7 @@ fragment ItemAppearanceForOutfitPreview on ItemAppearance {
     id
     remoteId
     imageUrl(size: $size)
+    knownGlitches
     zone {
       id
       depth

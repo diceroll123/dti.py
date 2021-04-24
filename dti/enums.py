@@ -1,7 +1,13 @@
 import random
 from enum import Enum, auto
 
-__all__ = ("LayerImageSize", "PetPose")
+__all__ = (
+    "LayerImageSize",
+    "PetPose",
+    "AppearanceLayerKnownGlitch",
+)
+
+from typing import Any
 
 
 class _DTIEnum(Enum):
@@ -52,3 +58,19 @@ class PetPose(int, _DTIEnum):
     @classmethod
     def all_masc(cls):
         return cls.SICK_MASC | cls.SAD_MASC | cls.HAPPY_MASC
+
+
+class AppearanceLayerKnownGlitch(Enum):
+    OFFICIAL_SWF_IS_INCORRECT = "OFFICIAL_SWF_IS_INCORRECT"
+    OFFICIAL_SVG_IS_INCORRECT = "OFFICIAL_SVG_IS_INCORRECT"
+    OFFICIAL_MOVIE_IS_INCORRECT = "OFFICIAL_MOVIE_IS_INCORRECT"
+    DISPLAYS_INCORRECTLY_BUT_CAUSE_UNKNOWN = "DISPLAYS_INCORRECTLY_BUT_CAUSE_UNKNOWN"
+    OFFICIAL_BODY_ID_IS_INCORRECT = "OFFICIAL_BODY_ID_IS_INCORRECT"
+    REQUIRES_OTHER_BODY_SPECIFIC_ASSETS = "REQUIRES_OTHER_BODY_SPECIFIC_ASSETS"
+
+
+def try_enum(cls, val) -> Any:
+    try:
+        return cls(val)
+    except TypeError:
+        return val
