@@ -292,6 +292,8 @@ class PetAppearance(Object):
         The appearance layers of the pet appearance.
     restricted_zones: List[:class:`Zone`]
         The restricted zones of the pet appearance. Outfits can't have conflicting restricted zones.
+    is_glitched: :class:`bool`
+        Whether or not this appearance is marked as glitched.
     """
 
     __slots__ = (
@@ -302,11 +304,13 @@ class PetAppearance(Object):
         "pose",
         "layers",
         "restricted_zones",
+        "is_glitched",
     )
 
     def __init__(self, *, state: State, data: Dict):
         self.id = data["id"]
         self.body_id = data["bodyId"]
+        self.is_glitched = data['isGlitched']
 
         # create new, somewhat temporary colors from this data since we don't have async access
         self.color = Color(data=data["color"], state=state)

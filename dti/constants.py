@@ -24,6 +24,7 @@ fragment PetAppearanceForOutfitPreview on PetAppearance {
   id
   pose
   bodyId
+  isGlitched
   color {
     id
     name
