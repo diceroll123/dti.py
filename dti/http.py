@@ -1,3 +1,4 @@
+import asyncio
 from typing import Dict
 
 import aiohttp
@@ -38,7 +39,13 @@ class HTTPClient:
             payload["variables"] = variables
 
         async with aiohttp.ClientSession() as session:
-            async with session.post(
-                f"{self.API_BASE}/graphql", json=payload, **kwargs
-            ) as r:
-                return await r.json()
+            for retries in range(1, 4):
+                # the server throws ERROR 500's and 504's seemingly randomly
+                # so we will retry up to 3 times.
+                async with session.post(
+                    f"{self.API_BASE}/graphql", json=payload, **kwargs
+                ) as r:
+                    if r.status in (500, 504):
+                        await asyncio.sleep(0.25 * retries)
+                        continue
+                    return await r.json()
