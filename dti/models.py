@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import io
 import logging
@@ -67,7 +69,7 @@ class Species(Object):
     def __init__(self, *, state: State, data: Dict):
         self._state = state
         self.id = int(data["id"])
-        self.name = data["name"]
+        self.name: str = data["name"]
 
     @_require_state
     async def _color_iterator(self, valid: bool = True) -> List["Color"]:
@@ -141,8 +143,8 @@ class Color(Object):
 
     def __init__(self, *, state: State, data: Dict):
         self._state = state
-        self.id = int(data["id"])
-        self.name = data["name"]
+        self.id: int = int(data["id"])
+        self.name: str = data["name"]
 
     @_require_state
     async def _species_iterator(self, valid: bool = True) -> List["Species"]:
@@ -213,9 +215,9 @@ class Zone(Object):
     )
 
     def __init__(self, data: Dict):
-        self.id = int(data["id"])
-        self.depth = int(data["depth"])
-        self.label = data["label"]
+        self.id: int = int(data["id"])
+        self.depth: int = int(data["depth"])
+        self.label: str = data["label"]
 
     def __repr__(self):
         return f"<Zone id={self.id} label={self.label!r} depth={self.depth}>"
@@ -240,7 +242,7 @@ class AppearanceLayer(Object):
 
     Attributes
     -----------
-    id: :class:`str`
+    id: :class:`int`
         The appearance layer's DTI ID. Guaranteed unique across all layers of all types.
     parent: Union[:class:`ItemAppearance`, :class:`PetAppearance`]
         The respective owner of this layer, an ItemAppearance or a PetAppearance.
@@ -269,14 +271,14 @@ class AppearanceLayer(Object):
         "known_glitches",
     )
 
-    def __init__(self, parent: Union["ItemAppearance", "PetAppearance"], **data):
-        self.id = data["id"]
-        self.parent = parent
-        self.image_url = data["imageUrl"]
-        self.asset_remote_id = data["remoteId"]
-        self.zone = Zone(data["zone"])
-        self.asset_type = data["asset_type"]
-        self.known_glitches = [
+    def __init__(self, parent: Union[ItemAppearance, PetAppearance], **data):
+        self.id: int = int(data["id"])
+        self.parent: Union[ItemAppearance, PetAppearance] = parent
+        self.image_url: str = data["imageUrl"]
+        self.asset_remote_id: str = data["remoteId"]
+        self.zone: Zone = Zone(data["zone"])
+        self.asset_type: str = data["asset_type"]
+        self.known_glitches: Optional[List[AppearanceLayerKnownGlitch]] = [
             try_enum(AppearanceLayerKnownGlitch, glitch)
             for glitch in data["knownGlitches"]
         ] or None
@@ -304,9 +306,9 @@ class PetAppearance(Object):
 
     Attributes
     -----------
-    id: :class:`str`
+    id: :class:`int`
         The pet appearance's ID.
-    body_id: :class:`str`
+    body_id: :class:`int`
         The pet appearance's body ID.
     color: :class:`Color`
         The color of the pet appearance.
@@ -334,20 +336,20 @@ class PetAppearance(Object):
     )
 
     def __init__(self, *, state: State, data: Dict):
-        self.id = data["id"]
-        self.body_id = data["bodyId"]
-        self.is_glitched = data["isGlitched"]
+        self.id: int = int(data["id"])
+        self.body_id: int = int(data["bodyId"])
+        self.is_glitched: bool = data["isGlitched"]
 
         # create new, somewhat temporary colors from this data since we don't have async access
-        self.color = Color(data=data["color"], state=state)
-        self.species = Species(data=data["species"], state=state)
+        self.color: Color = Color(data=data["color"], state=state)
+        self.species: Species = Species(data=data["species"], state=state)
 
-        self.pose = PetPose(data["pose"])
-        self.layers = [
+        self.pose: PetPose = PetPose(data["pose"])
+        self.layers: List[AppearanceLayer] = [
             AppearanceLayer(self, **layer, asset_type="biology")
             for layer in data["layers"]
         ]
-        self.restricted_zones = [
+        self.restricted_zones: List[Zone] = [
             Zone(restricted) for restricted in data["restrictedZones"]
         ]
 
@@ -375,7 +377,7 @@ class ItemAppearance(Object):
     Attributes
     -----------
     id: :class:`str`
-        The item appearance's ID.
+        The item appearance's ID. A string that looks something like "item-#####-body-##"
     item: :class:`Item`
         The item that owns this appearance.
     layers: List[:class:`AppearanceLayer`]
@@ -394,17 +396,17 @@ class ItemAppearance(Object):
         "occupies",
     )
 
-    def __init__(self, data: Dict, item: "Item"):
-        self.id = data["id"]
-        self.item = item
-        self.layers = [
+    def __init__(self, data: Dict, item: Item):
+        self.id: str = data["id"]
+        self.item: Item = item
+        self.layers: List[AppearanceLayer] = [
             AppearanceLayer(self, **layer, asset_type="object")
             for layer in data["layers"]
         ]
-        self.restricted_zones = [
+        self.restricted_zones: List[Zone] = [
             Zone(restricted) for restricted in data["restrictedZones"]
         ]
-        self.occupies = [layer.zone for layer in self.layers]
+        self.occupies: List[Zone] = [layer.zone for layer in self.layers]
 
     def __repr__(self):
         return f"<ItemAppearance id={self.id!r} item={self.item!r}>"
@@ -467,17 +469,19 @@ class Item(Object):
     )
 
     def __init__(self, **data):
-        self.id = int(data["id"])
-        self.name = data.get("name")
-        self.description = data.get("description")
-        self.thumbnail_url = data.get("thumbnailUrl")
-        self.is_nc = data.get("isNc")
-        self.is_pb = data.get("isPb")
-        self.rarity = int(data.get("rarityIndex"))
-        self.waka_value = data.get("wakaValueText")
+        self.id: int = int(data["id"])
+        self.name: str = data.get("name")
+        self.description: str = data.get("description")
+        self.thumbnail_url: str = data.get("thumbnailUrl")
+        self.is_nc: bool = data.get("isNc")
+        self.is_pb: bool = data.get("isPb")
+        self.rarity: int = int(data.get("rarityIndex"))
+        self.waka_value: Optional[str] = data.get("wakaValueText")
 
         appearance_data = data.get("appearanceOn", None)
-        self.appearance = appearance_data and ItemAppearance(appearance_data, self)
+        self.appearance: Optional[ItemAppearance] = appearance_data and ItemAppearance(
+            appearance_data, self
+        )
 
     @property
     def is_np(self) -> bool:
@@ -520,8 +524,8 @@ class User(Object):
     )
 
     def __init__(self, **data):
-        self.id = data["id"]
-        self.username = data["username"]
+        self.id: int = int(data["id"])
+        self.username: str = data["username"]
 
     def __str__(self):
         return self.username
@@ -577,14 +581,14 @@ class Neopet:
         state: State,
     ):
         self._state = state
-        self.species = species
-        self.color = color
-        self.appearances = appearances
-        self.items = items or []
-        self.name = name
-        self.size = size
-        self.pose = pose
-        self._valid_poses = valid_poses
+        self.species: Species = species
+        self.color: Color = color
+        self.appearances: List[PetAppearance] = appearances
+        self.items: List[Item] = items or []
+        self.name: Optional[str] = name
+        self.size: Optional[LayerImageSize] = size
+        self.pose: PetPose = pose
+        self._valid_poses: BitField = valid_poses
 
     @classmethod
     async def _fetch_assets_for(
@@ -598,7 +602,7 @@ class Neopet:
         size: Optional[LayerImageSize] = None,
         name: Optional[str] = None,
         state: State,
-    ) -> "Neopet":
+    ) -> Neopet:
         """Returns the data for a species+color+pose combo, optionally with items, an image size, and a name for internal usage."""
 
         if not await state._check(species_id=species.id, color_id=color.id):
@@ -668,7 +672,7 @@ class Neopet:
     @classmethod
     async def _fetch_by_name(
         cls, *, state: State, pet_name: str, size: Optional[LayerImageSize] = None
-    ) -> "Neopet":
+    ) -> Neopet:
         """Returns the data for a specific neopet, by name."""
 
         size = size or LayerImageSize.SIZE_600
@@ -941,9 +945,9 @@ class Outfit(Object):
     pet_appearance: :class:`PetAppearance`
         The outfit's Neopets' pet appearance.
     worn_items: List[:class:`Item`]
-        The items the Neopet is wearing.
+        The items the Neopet is wearing. Can be empty.
     closeted_items: List[:class:`Item`]
-        The items in the closet of the outfit.
+        The items in the closet of the outfit. Can be empty.
     created_at: :class:`datetime.datetime`
         The outfit's creation time in UTC.
     updated_at: :class:`datetime.datetime`
@@ -965,11 +969,19 @@ class Outfit(Object):
     def __init__(self, *, state: State, **data):
         self._state = state
         self.id = int(data["id"])
-        self.name = data["name"]
-        self.pet_appearance = PetAppearance(data=data["petAppearance"], state=state)
-        self.worn_items = [Item(**item_data) for item_data in data["wornItems"]]
-        self.closeted_items = [Item(**item_data) for item_data in data["closetedItems"]]
-        self.creator = User(**data["creator"]) if data["creator"] else None
+        self.name: Optional[str] = data["name"]
+        self.pet_appearance: PetAppearance = PetAppearance(
+            data=data["petAppearance"], state=state
+        )
+        self.worn_items: List[Item] = [
+            Item(**item_data) for item_data in data["wornItems"]
+        ]
+        self.closeted_items: List[Item] = [
+            Item(**item_data) for item_data in data["closetedItems"]
+        ]
+        self.creator: Optional[User] = (
+            User(**data["creator"]) if data["creator"] else None
+        )
 
         # in an effort to cut down on dependencies, at a small performance cost,
         # we will simply truncate the trailing "Z" from the timestamps

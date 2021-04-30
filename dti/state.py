@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import contextlib
 import time
@@ -196,12 +198,12 @@ class State:
             return True
         return self._last_update < time.monotonic() - self._cache_timeout
 
-    async def _get_species(self, species: Union[int, str]) -> Optional["Species"]:
+    async def _get_species(self, species: Union[int, str]) -> Optional[Species]:
         await self._update()
         async with self._lock:
             return self._species[species]
 
-    async def _get_color(self, color: Union[int, str]) -> Optional["Color"]:
+    async def _get_color(self, color: Union[int, str]) -> Optional[Color]:
         await self._update()
         async with self._lock:
             return self._colors[color]
