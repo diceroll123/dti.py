@@ -5,14 +5,14 @@ from .decorators import _require_state
 from .enums import LayerImageSize, PetPose
 from .errors import InvalidColorSpeciesPair, NoIteratorsFound, OutfitNotFound
 from .iterators import (
+    DTISearch,
     ItemIDSearch,
     ItemSearch,
-    ItemSearchToFit,
     ItemSearchNames,
-    DTISearch,
+    ItemSearchToFit,
 )
-from .models import Color, Species, Outfit, Neopet
-from .state import State, BitField
+from .models import Color, Neopet, Outfit, Species
+from .state import BitField, State
 
 
 class Client:

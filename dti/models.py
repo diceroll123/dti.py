@@ -1,32 +1,32 @@
 from __future__ import annotations
 
 import asyncio
+import datetime
 import io
 import logging
 import os
-import datetime
-from typing import Dict, List, Optional, Union, Tuple
-from urllib.parse import urlencode
-from PIL import Image
 from io import BytesIO
+from typing import Dict, List, Optional, Tuple, Union
+from urllib.parse import urlencode
+
+from PIL import Image
 
 from .constants import (
     CLOSEST_POSES_IN_ORDER,
     GRAB_PET_APPEARANCES_BY_IDS,
-    PET_ON_NEOPETS,
     GRAB_PET_APPEARANCES_BY_NAMES,
+    PET_ON_NEOPETS,
 )
 from .decorators import _require_state
-from .enums import PetPose, LayerImageSize, try_enum, AppearanceLayerKnownGlitch
+from .enums import AppearanceLayerKnownGlitch, LayerImageSize, PetPose, try_enum
 from .errors import (
-    MissingPetAppearance,
-    InvalidColorSpeciesPair,
-    NeopetNotFound,
     BrokenAssetImage,
+    InvalidColorSpeciesPair,
+    MissingPetAppearance,
+    NeopetNotFound,
 )
 from .mixins import Object
-from .state import State, BitField
-
+from .state import BitField, State
 
 log = logging.getLogger(__name__)
 

@@ -1,5 +1,6 @@
-from setuptools import setup
 import contextlib
+
+from setuptools import setup
 
 import dti
 
