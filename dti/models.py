@@ -629,7 +629,7 @@ class Neopet:
 
         data = await state._http._query(query=query, variables=variables)
 
-        error = data.get("error")
+        error = data.get("error", None)
         if error:
             if "it is undefined" in error["message"]:
                 raise InvalidColorSpeciesPair(
@@ -641,7 +641,7 @@ class Neopet:
                 "An error occurred while trying to gather this pet's data."
             )
 
-        if "data" not in data:
+        if not data or "data" not in data:
             # an error we were not prepared for has occurred, let's find it!
             log.critical("Unknown pet appearance data returned: " + str(data))
             raise NeopetNotFound(
