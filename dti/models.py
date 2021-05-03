@@ -629,6 +629,13 @@ class Neopet:
 
         data = await state._http._query(query=query, variables=variables)
 
+        if data is None:
+            # an error we were not prepared for has occurred, let's find it!
+            log.critical(f"Somehow, the API returned null for a query. Params: {variables!r}")
+            raise NeopetNotFound(
+                "An error occurred while trying to gather this pet's data."
+            )
+
         error = data.get("error", None)
         if error:
             if "it is undefined" in error["message"]:
@@ -641,7 +648,7 @@ class Neopet:
                 "An error occurred while trying to gather this pet's data."
             )
 
-        if not data or "data" not in data:
+        if "data" not in data:
             # an error we were not prepared for has occurred, let's find it!
             log.critical("Unknown pet appearance data returned: " + str(data))
             raise NeopetNotFound(
