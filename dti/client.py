@@ -24,12 +24,16 @@ class Client:
     cache_timeout: Optional[:class:`int`]
         The amount of time, in seconds, to reload the internal cache. It's updated as-needed after this amount of time.
         Default = 3600 (1 hour).
+    proxy: Optional[:class:`str`]
+        Proxy URL. If you have credentials, pass them in like so: "http://username:password@localhost:8030"
     """
 
-    __slots__ = ["_state"]
+    __slots__ = ("_state",)
 
-    def __init__(self, cache_timeout: Optional[int] = None):
-        self._state = State(cache_timeout=cache_timeout)
+    def __init__(
+        self, cache_timeout: Optional[int] = None, proxy: Optional[str] = None
+    ):
+        self._state = State(cache_timeout=cache_timeout, proxy=proxy)
 
     async def invalidate(self):
         """|coro|

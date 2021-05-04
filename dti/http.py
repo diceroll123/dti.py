@@ -1,27 +1,24 @@
-import asyncio
-from typing import Dict
+from typing import Dict, Optional
 
-import aiohttp
+import httpx
 
 
 class HTTPClient:
-    __slots__ = "extra_kwargs"
+    __slots__ = ("_proxy",)
     API_BASE = "https://impress-2020.openneo.net/api"
 
-    def __init__(self, *, proxy=None, proxy_auth=None):
-        self.extra_kwargs = {}
-        if proxy is not None:
-            self.extra_kwargs["proxy"] = proxy
-            if proxy_auth is not None:
-                self.extra_kwargs["proxy_auth"] = proxy_auth
+    def __init__(self, *, proxy: Optional[str] = None):
+        self._proxy = proxy
 
     async def _fetch_valid_pet_poses(self) -> bytes:
         return await self._fetch_binary_data(self.API_BASE + "/validPetPoses")
 
     async def _fetch_binary_data(self, url: str) -> bytes:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, **self.extra_kwargs) as r:
-                return await r.content.read()
+        async with httpx.AsyncClient(
+            proxies=self._proxy, transport=httpx.AsyncHTTPTransport(retries=3)
+        ) as client:
+            response = await client.get(url)
+            return response.read()
 
     async def _query(self, query, variables=None, **kwargs) -> Dict:
         # for graphql queries
@@ -31,21 +28,14 @@ class HTTPClient:
             "Accept-Encoding": "gzip, deflate, br",
         }
 
-        # Proxy support
-        kwargs.update(self.extra_kwargs)
-
         payload = {"query": query}
         if variables:
             payload["variables"] = variables
 
-        async with aiohttp.ClientSession() as session:
-            for retries in range(1, 4):
-                # the server throws ERROR 500's and 504's seemingly randomly
-                # so we will retry up to 3 times.
-                async with session.post(
-                    f"{self.API_BASE}/graphql", json=payload, **kwargs
-                ) as r:
-                    if r.status in (500, 504):
-                        await asyncio.sleep(0.25 * retries)
-                        continue
-                    return await r.json()
+        async with httpx.AsyncClient(
+            proxies=self._proxy, transport=httpx.AsyncHTTPTransport(retries=3)
+        ) as client:
+            response = await client.post(
+                f"{self.API_BASE}/graphql", json=payload, **kwargs
+            )
+            return response.json()

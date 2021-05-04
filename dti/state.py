@@ -142,7 +142,9 @@ class State:
         "_cache_timeout",
     )
 
-    def __init__(self, cache_timeout: Optional[int] = None):
+    def __init__(
+        self, cache_timeout: Optional[int] = None, proxy: Optional[str] = None
+    ):
         # colors and species below are accessed by the string version of their ID AND/OR lower-cased names
         # alternatively you can list them out by doing self._colors.values()
         self._colors = _NameDict()
@@ -164,7 +166,7 @@ class State:
         # this lock is so updating only happens once at a time, since it can be manually called
         self._update_lock = asyncio.Lock()
 
-        self._http = HTTPClient()
+        self._http = HTTPClient(proxy=proxy)
 
     async def _fetch_species_and_color(self):
         data = await self._http._query(query=ALL_SPECIES_AND_COLORS)
