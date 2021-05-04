@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import datetime
+import functools
 import io
 import logging
 import os
@@ -631,7 +632,9 @@ class Neopet:
 
         if data is None:
             # an error we were not prepared for has occurred, let's find it!
-            log.critical(f"Somehow, the API returned null for a query. Params: {variables!r}")
+            log.critical(
+                f"Somehow, the API returned null for a query. Params: {variables!r}"
+            )
             raise NeopetNotFound(
                 "An error occurred while trying to gather this pet's data."
             )
@@ -853,6 +856,38 @@ class Neopet:
 
         return sorted(visible_layers, key=lambda layer: layer.zone.depth)
 
+    def _layer_processing(
+        self,
+        *,
+        fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
+        img_size: int,
+        pose: PetPose,
+        layers_images: List[Tuple[AppearanceLayer, bytes]],
+    ) -> bool:
+        canvas = Image.new("RGBA", (img_size, img_size))
+        for layer, image in layers_images:
+            try:
+                layer_image = BytesIO(image)
+                foreground = Image.open(layer_image)
+            except Exception:
+                # for when the image itself is corrupted somehow
+                raise BrokenAssetImage(
+                    f"Layer image broken: <Data species={self.species!r} color={self.color!r} pose={pose!r} layer={layer!r}>"
+                )
+            finally:
+                if foreground.mode == "1":  # bad
+                    continue
+                if foreground.mode != "RGBA":
+                    foreground = foreground.convert("RGBA")
+
+                # force proper size if not already
+                if foreground.size != (img_size, img_size):
+                    foreground = foreground.resize((img_size, img_size))
+                canvas = Image.alpha_composite(canvas, foreground)
+
+        canvas.save(fp, format="PNG")
+        return True
+
     async def render(
         self,
         fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
@@ -901,8 +936,6 @@ class Neopet:
 
         img_size = sizes[size or self.size or LayerImageSize.SIZE_600]
 
-        canvas = Image.new("RGBA", (img_size, img_size))
-
         layers = await self._render_layers(pose)
 
         # download images simultaneously
@@ -913,27 +946,20 @@ class Neopet:
             ]
         )
 
-        for layer, image in zip(layers, images):
-            try:
-                layer_image = BytesIO(image)
-                foreground = Image.open(layer_image)
-            except Exception:
-                # for when the image itself is corrupted somehow
-                raise BrokenAssetImage(
-                    f"Layer image broken: <Data species={self.species!r} color={self.color!r} pose={pose!r} layer={layer!r}>"
-                )
-            finally:
-                if foreground.mode == "1":  # bad
-                    continue
-                if foreground.mode != "RGBA":
-                    foreground = foreground.convert("RGBA")
+        internal_function = functools.partial(
+            self._layer_processing,
+            fp=fp,
+            img_size=img_size,
+            pose=pose,
+            layers_images=zip(layers, images),
+        )
+        completed, pending = await asyncio.wait(
+            [asyncio.get_event_loop().run_in_executor(None, internal_function)]
+        )
+        layer_task = completed.pop()
+        if layer_task.exception():
+            raise layer_task.exception()
 
-                # force proper size if not already
-                if foreground.size != (img_size, img_size):
-                    foreground = foreground.resize((img_size, img_size))
-                canvas = Image.alpha_composite(canvas, foreground)
-
-        canvas.save(fp, format="PNG")
         if seek_begin and isinstance(fp, io.BufferedIOBase):
             fp.seek(0)
 
