@@ -355,7 +355,15 @@ class PetAppearance(Object):
         ]
 
     def __repr__(self):
-        return f"<PetAppearance species={self.species!r} color={self.color!r} pose={self.pose!r}>"
+        attrs = [
+            ("id", self.id),
+            ("species", self.species),
+            ("color", self.color),
+            ("pose", self.pose),
+            ("is_glitched", self.is_glitched),
+        ]
+        joined = " ".join("%s=%r" % t for t in attrs)
+        return f"<PetAppearance {joined}>"
 
 
 class ItemAppearance(Object):
