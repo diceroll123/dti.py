@@ -825,26 +825,31 @@ class Neopet:
         return temp_items, temp_closet
 
     async def _render_layers(
-        self, pose: Optional[PetPose] = None
+        self,
+        *,
+        pose: Optional[PetPose] = None,
+        pet_appearance: Optional[PetAppearance] = None,
     ) -> List[AppearanceLayer]:
         # Returns the image layers' images in order from bottom to top.
-        # You may override the pose here.
-
-        valid_poses = self.valid_poses(pose)
-
-        if len(valid_poses) == 0:
-            raise MissingPetAppearance(
-                f'Pet Appearance <"{self.species.id}-{self.color.id}"> does not exist with any poses.'
-            )
-
-        pose = valid_poses[0]
-
-        pet_appearance = self.get_pet_appearance(pose=pose)
 
         if pet_appearance is None:
-            raise MissingPetAppearance(
-                f'Pet Appearance <"{self.species.id}-{self.color.id}"> does not exist.'
-            )
+            # You may override the pose here, if no appearance is passed in.
+
+            valid_poses = self.valid_poses(pose)
+
+            if len(valid_poses) == 0:
+                raise MissingPetAppearance(
+                    f'Pet Appearance <"{self.species.id}-{self.color.id}"> does not exist with any poses.'
+                )
+
+            pose = valid_poses[0]
+
+            pet_appearance = self.get_pet_appearance(pose=pose)
+
+            if pet_appearance is None:
+                raise MissingPetAppearance(
+                    f'Pet Appearance <"{self.species.id}-{self.color.id}"> does not exist.'
+                )
 
         all_layers = list(pet_appearance.layers)
         item_restricted_zones = []
@@ -869,7 +874,6 @@ class Neopet:
         *,
         fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
         img_size: int,
-        pose: PetPose,
         layers_images: List[Tuple[AppearanceLayer, bytes]],
     ) -> bool:
         canvas = Image.new("RGBA", (img_size, img_size))
@@ -880,7 +884,7 @@ class Neopet:
             except Exception:
                 # for when the image itself is corrupted somehow
                 raise BrokenAssetImage(
-                    f"Layer image broken: <Data species={self.species!r} color={self.color!r} pose={pose!r} layer={layer!r}>"
+                    f"Layer image broken: <Data species={self.species!r} color={self.color!r} layer={layer!r}>"
                 )
             finally:
                 if foreground.mode == "1":  # bad
@@ -900,6 +904,7 @@ class Neopet:
         self,
         fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
         pose: Optional[PetPose] = None,
+        pet_appearance: Optional[PetAppearance] = None,
         size: Optional[LayerImageSize] = None,
         *,
         seek_begin: bool = True,
@@ -922,6 +927,8 @@ class Neopet:
             A file-like object opened in binary mode and write mode (`wb`).
         pose: Optional[:class:`PetPose`]
             The desired pet pose for the render. Defaults to the current neopets' pose.
+        pet_appearance: Optional[:class:`PetAppearance`]
+            The desired pet appearance for the render. This overrides any pose passed in.
         size: Optional[:class:`LayerImageSize`]
             The desired size for the render. Defaults to the current neopets' pose if there is one,
             otherwise defaults to LayerImageSize.SIZE_600.
@@ -934,8 +941,6 @@ class Neopet:
             A layer's asset image is broken somehow on DTI's side.
         """
 
-        pose = pose or self.pose
-
         sizes = {
             LayerImageSize.SIZE_150: 150,
             LayerImageSize.SIZE_300: 300,
@@ -944,7 +949,9 @@ class Neopet:
 
         img_size = sizes[size or self.size or LayerImageSize.SIZE_600]
 
-        layers = await self._render_layers(pose)
+        layers = await self._render_layers(
+            pose=pose or self.pose, pet_appearance=pet_appearance
+        )
 
         # download images simultaneously
         images = await asyncio.gather(
@@ -958,7 +965,6 @@ class Neopet:
             self._layer_processing,
             fp=fp,
             img_size=img_size,
-            pose=pose,
             layers_images=zip(layers, images),
         )
         completed, pending = await asyncio.wait(
