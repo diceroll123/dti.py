@@ -14,8 +14,8 @@ from PIL import Image
 
 from .constants import (
     CLOSEST_POSES_IN_ORDER,
-    GRAB_PET_APPEARANCES_BY_IDS,
-    GRAB_PET_APPEARANCES_BY_NAMES,
+    GRAB_PET_APPEARANCES_WITH_ITEMS_BY_IDS,
+    GRAB_PET_APPEARANCES_WITH_ITEMS_BY_NAMES,
     PET_ON_NEOPETS,
 )
 from .decorators import _require_state
@@ -763,11 +763,11 @@ class Neopet:
 
         if item_names:
             variables["names"] = item_names or []
-            query = GRAB_PET_APPEARANCES_BY_NAMES
+            query = GRAB_PET_APPEARANCES_WITH_ITEMS_BY_NAMES
             key = "itemsByName"
         else:
             variables["allItemIds"] = item_ids or []
-            query = GRAB_PET_APPEARANCES_BY_IDS
+            query = GRAB_PET_APPEARANCES_WITH_ITEMS_BY_IDS
             key = "items"
 
         data = await state._http._query(query=query, variables=variables)

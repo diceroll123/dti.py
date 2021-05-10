@@ -146,7 +146,7 @@ query($name: String!) {
 )
 
 # grab pet appearances
-GRAB_PET_APPEARANCES_BY_IDS = (
+GRAB_PET_APPEARANCES_WITH_ITEMS_BY_IDS = (
     """
 query ($allItemIds: [ID!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSize!) {
   petAppearances(speciesId: $speciesId, colorId: $colorId) {
@@ -164,7 +164,7 @@ query ($allItemIds: [ID!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSiz
     + FRAGMENT_PET_APPEARANCE
 )
 
-GRAB_PET_APPEARANCES_BY_NAMES = (
+GRAB_PET_APPEARANCES_WITH_ITEMS_BY_NAMES = (
     """
 query ($names: [String!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSize!) {
   petAppearances(speciesId: $speciesId, colorId: $colorId) {
