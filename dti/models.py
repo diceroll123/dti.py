@@ -7,7 +7,7 @@ import io
 import logging
 import os
 from io import BytesIO
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Sequence, Tuple, Union
 from urllib.parse import urlencode
 
 from PIL import Image
@@ -334,6 +334,7 @@ class PetAppearance(Object):
     """
 
     __slots__ = (
+        "_state",
         "id",
         "body_id",
         "species",
@@ -345,6 +346,7 @@ class PetAppearance(Object):
     )
 
     def __init__(self, *, state: State, data: PetAppearancePayload):
+        self._state = state
         self.id: int = int(data["id"])
         self.body_id: int = int(data["bodyId"])
         self.is_glitched: bool = data["isGlitched"]
@@ -372,6 +374,130 @@ class PetAppearance(Object):
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<PetAppearance {joined}>"
+
+    async def _render_layers(
+        self, items: Optional[Sequence[Item]]
+    ) -> List[AppearanceLayer]:
+        # Returns the image layers' images in order from bottom to top.
+
+        all_layers = list(self.layers)
+        item_restricted_zones = []
+        if items:
+            render_items, _ = _render_items(items)
+            for item in render_items:
+                all_layers.extend(item.appearance.layers)
+
+                item_restricted_zones.extend(item.appearance.restricted_zones)
+
+        all_restricted_zones = set(item_restricted_zones + self.restricted_zones)
+
+        visible_layers = filter(
+            lambda layer: layer.zone not in all_restricted_zones, all_layers
+        )
+
+        return sorted(visible_layers, key=lambda layer: layer.zone.depth)
+
+    def _layer_processing(
+        self,
+        *,
+        fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
+        img_size: int,
+        layers_images: List[Tuple[AppearanceLayer, bytes]],
+    ) -> bool:
+        canvas = Image.new("RGBA", (img_size, img_size))
+        for layer, image in layers_images:
+            try:
+                layer_image = BytesIO(image)
+                foreground = Image.open(layer_image)
+            except Exception:
+                # for when the image itself is corrupted somehow
+                raise BrokenAssetImage(
+                    f"Layer image broken: <Data species={self.species!r} color={self.color!r} layer={layer!r}>"
+                )
+            finally:
+                if foreground.mode == "1":  # bad
+                    continue
+                if foreground.mode != "RGBA":
+                    foreground = foreground.convert("RGBA")
+
+                # force proper size if not already
+                if foreground.size != (img_size, img_size):
+                    foreground = foreground.resize((img_size, img_size))
+                canvas = Image.alpha_composite(canvas, foreground)
+
+        canvas.save(fp, format="PNG")
+        return True
+
+    async def render(
+        self,
+        fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
+        *,
+        items: Optional[Sequence[Item]] = None,
+        size: Optional[LayerImageSize] = None,
+        seek_begin: bool = True,
+    ):
+        """|coro|
+
+        Outputs the rendered pet with the desired emotion + gender presentation to the file-like object passed.
+
+        It is suggested to use something like BytesIO as the object, since this function can take a second or
+        so since it downloads every layer, and you'd be keeping a file object open on the disk
+        for an indeterminate amount of time.
+
+        .. note::
+
+            Only supports PNG output.
+
+        Parameters
+        -----------
+        fp: Union[:class:`io.BufferedIOBase`, :class:`os.PathLike`]
+            A file-like object opened in binary mode and write mode (`wb`).
+        items: Optional[Sequence[:class:`Item`]]
+            An optional list of items to render on this appearance.
+        size: Optional[:class:`LayerImageSize`]
+            The desired size for the render. Defaults to the current neopets' pose if there is one,
+            otherwise defaults to LayerImageSize.SIZE_600.
+        seek_begin: :class:`bool`
+            Whether to seek to the beginning of the file after saving is successfully done.
+
+        Raises
+        -------
+        ~dti.BrokenAssetImage
+            A layer's asset image is broken somehow on DTI's side.
+        """
+        sizes = {
+            LayerImageSize.SIZE_150: 150,
+            LayerImageSize.SIZE_300: 300,
+            LayerImageSize.SIZE_600: 600,
+        }
+
+        img_size = sizes[size or LayerImageSize.SIZE_600]
+
+        layers = await self._render_layers(items)
+
+        # download images simultaneously
+        images = await asyncio.gather(
+            *[
+                self._state._http._fetch_binary_data(_raise_if_none(layer))
+                for layer in layers
+            ]
+        )
+
+        internal_function = functools.partial(
+            self._layer_processing,
+            fp=fp,
+            img_size=img_size,
+            layers_images=zip(layers, images),
+        )
+        completed, pending = await asyncio.wait(
+            [asyncio.get_event_loop().run_in_executor(None, internal_function)]
+        )
+        layer_task = completed.pop()
+        if layer_task.exception():
+            raise layer_task.exception()
+
+        if seek_begin and isinstance(fp, io.BufferedIOBase):
+            fp.seek(0)
 
 
 class ItemAppearance(Object):
@@ -758,7 +884,7 @@ class Neopet:
                 params["state"] = appearance.id
 
         if self.items:
-            objects, closet = self._render_items()
+            objects, closet = _render_items(self.items)
             params["objects[]"] = [item.id for item in objects]
             params["closet[]"] = [item.id for item in closet]
 
@@ -779,7 +905,7 @@ class Neopet:
             params["pose"] = valid_poses[0]
 
         if self.items:
-            objects, closet = self._render_items()
+            objects, closet = self._render_items(self.items)
             params["objects[]"] = [item.id for item in objects]
             params["closet[]"] = [item.id for item in closet]
 
@@ -802,111 +928,6 @@ class Neopet:
         """List[:class:`PetPose`]: Returns a list of valid pet poses for the current species+color."""
         pose = override_pose or self.pose
         return [p for p in CLOSEST_POSES_IN_ORDER[pose] if self.check(pose=p)]
-
-    def _render_items(self) -> Tuple[List[Item], List[Item]]:
-        # Separates all items into what's wearable and what's in the closet.
-        # Mimics DTI's method of getting rid of item conflicts in a FIFO manner.
-        # Any conflicts go to the closet list.
-
-        temp_items: List[Item] = []
-        temp_closet: List[Item] = []
-        for item in self.items:
-            for temp in self.items:
-                if item == temp:
-                    continue
-
-                if temp not in temp_items:
-                    continue
-
-                intersect_1 = set(item.appearance.occupies).intersection(
-                    temp.appearance.occupies + temp.appearance.restricted_zones
-                )
-                intersect_2 = set(temp.appearance.occupies).intersection(
-                    item.appearance.occupies + item.appearance.restricted_zones
-                )
-
-                if intersect_1 or intersect_2:
-                    temp_closet.append(temp)
-                    temp_items.remove(temp)
-            temp_items.append(item)
-
-        return temp_items, temp_closet
-
-    async def _render_layers(
-        self,
-        *,
-        pose: Optional[PetPose] = None,
-        pet_appearance: Optional[PetAppearance] = None,
-    ) -> List[AppearanceLayer]:
-        # Returns the image layers' images in order from bottom to top.
-
-        if pet_appearance is None:
-            # You may override the pose here, if no appearance is passed in.
-
-            valid_poses = self.valid_poses(pose)
-
-            if len(valid_poses) == 0:
-                raise MissingPetAppearance(
-                    f'Pet Appearance <"{self.species.id}-{self.color.id}"> does not exist with any poses.'
-                )
-
-            pose = valid_poses[0]
-
-            pet_appearance = self.get_pet_appearance(pose=pose)
-
-            if pet_appearance is None:
-                raise MissingPetAppearance(
-                    f'Pet Appearance <"{self.species.id}-{self.color.id}"> does not exist.'
-                )
-
-        all_layers = list(pet_appearance.layers)
-        item_restricted_zones = []
-        render_items, _ = self._render_items()
-        for item in render_items:
-            all_layers.extend(item.appearance.layers)
-
-            item_restricted_zones.extend(item.appearance.restricted_zones)
-
-        all_restricted_zones = set(
-            item_restricted_zones + pet_appearance.restricted_zones
-        )
-
-        visible_layers = filter(
-            lambda layer: layer.zone not in all_restricted_zones, all_layers
-        )
-
-        return sorted(visible_layers, key=lambda layer: layer.zone.depth)
-
-    def _layer_processing(
-        self,
-        *,
-        fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
-        img_size: int,
-        layers_images: List[Tuple[AppearanceLayer, bytes]],
-    ) -> bool:
-        canvas = Image.new("RGBA", (img_size, img_size))
-        for layer, image in layers_images:
-            try:
-                layer_image = BytesIO(image)
-                foreground = Image.open(layer_image)
-            except Exception:
-                # for when the image itself is corrupted somehow
-                raise BrokenAssetImage(
-                    f"Layer image broken: <Data species={self.species!r} color={self.color!r} layer={layer!r}>"
-                )
-            finally:
-                if foreground.mode == "1":  # bad
-                    continue
-                if foreground.mode != "RGBA":
-                    foreground = foreground.convert("RGBA")
-
-                # force proper size if not already
-                if foreground.size != (img_size, img_size):
-                    foreground = foreground.resize((img_size, img_size))
-                canvas = Image.alpha_composite(canvas, foreground)
-
-        canvas.save(fp, format="PNG")
-        return True
 
     async def render(
         self,
@@ -949,41 +970,31 @@ class Neopet:
             A layer's asset image is broken somehow on DTI's side.
         """
 
-        sizes = {
-            LayerImageSize.SIZE_150: 150,
-            LayerImageSize.SIZE_300: 300,
-            LayerImageSize.SIZE_600: 600,
-        }
+        size = size or self.size
 
-        img_size = sizes[size or self.size or LayerImageSize.SIZE_600]
+        if pet_appearance is None:
+            # You may override the pose here, if no appearance is passed in.
+            pose = pose or self.pose
 
-        layers = await self._render_layers(
-            pose=pose or self.pose, pet_appearance=pet_appearance
+            valid_poses = self.valid_poses(pose)
+
+            if len(valid_poses) == 0:
+                raise MissingPetAppearance(
+                    f'Pet Appearance <"{self.species.id}-{self.color.id}-{pose.name}"> does not exist with any poses.'
+                )
+
+            pose = valid_poses[0]
+
+            pet_appearance = self.get_pet_appearance(pose=pose)
+
+        if pet_appearance is None:
+            raise MissingPetAppearance(
+                f'Pet Appearance <"{self.species.id}-{self.color.id}"> does not exist.'
+            )
+
+        await pet_appearance.render(
+            fp, items=self.items, size=size, seek_begin=seek_begin
         )
-
-        # download images simultaneously
-        images = await asyncio.gather(
-            *[
-                self._state._http._fetch_binary_data(_raise_if_none(layer))
-                for layer in layers
-            ]
-        )
-
-        internal_function = functools.partial(
-            self._layer_processing,
-            fp=fp,
-            img_size=img_size,
-            layers_images=zip(layers, images),
-        )
-        completed, pending = await asyncio.wait(
-            [asyncio.get_event_loop().run_in_executor(None, internal_function)]
-        )
-        layer_task = completed.pop()
-        if layer_task.exception():
-            raise layer_task.exception()
-
-        if seek_begin and isinstance(fp, io.BufferedIOBase):
-            fp.seek(0)
 
 
 class Outfit(Object):
@@ -1079,18 +1090,44 @@ class Outfit(Object):
         *,
         seek_begin: bool = True,
     ):
-        pose = pose or self.pet_appearance.pose
+        """|coro|
+
+        Outputs the rendered pet with the desired emotion + gender presentation to the file-like object passed.
+
+        It is suggested to use something like BytesIO as the object, since this function can take a second or
+        so since it downloads every layer, and you'd be keeping a file object open on the disk
+        for an indeterminate amount of time.
+
+        .. note::
+
+            Only supports PNG output.
+
+        Parameters
+        -----------
+        fp: Union[:class:`io.BufferedIOBase`, :class:`os.PathLike`]
+            A file-like object opened in binary mode and write mode (`wb`).
+        pose: Optional[:class:`PetPose`]
+            The desired pet pose for the render. Defaults to the current neopets' pose.
+        size: Optional[:class:`LayerImageSize`]
+            The desired size for the render. Defaults to the current neopets' pose if there is one,
+            otherwise defaults to LayerImageSize.SIZE_600.
+        seek_begin: :class:`bool`
+            Whether to seek to the beginning of the file after saving is successfully done.
+
+        Raises
+        -------
+        ~dti.BrokenAssetImage
+            A layer's asset image is broken somehow on DTI's side.
+        """
         neopet = await Neopet._fetch_assets_for(
             species=self.pet_appearance.species,
             color=self.pet_appearance.color,
-            pose=pose,
+            pose=pose or self.pet_appearance.pose,
             size=size,
             item_ids=[item.id for item in self.worn_items],
             state=self._state,
         )
         await neopet.render(fp, seek_begin=seek_begin)
-
-    render.__doc__ = Neopet.render.__doc__
 
     def __repr__(self):
         attrs = [
@@ -1109,3 +1146,33 @@ def _raise_if_none(layer: AppearanceLayer):
     if url is None:
         raise BrokenAssetImage(f"Layer image broken: {layer!r}")
     return url
+
+
+def _render_items(items: Sequence[Item]) -> Tuple[List[Item], List[Item]]:
+    # Separates all items into what's wearable and what's in the closet.
+    # Mimics DTI's method of getting rid of item conflicts in a FIFO manner.
+    # Any conflicts go to the closet list.
+
+    temp_items: List[Item] = []
+    temp_closet: List[Item] = []
+    for item in items:
+        for temp in items:
+            if item == temp:
+                continue
+
+            if temp not in temp_items:
+                continue
+
+            intersect_1 = set(item.appearance.occupies).intersection(
+                temp.appearance.occupies + temp.appearance.restricted_zones
+            )
+            intersect_2 = set(temp.appearance.occupies).intersection(
+                item.appearance.occupies + item.appearance.restricted_zones
+            )
+
+            if intersect_1 or intersect_2:
+                temp_closet.append(temp)
+                temp_items.remove(temp)
+        temp_items.append(item)
+
+    return temp_items, temp_closet
