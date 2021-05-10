@@ -1,9 +1,14 @@
 from typing import List, Optional, Union
 
-from .constants import OUTFIT
+from .constants import GRAB_PET_APPEARANCE_BY_ID, OUTFIT
 from .decorators import _require_state
 from .enums import LayerImageSize, PetPose
-from .errors import InvalidColorSpeciesPair, NoIteratorsFound, OutfitNotFound
+from .errors import (
+    InvalidColorSpeciesPair,
+    MissingPetAppearance,
+    NoIteratorsFound,
+    OutfitNotFound,
+)
 from .iterators import (
     DTISearch,
     ItemIDSearch,
@@ -11,7 +16,7 @@ from .iterators import (
     ItemSearchNames,
     ItemSearchToFit,
 )
-from .models import Color, Neopet, Outfit, Species
+from .models import Color, Neopet, Outfit, PetAppearance, Species
 from .state import BitField, State
 
 
@@ -355,3 +360,43 @@ class Client:
             )
 
         return searcher
+
+    async def fetch_appearance(
+        self, appearance_id: int, size: Optional[LayerImageSize] = None
+    ) -> PetAppearance:
+        """|coro|
+
+        Fetches the pet appearance from DTI by ID, if it exists.
+
+        Parameters
+        -----------
+        appearance_id: :class:`int`
+            The appearance ID you'd like.
+        size: Optional[:class:`LayerImageSize`]
+            The desired size for the pet appearance image layers. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
+
+        Raises
+        -------
+        ~dti.MissingPetAppearance
+            The Pet Appearance is not found on DTI.
+
+        Returns
+        --------
+        :class:`PetAppearance`
+            The corresponding pet appearance.
+        """
+
+        data = await self._state._http._query(
+            GRAB_PET_APPEARANCE_BY_ID,
+            variables={
+                "appearanceId": appearance_id,
+                "size": str(size or LayerImageSize.SIZE_600),
+            },
+        )
+
+        appearance_data = data["data"]["petAppearanceById"]
+
+        if appearance_data is None:
+            raise MissingPetAppearance(f"Pet Appearance ID: {appearance_id} not found.")
+
+        return PetAppearance(data=appearance_data, state=self._state)
