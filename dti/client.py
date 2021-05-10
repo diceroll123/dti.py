@@ -1,6 +1,6 @@
 from typing import List, Optional, Union
 
-from .constants import GRAB_PET_APPEARANCE_BY_ID, OUTFIT
+from .constants import GRAB_PET_APPEARANCE_BY_ID, GRAB_ZONES, OUTFIT
 from .decorators import _require_state
 from .enums import LayerImageSize, PetPose
 from .errors import (
@@ -16,7 +16,7 @@ from .iterators import (
     ItemSearchNames,
     ItemSearchToFit,
 )
-from .models import Color, Neopet, Outfit, PetAppearance, Species
+from .models import Color, Neopet, Outfit, PetAppearance, Species, Zone
 from .state import BitField, State
 
 
@@ -400,3 +400,8 @@ class Client:
             raise MissingPetAppearance(f"Pet Appearance ID: {appearance_id} not found.")
 
         return PetAppearance(data=appearance_data, state=self._state)
+
+    async def fetch_all_zones(self) -> List[Zone]:
+        zone_data = await self._state._http._query(GRAB_ZONES)
+        zones = zone_data["data"]["allZones"]
+        return [Zone(data) for data in zones]

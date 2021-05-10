@@ -225,7 +225,7 @@ class Zone(Object):
 
     def __init__(self, data: ZonePayload):
         self.id: int = int(data["id"])
-        self.depth: int = int(data["depth"])
+        self.depth: int = data["depth"]
         self.label: str = data["label"]
 
     def __repr__(self):

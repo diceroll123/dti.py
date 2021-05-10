@@ -24,7 +24,7 @@ class ColorPayload(TypedDict):
 
 class ZonePayload(TypedDict):
     id: str
-    depth: str
+    depth: int
     label: str
 
 

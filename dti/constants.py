@@ -1,6 +1,13 @@
 from .enums import PetPose
 
 # fragments
+FRAGMENT_ZONE = """
+fragment ZoneProperties on Zone {
+  id
+  depth
+  label
+}"""
+
 FRAGMENT_ITEM_PROPERTIES = """
 fragment ItemProperties on Item {
   id
@@ -19,7 +26,8 @@ fragment UserProperties on User {
   username
 }"""
 
-FRAGMENT_PET_APPEARANCE = """
+FRAGMENT_PET_APPEARANCE = (
+    """
 fragment PetAppearanceForOutfitPreview on PetAppearance {
   id
   pose
@@ -34,9 +42,7 @@ fragment PetAppearanceForOutfitPreview on PetAppearance {
     name
   }
   restrictedZones {
-    id
-    depth
-    label
+    ...ZoneProperties
   }
   layers {
     id
@@ -44,20 +50,19 @@ fragment PetAppearanceForOutfitPreview on PetAppearance {
     imageUrl(size: $size)
     knownGlitches
     zone {
-      id
-      depth
-      label
+      ...ZoneProperties
     }
   }
 }"""
+    + FRAGMENT_ZONE
+)
 
-FRAGMENT_ITEM_APPEARANCE = """
+FRAGMENT_ITEM_APPEARANCE = (
+    """
 fragment ItemAppearanceForOutfitPreview on ItemAppearance {
   id
   restrictedZones {
-    id
-    depth
-    label
+    ...ZoneProperties
   }
   layers {
     id
@@ -65,12 +70,12 @@ fragment ItemAppearanceForOutfitPreview on ItemAppearance {
     imageUrl(size: $size)
     knownGlitches
     zone {
-      id
-      depth
-      label
+      ...ZoneProperties
     }
   }
 }"""
+    + FRAGMENT_ZONE
+)
 
 
 # cache species/colors
@@ -236,6 +241,17 @@ query($outfitId: ID!, $size: LayerImageSize!) {
     + FRAGMENT_ITEM_PROPERTIES
     + FRAGMENT_PET_APPEARANCE
     + FRAGMENT_USER_PROPERTIES
+)
+
+# grab zones
+GRAB_ZONES = (
+    """
+{
+  allZones {
+    ...ZoneProperties
+  }
+}"""
+    + FRAGMENT_ZONE
 )
 
 # borrowed from DTI, for ensuring a valid pose
