@@ -275,7 +275,7 @@ class Client:
         if outfit_data is None:
             raise OutfitNotFound(f"Outfit (ID: {outfit_id}) not found.")
 
-        return Outfit(**outfit_data, state=self._state)
+        return Outfit(data=outfit_data, state=self._state)
 
     def search(
         self,

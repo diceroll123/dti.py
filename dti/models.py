@@ -7,7 +7,7 @@ import io
 import logging
 import os
 from io import BytesIO
-from typing import Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 from urllib.parse import urlencode
 
 from PIL import Image
@@ -28,6 +28,14 @@ from .errors import (
 )
 from .mixins import Object
 from .state import BitField, State
+from .types import (
+    ColorPayload,
+    ItemAppearancePayload,
+    OutfitPayload,
+    PetAppearancePayload,
+    SpeciesPayload,
+    ZonePayload,
+)
 
 log = logging.getLogger(__name__)
 
@@ -67,13 +75,13 @@ class Species(Object):
         "name",
     )
 
-    def __init__(self, *, state: State, data: Dict):
+    def __init__(self, *, state: State, data: SpeciesPayload):
         self._state = state
         self.id = int(data["id"])
         self.name: str = data["name"]
 
     @_require_state
-    async def _color_iterator(self, valid: bool = True) -> List["Color"]:
+    async def _color_iterator(self, valid: bool = True) -> List[Color]:
         found = []
         for color_id in range(1, self._state._valid_pairs.color_count + 1):
             is_valid = self._state._valid_pairs._check(
@@ -83,14 +91,14 @@ class Species(Object):
                 found.append(self._state._colors[color_id])
         return found
 
-    async def colors(self) -> List["Color"]:
+    async def colors(self) -> List[Color]:
         """|coro|
 
         List[:class:`Color`]: Returns all colors this species can be painted.
         """
         return await self._color_iterator()
 
-    async def missing_colors(self) -> List["Color"]:
+    async def missing_colors(self) -> List[Color]:
         """|coro|
 
         List[:class:`Color`]: Returns all colors this species can not be painted.
@@ -142,13 +150,13 @@ class Color(Object):
         "name",
     )
 
-    def __init__(self, *, state: State, data: Dict):
+    def __init__(self, *, state: State, data: ColorPayload):
         self._state = state
         self.id: int = int(data["id"])
         self.name: str = data["name"]
 
     @_require_state
-    async def _species_iterator(self, valid: bool = True) -> List["Species"]:
+    async def _species_iterator(self, valid: bool = True) -> List[Species]:
         found = []
         for species_id in range(1, self._state._valid_pairs.species_count + 1):
             is_valid = self._state._valid_pairs._check(
@@ -158,14 +166,14 @@ class Color(Object):
                 found.append(self._state._species[species_id])
         return found
 
-    async def species(self) -> List["Species"]:
+    async def species(self) -> List[Species]:
         """|coro|
 
         List[:class:`Species`]: Returns all species this color can be painted on.
         """
         return await self._species_iterator()
 
-    async def missing_species(self) -> List["Species"]:
+    async def missing_species(self) -> List[Species]:
         """|coro|
 
         List[:class:`Species`]: Returns all species this color can not be painted on.
@@ -215,7 +223,7 @@ class Zone(Object):
         "label",
     )
 
-    def __init__(self, data: Dict):
+    def __init__(self, data: ZonePayload):
         self.id: int = int(data["id"])
         self.depth: int = int(data["depth"])
         self.label: str = data["label"]
@@ -336,7 +344,7 @@ class PetAppearance(Object):
         "is_glitched",
     )
 
-    def __init__(self, *, state: State, data: Dict):
+    def __init__(self, *, state: State, data: PetAppearancePayload):
         self.id: int = int(data["id"])
         self.body_id: int = int(data["bodyId"])
         self.is_glitched: bool = data["isGlitched"]
@@ -405,7 +413,7 @@ class ItemAppearance(Object):
         "occupies",
     )
 
-    def __init__(self, data: Dict, item: Item):
+    def __init__(self, data: ItemAppearancePayload, item: Item):
         self.id: str = data["id"]
         self.item: Item = item
         self.layers: List[AppearanceLayer] = [
@@ -1013,7 +1021,7 @@ class Outfit(Object):
         "updated_at",
     )
 
-    def __init__(self, *, state: State, **data):
+    def __init__(self, *, state: State, data: OutfitPayload):
         self._state = state
         self.id = int(data["id"])
         self.name: Optional[str] = data["name"]
