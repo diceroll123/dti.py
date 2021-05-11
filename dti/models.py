@@ -907,7 +907,7 @@ class Neopet:
             params["pose"] = valid_poses[0]
 
         if self.items:
-            objects, closet = self._render_items(self.items)
+            objects, closet = _render_items(self.items)
             params["objects[]"] = [item.id for item in objects]
             params["closet[]"] = [item.id for item in closet]
 
