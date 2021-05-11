@@ -313,6 +313,26 @@ class AppearanceLayer(Object):
             else AppearanceLayerType.OBJECT
         )
 
+    async def read(self) -> bytes:
+        """|coro|
+
+        Retrieves the content of this asset as a :class:`bytes` object.
+
+        Raises
+        ------
+        BrokenAssetImage
+            The image URL for this asset was returned by DTI as a null object.
+
+        Returns
+        -------
+        :class:`bytes`
+            The content of the asset.
+        """
+        if self.image_url is None:
+            # image_url isn't marked as optional because it should never happen... but sometimes it does.
+            raise BrokenAssetImage(f"Layer image broken: {self!r}")
+        return await self._state._http._fetch_binary_data(self.image_url)
+
     def __repr__(self):
         return f"<AppearanceLayer zone={self.zone!r} url={self.image_url!r} parent={self.parent!r}>"
 
@@ -496,12 +516,7 @@ class PetAppearance(Object):
         layers = await self._render_layers(items)
 
         # download images simultaneously
-        images = await asyncio.gather(
-            *[
-                self._state._http._fetch_binary_data(_raise_if_none(layer))
-                for layer in layers
-            ]
-        )
+        images = await asyncio.gather(*[layer.read() for layer in layers])
 
         internal_function = functools.partial(
             self._layer_processing,
@@ -1164,11 +1179,6 @@ class Outfit(Object):
 
 
 #  utility functions below
-def _raise_if_none(layer: AppearanceLayer):
-    url = layer.image_url
-    if url is None:
-        raise BrokenAssetImage(f"Layer image broken: {layer!r}")
-    return url
 
 
 def _render_items(items: Sequence[Item]) -> Tuple[List[Item], List[Item]]:
