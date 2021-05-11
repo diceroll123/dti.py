@@ -334,7 +334,15 @@ class AppearanceLayer(Object):
         return await self._state._http._fetch_binary_data(self.image_url)
 
     def __repr__(self):
-        return f"<AppearanceLayer zone={self.zone!r} url={self.image_url!r} parent={self.parent!r}>"
+        attrs = [
+            ("id", self.id),
+            ("asset_remote_id", self.asset_remote_id),
+            ("zone", self.zone),
+            ("url", self.image_url),
+            ("parent", self.parent),
+        ]
+        joined = " ".join("%s=%r" % t for t in attrs)
+        return f"<AppearanceLayer {joined}>"
 
 
 class PetAppearance(Object):
