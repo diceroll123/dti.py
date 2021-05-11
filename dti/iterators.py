@@ -34,7 +34,7 @@ class DTISearch:
 
         for item in items:
             if item:
-                await self._items.put(Item(**item))
+                await self._items.put(Item(data=item, state=self._state))
             else:
                 await self._items.put(None)
 
