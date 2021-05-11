@@ -451,23 +451,19 @@ class PetAppearance(Object):
         canvas = Image.new("RGBA", (img_size, img_size))
         for layer, image in layers_images:
             try:
-                layer_image = BytesIO(image)
-                foreground = Image.open(layer_image)
+                foreground = Image.open(BytesIO(image))
+
+                # force proper size and mode if not already
+                if foreground.mode != "RGBA":
+                    foreground = foreground.convert("RGBA")
+                if foreground.size != (img_size, img_size):
+                    foreground = foreground.resize((img_size, img_size))
+                canvas = Image.alpha_composite(canvas, foreground)
             except Exception:
                 # for when the image itself is corrupted somehow
                 raise BrokenAssetImage(
                     f"Layer image broken: <Data species={self.species!r} color={self.color!r} layer={layer!r}>"
                 )
-            finally:
-                if foreground.mode == "1":  # bad
-                    continue
-                if foreground.mode != "RGBA":
-                    foreground = foreground.convert("RGBA")
-
-                # force proper size if not already
-                if foreground.size != (img_size, img_size):
-                    foreground = foreground.resize((img_size, img_size))
-                canvas = Image.alpha_composite(canvas, foreground)
 
         canvas.save(fp, format="PNG")
         return True
