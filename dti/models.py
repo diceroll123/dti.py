@@ -404,6 +404,10 @@ class PetAppearance(Object):
             Zone(restricted) for restricted in data["restrictedZones"]
         ]
 
+    @property
+    def url(self) -> str:
+        return f'https://impress-2020.openneo.net/outfits/new?species={self.species.id}&color={self.color.id}&pose={self.pose.name}&state={self.id}'
+
     def __repr__(self):
         attrs = [
             ("id", self.id),
