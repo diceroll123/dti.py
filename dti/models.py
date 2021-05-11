@@ -552,6 +552,7 @@ class ItemAppearance(Object):
     """
 
     __slots__ = (
+        "_state",
         "id",
         "item",
         "layers",
@@ -560,6 +561,7 @@ class ItemAppearance(Object):
     )
 
     def __init__(self, data: ItemAppearancePayload, item: Item):
+        self._state = item._state
         self.id: str = data["id"]
         self.item: Item = item
         self.layers: List[AppearanceLayer] = [
