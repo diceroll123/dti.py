@@ -33,6 +33,13 @@ class LayerImageSize(_DTIEnum):
     SIZE_150 = auto()
 
 
+class AppearanceLayerType(_DTIEnum):
+    """Represents the type of appearance layer, whether it's for a pet or an item."""
+
+    BIOLOGY = auto()
+    OBJECT = auto()
+
+
 class PetPose(int, _DTIEnum):
     """Represents a single pet pose. Each pose has an associated power-of-two value to easily
     create :class:`BitField` objects. This object acts like an :class:`int`.

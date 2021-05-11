@@ -19,7 +19,13 @@ from .constants import (
     PET_ON_NEOPETS,
 )
 from .decorators import _require_state
-from .enums import AppearanceLayerKnownGlitch, LayerImageSize, PetPose, try_enum
+from .enums import (
+    AppearanceLayerKnownGlitch,
+    AppearanceLayerType,
+    LayerImageSize,
+    PetPose,
+    try_enum,
+)
 from .errors import (
     BrokenAssetImage,
     InvalidColorSpeciesPair,
@@ -263,9 +269,8 @@ class AppearanceLayer(Object):
         The appearance layer's Neopets ID. Guaranteed unique across layers of the *same* type, but
         not of different types. That is, it's allowed and common for an item
         layer and a pet layer to have the same asset_remote_id.
-    asset_type: :class:`str`
-        The appearance layer's asset type. The only values this can have currently are `biology` and `object`,
-        to differentiate between layers of a pet and layers of items respectively.
+    asset_type: :class:`AppearanceLayerType`
+        The appearance layer's asset type.
     zone: :class:`Zone`
         The appearance layer's zone.
     known_glitches: Optional[List[:class:`AppearanceLayerKnownGlitch`]]
@@ -288,11 +293,16 @@ class AppearanceLayer(Object):
         self.image_url: str = data["imageUrl"]
         self.asset_remote_id: str = data["remoteId"]
         self.zone: Zone = Zone(data["zone"])
-        self.asset_type: str = data["asset_type"]
         self.known_glitches: Optional[List[AppearanceLayerKnownGlitch]] = [
             try_enum(AppearanceLayerKnownGlitch, glitch)
             for glitch in data["knownGlitches"]
         ] or None
+
+        self.asset_type = (
+            AppearanceLayerType.BIOLOGY
+            if isinstance(parent, PetAppearance)
+            else AppearanceLayerType.OBJECT
+        )
 
     def __repr__(self):
         return f"<AppearanceLayer zone={self.zone!r} url={self.image_url!r} parent={self.parent!r}>"
