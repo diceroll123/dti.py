@@ -40,6 +40,7 @@ if TYPE_CHECKING:
         AppearanceLayerPayload,
         ColorPayload,
         ItemAppearancePayload,
+        ItemPayload,
         OutfitPayload,
         PetAppearancePayload,
         SpeciesPayload,
@@ -618,6 +619,7 @@ class Item(Object):
     """
 
     __slots__ = (
+        "_state",
         "id",
         "name",
         "description",
@@ -629,7 +631,8 @@ class Item(Object):
         "waka_value",
     )
 
-    def __init__(self, **data):
+    def __init__(self, *, data: ItemPayload, state: State):
+        self._state = state
         self.id: int = int(data["id"])
         self.name: str = data.get("name")
         self.description: str = data.get("description")
@@ -819,7 +822,7 @@ class Neopet:
             )
 
         data = data["data"]
-        items = [Item(**item) for item in data[key] if item is not None]
+        items = [Item(data=item, state=state) for item in data[key] if item is not None]
         appearances = [
             PetAppearance(data=appearance, state=state)
             for appearance in data["petAppearances"]
@@ -1058,10 +1061,10 @@ class Outfit(Object):
             data=data["petAppearance"], state=state
         )
         self.worn_items: List[Item] = [
-            Item(**item_data) for item_data in data["wornItems"]
+            Item(data=item_data, state=state) for item_data in data["wornItems"]
         ]
         self.closeted_items: List[Item] = [
-            Item(**item_data) for item_data in data["closetedItems"]
+            Item(data=item_data, state=state) for item_data in data["closetedItems"]
         ]
         self.creator: Optional[User] = (
             User(**data["creator"]) if data["creator"] else None
