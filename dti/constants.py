@@ -194,6 +194,18 @@ query ($appearanceId: ID!, $size: LayerImageSize!) {
     + FRAGMENT_PET_APPEARANCE
 )
 
+# grab pet appearance by ID
+GRAB_PET_APPEARANCES_BY_IDS = (
+    """
+query ($speciesId: ID!, $colorId: ID!, $size: LayerImageSize!) {
+  petAppearances(speciesId: $speciesId, colorId: $colorId) {
+    ...PetAppearanceForOutfitPreview
+  } 
+}
+"""
+    + FRAGMENT_PET_APPEARANCE
+)
+
 # grab pet data
 PET_ON_NEOPETS = (
     """

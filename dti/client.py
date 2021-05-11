@@ -1,6 +1,11 @@
 from typing import List, Optional, Union
 
-from .constants import GRAB_PET_APPEARANCE_BY_ID, GRAB_ZONES, OUTFIT
+from .constants import (
+    GRAB_PET_APPEARANCE_BY_ID,
+    GRAB_PET_APPEARANCES_BY_IDS,
+    GRAB_ZONES,
+    OUTFIT,
+)
 from .decorators import _require_state
 from .enums import LayerImageSize, PetPose
 from .errors import (
@@ -400,6 +405,64 @@ class Client:
             raise MissingPetAppearance(f"Pet Appearance ID: {appearance_id} not found.")
 
         return PetAppearance(data=appearance_data, state=self._state)
+
+    async def fetch_appearances(
+        self,
+        *,
+        species: Union[int, str, Species],
+        color: Union[int, str, Color],
+        size: Optional[LayerImageSize] = None,
+    ) -> List[PetAppearance]:
+        """|coro|
+
+        Fetches pet appearances of a provided species/color.
+
+        Parameters
+        -----------
+        species: Union[:class:`int`, :class:`str`, :class:`Species`]
+            The name, or ID, or Species object of the desired Species. Case-insensitive.
+        color: Union[:class:`int`, :class:`str`, :class:`Color`]
+            The name, or ID, or Color object of the desired Color. Case-insensitive.
+        size: Optional[:class:`LayerImageSize`]
+            The desired size for the pet appearance layers. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
+
+        Raises
+        -------
+        ~dti.InvalidColorSpeciesPair
+            This species/color combo does not exist, according to DTI.
+
+        Returns
+        --------
+        List[:class:`PetAppearance`]
+            The list of this pet's appearances.
+        """
+
+        if not isinstance(species, Species):
+            species = await self.get_species(species)
+
+        if not isinstance(color, Color):
+            color = await self.get_color(color)
+
+        valid = await self.check(species=species, color=color)
+
+        if not valid:
+            raise InvalidColorSpeciesPair("Invalid Species/Color provided")
+
+        data = await self._state._http._query(
+            GRAB_PET_APPEARANCES_BY_IDS,
+            variables={
+                "speciesId": species.id,
+                "colorId": color.id,
+                "size": str(size or LayerImageSize.SIZE_600),
+            },
+        )
+
+        appearance_data = data["data"]["petAppearances"]
+
+        return [
+            PetAppearance(data=app_data, state=self._state)
+            for app_data in appearance_data
+        ]
 
     async def fetch_all_zones(self) -> List[Zone]:
         zone_data = await self._state._http._query(GRAB_ZONES)
