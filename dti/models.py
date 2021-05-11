@@ -7,7 +7,7 @@ import io
 import logging
 import os
 from io import BytesIO
-from typing import List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Sequence, Tuple, Union
 from urllib.parse import urlencode
 
 from PIL import Image
@@ -28,14 +28,16 @@ from .errors import (
 )
 from .mixins import Object
 from .state import BitField, State
-from .types import (
-    ColorPayload,
-    ItemAppearancePayload,
-    OutfitPayload,
-    PetAppearancePayload,
-    SpeciesPayload,
-    ZonePayload,
-)
+
+if TYPE_CHECKING:
+    from .types import (
+        ColorPayload,
+        ItemAppearancePayload,
+        OutfitPayload,
+        PetAppearancePayload,
+        SpeciesPayload,
+        ZonePayload,
+    )
 
 log = logging.getLogger(__name__)
 
