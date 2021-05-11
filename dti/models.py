@@ -267,7 +267,7 @@ class AppearanceLayer(Object):
         The respective owner of this layer, an ItemAppearance or a PetAppearance.
     image_url: :class:`str`
         The appearance layer's DTI image url.
-    asset_remote_id: :class:`str`
+    asset_remote_id: :class:`int`
         The appearance layer's Neopets ID. Guaranteed unique across layers of the *same* type, but
         not of different types. That is, it's allowed and common for an item
         layer and a pet layer to have the same asset_remote_id.
@@ -300,7 +300,7 @@ class AppearanceLayer(Object):
         self.id: int = int(data["id"])
         self.parent: Union[ItemAppearance, PetAppearance] = parent
         self.image_url: str = data["imageUrl"]
-        self.asset_remote_id: str = data["remoteId"]
+        self.asset_remote_id: int = int(data["remoteId"])
         self.zone: Zone = Zone(data["zone"])
         self.known_glitches: Optional[List[AppearanceLayerKnownGlitch]] = [
             try_enum(AppearanceLayerKnownGlitch, glitch)
