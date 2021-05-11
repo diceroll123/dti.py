@@ -37,6 +37,7 @@ from .state import BitField, State
 
 if TYPE_CHECKING:
     from .types import (
+        AppearanceLayerPayload,
         ColorPayload,
         ItemAppearancePayload,
         OutfitPayload,
@@ -278,6 +279,7 @@ class AppearanceLayer(Object):
     """
 
     __slots__ = (
+        "_state",
         "id",
         "parent",
         "zone",
@@ -287,7 +289,13 @@ class AppearanceLayer(Object):
         "known_glitches",
     )
 
-    def __init__(self, parent: Union[ItemAppearance, PetAppearance], **data):
+    def __init__(
+        self,
+        *,
+        parent: Union[ItemAppearance, PetAppearance],
+        data: AppearanceLayerPayload,
+    ):
+        self._state = parent._state
         self.id: int = int(data["id"])
         self.parent: Union[ItemAppearance, PetAppearance] = parent
         self.image_url: str = data["imageUrl"]
@@ -369,8 +377,7 @@ class PetAppearance(Object):
 
         self.pose: PetPose = PetPose(data["pose"])
         self.layers: List[AppearanceLayer] = [
-            AppearanceLayer(self, **layer, asset_type="biology")
-            for layer in data["layers"]
+            AppearanceLayer(parent=self, data=layer) for layer in data["layers"]
         ]
         self.restricted_zones: List[Zone] = [
             Zone(restricted) for restricted in data["restrictedZones"]
@@ -555,8 +562,7 @@ class ItemAppearance(Object):
         self.id: str = data["id"]
         self.item: Item = item
         self.layers: List[AppearanceLayer] = [
-            AppearanceLayer(self, **layer, asset_type="object")
-            for layer in data["layers"]
+            AppearanceLayer(parent=self, data=layer) for layer in data["layers"]
         ]
         self.restricted_zones: List[Zone] = [
             Zone(restricted) for restricted in data["restrictedZones"]
