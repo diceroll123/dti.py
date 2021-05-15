@@ -40,8 +40,8 @@ class NoIteratorsFound(DTIException):
     pass
 
 
-class BrokenAssetImage(DTIException):
-    """An exception that is thrown when the biology/object image is broken and must be reported to fix."""
+class NullAssetImage(DTIException):
+    """An exception that is thrown when the biology/object image is null and must be reported to fix."""
 
     pass
 

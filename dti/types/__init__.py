@@ -30,7 +30,7 @@ class ZonePayload(TypedDict):
 
 class AppearanceLayerPayload(TypedDict):
     id: str
-    imageUrl: str
+    imageUrl: Optional[str]
     remoteId: str
     zone: ZonePayload
     knownGlitches: List[str]

@@ -28,7 +28,7 @@ from .enums import (
     try_enum,
 )
 from .errors import (
-    BrokenAssetImage,
+    NullAssetImage,
     InvalidColorSpeciesPair,
     MissingPetAppearance,
     NeopetNotFound,
@@ -266,8 +266,9 @@ class AppearanceLayer(Object):
         The appearance layer's DTI ID. Guaranteed unique across all layers of all types.
     parent: Union[:class:`ItemAppearance`, :class:`PetAppearance`]
         The respective owner of this layer, an ItemAppearance or a PetAppearance.
-    image_url: :class:`str`
-        The appearance layer's DTI image url.
+    image_url: Optional[:class:`str`]
+        The appearance layer's PNG image url. If this is None, the item has a complex movie-based image.
+        Rendering these will raise an error.
     asset_remote_id: :class:`int`
         The appearance layer's Neopets ID. Guaranteed unique across layers of the *same* type, but
         not of different types. That is, it's allowed and common for an item
@@ -300,7 +301,7 @@ class AppearanceLayer(Object):
         self._state = parent._state
         self.id: int = int(data["id"])
         self.parent: Union[ItemAppearance, PetAppearance] = parent
-        self.image_url: str = data["imageUrl"]
+        self.image_url: Optional[str] = data["imageUrl"]
         self.asset_remote_id: int = int(data["remoteId"])
         self.zone: Zone = Zone(data["zone"])
         self.known_glitches: Optional[List[AppearanceLayerKnownGlitch]] = [
@@ -330,8 +331,7 @@ class AppearanceLayer(Object):
             The content of the asset.
         """
         if self.image_url is None:
-            # image_url isn't marked as optional because it should never happen... but sometimes it does.
-            raise BrokenAssetImage(f"Layer image broken: {self!r}")
+            raise NullAssetImage(f"Layer image missing: {self!r}")
         return await self._state._http._fetch_binary_data(self.image_url)
 
     def __repr__(self):
@@ -469,7 +469,11 @@ class PetAppearance(Object):
 
         layers = self._render_layers(items)
 
-        layer_urls = ",".join(layer.image_url for layer in layers)
+        try:
+            layer_urls = ",".join(layer.image_url for layer in layers)
+        except TypeError:
+            # expected str, NoneType found
+            raise NullAssetImage('An image in this render has a null image URL.')
 
         return f"https://impress-2020.openneo.net/api/outfitImage?size={size_px}&layerUrls={layer_urls}"
 
