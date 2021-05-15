@@ -393,13 +393,17 @@ class PetAppearance(Object):
         "layers",
         "restricted_zones",
         "is_glitched",
+        "size",
     )
 
-    def __init__(self, *, state: State, data: PetAppearancePayload):
+    def __init__(
+        self, *, state: State, size: LayerImageSize, data: PetAppearancePayload
+    ):
         self._state = state
         self.id: int = int(data["id"])
         self.body_id: int = int(data["bodyId"])
         self.is_glitched: bool = data["isGlitched"]
+        self.size = size
 
         # create new, somewhat temporary colors from this data since we don't have async access
         self.color: Color = Color(data=data["color"], state=state)
@@ -415,7 +419,7 @@ class PetAppearance(Object):
 
     @property
     def url(self) -> str:
-        return f'https://impress-2020.openneo.net/outfits/new?species={self.species.id}&color={self.color.id}&pose={self.pose.name}&state={self.id}'
+        return f"https://impress-2020.openneo.net/outfits/new?species={self.species.id}&color={self.color.id}&pose={self.pose.name}&state={self.id}"
 
     def __repr__(self):
         attrs = [
@@ -428,9 +432,7 @@ class PetAppearance(Object):
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<PetAppearance {joined}>"
 
-    def _render_layers(
-        self, items: Optional[Sequence[Item]]
-    ) -> List[AppearanceLayer]:
+    def _render_layers(self, items: Optional[Sequence[Item]]) -> List[AppearanceLayer]:
         # Returns the image layers' images in order from bottom to top.
 
         all_layers = list(self.layers)
@@ -450,45 +452,12 @@ class PetAppearance(Object):
 
         return sorted(visible_layers, key=lambda layer: layer.zone.depth)
 
-    def _layer_processing(
-        self,
-        *,
-        fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
-        img_size: int,
-        layers_images: List[Tuple[AppearanceLayer, bytes]],
-    ) -> bool:
-        canvas = Image.new("RGBA", (img_size, img_size))
-        for layer, image in layers_images:
-            try:
-                foreground = Image.open(BytesIO(image))
-
-                # force proper size and mode if not already
-                if foreground.mode != "RGBA":
-                    foreground = foreground.convert("RGBA")
-                if foreground.size != (img_size, img_size):
-                    foreground = foreground.resize((img_size, img_size))
-                canvas = Image.alpha_composite(canvas, foreground)
-            except Exception:
-                # for when the image itself is corrupted somehow
-                raise BrokenAssetImage(
-                    f"Layer image broken: <Data species={self.species!r} color={self.color!r} layer={layer!r}>"
-                )
-
-        canvas.save(fp, format="PNG")
-        return True
-
-    def image_url(
-        self,
-        items: Optional[Sequence[Item]] = None,
-        size: Optional[LayerImageSize] = None,
-    ) -> str:
+    def image_url(self, items: Optional[Sequence[Item]] = None) -> str:
         """
         Parameters
         -----------
         items: Optional[Sequence[:class:`Item`]]
             An optional list of items to render on this appearance.
-        size: Optional[:class:`LayerImageSize`]
-            The desired size for the image. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
 
         Returns
         --------
@@ -496,7 +465,7 @@ class PetAppearance(Object):
             The DTI server-side-rendering image url of a Neopet appearance.
         """
 
-        size_px = int(str(size or LayerImageSize.SIZE_600)[-3:])
+        size_px = int(str(self.size)[-3:])
 
         layers = self._render_layers(items)
 
@@ -504,11 +473,7 @@ class PetAppearance(Object):
 
         return f"https://impress-2020.openneo.net/api/outfitImage?size={size_px}&layerUrls={layer_urls}"
 
-    async def read(
-        self,
-        items: Optional[Sequence[Item]] = None,
-        size: Optional[LayerImageSize] = None,
-    ) -> bytes:
+    async def read(self, items: Optional[Sequence[Item]] = None) -> bytes:
         """|coro|
 
         Retrieves the content of the server-side-rendered image of this pet appearance as a :class:`bytes` object.
@@ -517,24 +482,19 @@ class PetAppearance(Object):
         -----------
         items: Optional[Sequence[:class:`Item`]]
             An optional list of items to render on this appearance.
-        size: Optional[:class:`LayerImageSize`]
-            The desired size for the render. Defaults to LayerImageSize.SIZE_600.
 
         Returns
         -------
         :class:`bytes`
             The content of the rendered image.
         """
-        return await self._state._http._fetch_binary_data(
-            self.image_url(items=items, size=size)
-        )
+        return await self._state._http._fetch_binary_data(self.image_url(items=items))
 
     async def render(
         self,
         fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
         *,
         items: Optional[Sequence[Item]] = None,
-        size: Optional[LayerImageSize] = None,
         seek_begin: bool = True,
     ):
         """|coro|
@@ -555,42 +515,11 @@ class PetAppearance(Object):
             A file-like object opened in binary mode and write mode (`wb`).
         items: Optional[Sequence[:class:`Item`]]
             An optional list of items to render on this appearance.
-        size: Optional[:class:`LayerImageSize`]
-            The desired size for the render. Defaults to the current neopets' pose if there is one,
-            otherwise defaults to LayerImageSize.SIZE_600.
         seek_begin: :class:`bool`
             Whether to seek to the beginning of the file after saving is successfully done.
-
-        Raises
-        -------
-        ~dti.BrokenAssetImage
-            A layer's asset image is broken somehow on DTI's side.
         """
-        sizes = {
-            LayerImageSize.SIZE_150: 150,
-            LayerImageSize.SIZE_300: 300,
-            LayerImageSize.SIZE_600: 600,
-        }
 
-        img_size = sizes[size or LayerImageSize.SIZE_600]
-
-        layers = self._render_layers(items)
-
-        # download images simultaneously
-        images = await asyncio.gather(*[layer.read() for layer in layers])
-
-        internal_function = functools.partial(
-            self._layer_processing,
-            fp=fp,
-            img_size=img_size,
-            layers_images=zip(layers, images),
-        )
-        completed, pending = await asyncio.wait(
-            [asyncio.get_event_loop().run_in_executor(None, internal_function)]
-        )
-        layer_task = completed.pop()
-        if layer_task.exception():
-            raise layer_task.exception()
+        fp.write(await self.read(items=items))
 
         if seek_begin and isinstance(fp, io.BufferedIOBase):
             fp.seek(0)
@@ -791,8 +720,6 @@ class Neopet:
         A list of the pet's appearances. This is essentially just a PetAppearance for each valid PetPose
     items: List[:class:`Item`]
         A list of the items that will be applied to the pet. Can be empty.
-    size: Optional[:class:`LayerImageSize`]
-        The desired size of the rendered image, or `None`.
     name: Optional[:class:`str`]
         The name of the Neopet, if one is supplied.
     """
@@ -902,7 +829,7 @@ class Neopet:
         data = data["data"]
         items = [Item(data=item, state=state) for item in data[key] if item is not None]
         appearances = [
-            PetAppearance(data=appearance, state=state)
+            PetAppearance(data=appearance, size=size, state=state)
             for appearance in data["petAppearances"]
         ]
 
@@ -1033,7 +960,6 @@ class Neopet:
         fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
         pose: Optional[PetPose] = None,
         pet_appearance: Optional[PetAppearance] = None,
-        size: Optional[LayerImageSize] = None,
         *,
         seek_begin: bool = True,
     ):
@@ -1057,9 +983,6 @@ class Neopet:
             The desired pet pose for the render. Defaults to the current neopets' pose.
         pet_appearance: Optional[:class:`PetAppearance`]
             The desired pet appearance for the render. This overrides any pose passed in.
-        size: Optional[:class:`LayerImageSize`]
-            The desired size for the render. Defaults to the current neopets' pose if there is one,
-            otherwise defaults to LayerImageSize.SIZE_600.
         seek_begin: :class:`bool`
             Whether to seek to the beginning of the file after saving is successfully done.
 
@@ -1068,8 +991,6 @@ class Neopet:
         ~dti.BrokenAssetImage
             A layer's asset image is broken somehow on DTI's side.
         """
-
-        size = size or self.size
 
         if pet_appearance is None:
             # You may override the pose here, if no appearance is passed in.
@@ -1091,9 +1012,7 @@ class Neopet:
                 f'Pet Appearance <"{self.species.id}-{self.color.id}"> does not exist.'
             )
 
-        await pet_appearance.render(
-            fp, items=self.items, size=size, seek_begin=seek_begin
-        )
+        await pet_appearance.render(fp, items=self.items, seek_begin=seek_begin)
 
 
 class Outfit(Object):
@@ -1129,14 +1048,16 @@ class Outfit(Object):
         "closeted_items",
         "created_at",
         "updated_at",
+        "size",
     )
 
-    def __init__(self, *, state: State, data: OutfitPayload):
+    def __init__(self, *, state: State, size: LayerImageSize, data: OutfitPayload):
         self._state = state
         self.id = data["id"]
         self.name: Optional[str] = data["name"]
+        self.size = size
         self.pet_appearance: PetAppearance = PetAppearance(
-            data=data["petAppearance"], state=state
+            data=data["petAppearance"], size=size, state=state
         )
         self.worn_items: List[Item] = [
             Item(data=item_data, state=state) for item_data in data["wornItems"]
@@ -1183,12 +1104,29 @@ class Outfit(Object):
 
         params = {
             "id": self.id,
-            "size": str(size or LayerImageSize.SIZE_600)[-3:],
+            "size": str(size or self.size)[-3:],
             "updatedAt": int(self.updated_at.timestamp()),
         }
 
         encoded = urllib.parse.urlencode(params)
         return f"https://impress-2020.openneo.net/api/outfitImage?{encoded}"
+
+    async def read(self, size: Optional[LayerImageSize] = None) -> bytes:
+        """|coro|
+
+        Retrieves the content of the server-side-rendered image of this outfit as a :class:`bytes` object.
+
+        Parameters
+        -----------
+        size: Optional[LayerImageSize]
+            The desired size for the image. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
+
+        Returns
+        -------
+        :class:`bytes`
+            The content of the rendered image.
+        """
+        return await self._state._http._fetch_binary_data(self.image_url(size=size))
 
     async def render(
         self,
@@ -1227,15 +1165,24 @@ class Outfit(Object):
         ~dti.BrokenAssetImage
             A layer's asset image is broken somehow on DTI's side.
         """
-        neopet = await Neopet._fetch_assets_for(
-            species=self.pet_appearance.species,
-            color=self.pet_appearance.color,
-            pose=pose or self.pet_appearance.pose,
-            size=size,
-            item_ids=[item.id for item in self.worn_items],
-            state=self._state,
-        )
-        await neopet.render(fp, seek_begin=seek_begin)
+
+        if pose:
+            # if there's a pose, we have to rebuild
+            neopet = await Neopet._fetch_assets_for(
+                species=self.pet_appearance.species,
+                color=self.pet_appearance.color,
+                pose=pose or self.pet_appearance.pose,
+                size=self.size,
+                item_ids=[item.id for item in self.worn_items],
+                state=self._state,
+            )
+            await neopet.render(fp, seek_begin=seek_begin)
+        else:
+            # render from outfit ID
+            fp.write(await self.read(size=size or self.size))
+
+            if seek_begin and isinstance(fp, io.BufferedIOBase):
+                fp.seek(0)
 
     def __repr__(self):
         attrs = [

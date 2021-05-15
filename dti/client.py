@@ -224,7 +224,9 @@ class Client:
             state=self._state,
         )
 
-    async def fetch_neopet_by_name(self, pet_name: str) -> Neopet:
+    async def fetch_neopet_by_name(
+        self, pet_name: str, size: Optional[LayerImageSize] = None
+    ) -> Neopet:
         """|coro|
 
         Creates a :class:`Neopet` using the name of a real Neopet.
@@ -233,6 +235,8 @@ class Client:
         -----------
         pet_name: :class:`str`
             The name of the pet you'd like to find.
+        size: Optional[:class:`LayerImageSize`]
+            The desired size for the render. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
 
         Raises
         -------
@@ -272,11 +276,14 @@ class Client:
         :class:`Outfit`
             The corresponding outfit that matches the ID.
         """
+
+        size = size or LayerImageSize.SIZE_600
+
         data = await self._state._http._query(
             OUTFIT,
             variables={
                 "outfitId": outfit_id,
-                "size": str(size or LayerImageSize.SIZE_600),
+                "size": str(size),
             },
         )
 
@@ -285,7 +292,7 @@ class Client:
         if outfit_data is None:
             raise OutfitNotFound(f"Outfit (ID: {outfit_id}) not found.")
 
-        return Outfit(data=outfit_data, state=self._state)
+        return Outfit(data=outfit_data, size=size, state=self._state)
 
     def search(
         self,
@@ -391,11 +398,13 @@ class Client:
             The corresponding pet appearance.
         """
 
+        size = size or LayerImageSize.SIZE_600
+
         data = await self._state._http._query(
             GRAB_PET_APPEARANCE_BY_ID,
             variables={
                 "appearanceId": appearance_id,
-                "size": str(size or LayerImageSize.SIZE_600),
+                "size": str(size),
             },
         )
 
@@ -404,7 +413,7 @@ class Client:
         if appearance_data is None:
             raise MissingPetAppearance(f"Pet Appearance ID: {appearance_id} not found.")
 
-        return PetAppearance(data=appearance_data, state=self._state)
+        return PetAppearance(data=appearance_data, size=size, state=self._state)
 
     async def fetch_appearances(
         self,
@@ -448,19 +457,21 @@ class Client:
         if not valid:
             raise InvalidColorSpeciesPair("Invalid Species/Color provided")
 
+        size = size or LayerImageSize.SIZE_600
+
         data = await self._state._http._query(
             GRAB_PET_APPEARANCES_BY_IDS,
             variables={
                 "speciesId": species.id,
                 "colorId": color.id,
-                "size": str(size or LayerImageSize.SIZE_600),
+                "size": str(size),
             },
         )
 
         appearance_data = data["data"]["petAppearances"]
 
         return [
-            PetAppearance(data=app_data, state=self._state)
+            PetAppearance(data=app_data, size=size, state=self._state)
             for app_data in appearance_data
         ]
 
