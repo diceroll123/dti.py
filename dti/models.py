@@ -428,7 +428,7 @@ class PetAppearance(Object):
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<PetAppearance {joined}>"
 
-    async def _render_layers(
+    def _render_layers(
         self, items: Optional[Sequence[Item]]
     ) -> List[AppearanceLayer]:
         # Returns the image layers' images in order from bottom to top.
@@ -522,7 +522,7 @@ class PetAppearance(Object):
 
         img_size = sizes[size or LayerImageSize.SIZE_600]
 
-        layers = await self._render_layers(items)
+        layers = self._render_layers(items)
 
         # download images simultaneously
         images = await asyncio.gather(*[layer.read() for layer in layers])
