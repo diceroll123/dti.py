@@ -504,6 +504,31 @@ class PetAppearance(Object):
 
         return f"https://impress-2020.openneo.net/api/outfitImage?size={size_px}&layerUrls={layer_urls}"
 
+    async def read(
+        self,
+        items: Optional[Sequence[Item]] = None,
+        size: Optional[LayerImageSize] = None,
+    ) -> bytes:
+        """|coro|
+
+        Retrieves the content of the server-side-rendered image of this pet appearance as a :class:`bytes` object.
+
+        Parameters
+        -----------
+        items: Optional[Sequence[:class:`Item`]]
+            An optional list of items to render on this appearance.
+        size: Optional[:class:`LayerImageSize`]
+            The desired size for the render. Defaults to LayerImageSize.SIZE_600.
+
+        Returns
+        -------
+        :class:`bytes`
+            The content of the rendered image.
+        """
+        return await self._state._http._fetch_binary_data(
+            self.image_url(items=items, size=size)
+        )
+
     async def render(
         self,
         fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
