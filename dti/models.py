@@ -473,7 +473,8 @@ class PetAppearance(Object):
             layer_urls = ",".join(layer.image_url for layer in layers)
         except TypeError:
             # expected str, NoneType found
-            raise NullAssetImage('An image in this render has a null image URL.')
+            missing = [layer for layer in layers if layer.image_url is None]
+            raise NullAssetImage(f'Null image URLs found in this render: {missing}')
 
         return f"https://impress-2020.openneo.net/api/outfitImage?size={size_px}&layerUrls={layer_urls}"
 
