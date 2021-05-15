@@ -6,6 +6,7 @@ import functools
 import io
 import logging
 import os
+import urllib.parse
 from io import BytesIO
 from typing import TYPE_CHECKING, List, Optional, Sequence, Tuple, Union
 from urllib.parse import urlencode
@@ -1115,18 +1116,27 @@ class Outfit(Object):
         """:class:`str`: Returns the outfit URL for the ID provided."""
         return f"https://impress-2020.openneo.net/outfits/{self.id}"
 
-    @property
-    def image_urls(self):
-        """:class:`Dict[str]`: Returns a dict of the different sizes for the rendered image url of an outfit for the ID provided."""
-        new_id = str(self.id).zfill(9)
-        id_folder = new_id[:3] + "/" + new_id[3:6] + "/" + new_id[6:]
-        url = f"https://openneo-uploads.s3.amazonaws.com/outfits/{id_folder}/"
+    def image_url(self, size: Optional[LayerImageSize] = None) -> str:
+        """
+        Parameters
+        -----------
+        size: Optional[:class:`LayerImageSize`]
+            The desired size for the image. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
 
-        return {
-            "large": url + "preview.png",
-            "medium": url + "medium_preview.png",
-            "small": url + "small_preview.png",
+        Returns
+        --------
+        :class:`str`
+            The image url of an outfit.
+        """
+
+        params = {
+            "id": self.id,
+            "size": str(size or LayerImageSize.SIZE_600)[-3:],
+            "updatedAt": int(self.updated_at.timestamp()),
         }
+
+        encoded = urllib.parse.urlencode(params)
+        return f"https://impress-2020.openneo.net/api/outfitImage?{encoded}"
 
     async def render(
         self,
