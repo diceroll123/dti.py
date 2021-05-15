@@ -880,7 +880,7 @@ class Neopet:
                 "An error occurred while trying to gather this pet's data."
             )
 
-        pet_appearance = PetAppearance(data=pet_on_neo["petAppearance"], state=state)
+        pet_appearance = PetAppearance(data=pet_on_neo["petAppearance"], size=size, state=state)
 
         neopet = await Neopet._fetch_assets_for(
             species=pet_appearance.species,
