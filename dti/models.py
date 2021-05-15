@@ -1048,7 +1048,7 @@ class Outfit(Object):
 
     Attributes
     -----------
-    id: :class:`int`
+    id: :class:`str`
         The outfit's DTI ID.
     name: Optional[:class:`str`]
         The outfit's name on DTI. Can be None.
@@ -1080,7 +1080,7 @@ class Outfit(Object):
 
     def __init__(self, *, state: State, data: OutfitPayload):
         self._state = state
-        self.id = int(data["id"])
+        self.id = data["id"]
         self.name: Optional[str] = data["name"]
         self.pet_appearance: PetAppearance = PetAppearance(
             data=data["petAppearance"], state=state
