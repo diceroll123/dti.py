@@ -1172,7 +1172,7 @@ class Outfit(Object):
                 species=self.pet_appearance.species,
                 color=self.pet_appearance.color,
                 pose=pose or self.pet_appearance.pose,
-                size=self.size,
+                size=size or self.size,
                 item_ids=[item.id for item in self.worn_items],
                 state=self._state,
             )
