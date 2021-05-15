@@ -28,7 +28,7 @@ class ZonePayload(TypedDict):
     label: str
 
 
-class AppearanceLayerPayload(TypedDict, total=False):
+class AppearanceLayerPayload(TypedDict):
     id: str
     imageUrl: str
     remoteId: str
