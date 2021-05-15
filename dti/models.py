@@ -477,6 +477,33 @@ class PetAppearance(Object):
         canvas.save(fp, format="PNG")
         return True
 
+    def image_url(
+        self,
+        items: Optional[Sequence[Item]] = None,
+        size: Optional[LayerImageSize] = None,
+    ) -> str:
+        """
+        Parameters
+        -----------
+        items: Optional[Sequence[:class:`Item`]]
+            An optional list of items to render on this appearance.
+        size: Optional[:class:`LayerImageSize`]
+            The desired size for the image. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
+
+        Returns
+        --------
+        :class:`str`
+            The DTI server-side-rendering image url of a Neopet appearance.
+        """
+
+        size_px = int(str(size or LayerImageSize.SIZE_600)[-3:])
+
+        layers = self._render_layers(items)
+
+        layer_urls = ",".join(layer.image_url for layer in layers)
+
+        return f"https://impress-2020.openneo.net/api/outfitImage?size={size_px}&layerUrls={layer_urls}"
+
     async def render(
         self,
         fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
