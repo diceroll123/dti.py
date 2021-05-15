@@ -249,7 +249,7 @@ class Client:
             The corresponding Neopet that matches the name provided.
         """
 
-        return await Neopet._fetch_by_name(pet_name=pet_name, state=self._state)
+        return await Neopet._fetch_by_name(pet_name=pet_name, size=size, state=self._state)
 
     @_require_state
     async def fetch_outfit(
