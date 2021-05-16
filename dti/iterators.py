@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Optional, Union
+from typing import Optional, Sequence, Union
 
 from .constants import (
     SEARCH_ITEM_IDS,
@@ -8,7 +8,7 @@ from .constants import (
     SEARCH_QUERY_EXACT_SINGLE,
     SEARCH_TO_FIT,
 )
-from .enums import LayerImageSize
+from .enums import ItemKind, LayerImageSize
 from .errors import InvalidItemID
 from .models import Item
 from .state import State
@@ -24,7 +24,7 @@ class DTISearch:
     async def fetch_items(self):
         raise NotImplementedError
 
-    def post_fetch(self, items: List[Item]):
+    def post_fetch(self, items: Sequence[Item]):
         # override these where needed to do things like adding to offset
         # this here, by default, will exhaust the searcher, with single-offset searchers in mind
         self._exhausted = True
@@ -69,7 +69,7 @@ class DTISearch:
 class ItemIDSearch(DTISearch):
     # an item-ID search
     # TODO: might need to be tweaked to be paginated in the future
-    def __init__(self, state: State, item_ids: List[Union[str, int]]):
+    def __init__(self, state: State, item_ids: Sequence[Union[str, int]]):
         super().__init__(state=state)
         self.item_ids = item_ids
 
@@ -92,7 +92,7 @@ class PaginatedDTISearch(DTISearch):
     async def fetch_items(self):
         raise NotImplementedError
 
-    def post_fetch(self, items: List[Item]):
+    def post_fetch(self, items: Sequence[Item]):
         self.offset += self.per_page
 
         # when we find the last page, don't try another next time
@@ -108,6 +108,7 @@ class ItemSearchToFit(PaginatedDTISearch):
         species_id: int,
         color_id: int,
         per_page: int = 30,
+        item_kind: Optional[ItemKind] = None,
         size: Optional[LayerImageSize] = None,
         state: State,
     ):
@@ -115,9 +116,10 @@ class ItemSearchToFit(PaginatedDTISearch):
         self.query = query
         self.species_id = species_id
         self.color_id = color_id
+        self.item_kind = item_kind
         self.offset = 0
         self.per_page = per_page
-        self.size = size
+        self.size = size or LayerImageSize.SIZE_600
 
     async def fetch_items(self):
         data = await self._state._http._query(
@@ -126,12 +128,14 @@ class ItemSearchToFit(PaginatedDTISearch):
                 "query": self.query,
                 "speciesId": self.species_id,
                 "colorId": self.color_id,
+                "fitsPet": {"speciesId": self.species_id, "colorId": self.color_id},
+                "itemKind": str(self.item_kind) if self.item_kind else None,
                 "offset": self.offset,
                 "limit": self.per_page,
-                "size": str(self.size or LayerImageSize.SIZE_600),
+                "size": str(self.size),
             },
         )
-        return data["data"]["itemSearchToFit"]["items"]
+        return data["data"]["itemSearch"]["items"]
 
 
 class ItemSearchNames(DTISearch):
@@ -141,7 +145,7 @@ class ItemSearchNames(DTISearch):
         self,
         *,
         state: State,
-        names: List[str],
+        names: Sequence[str],
     ):
         super().__init__(state=state)
         self.names = names
@@ -169,13 +173,17 @@ class ItemSearchNames(DTISearch):
 
 class ItemSearch(DTISearch):
     # a regular search query
-    def __init__(self, *, state: State, query: str):
+    def __init__(self, *, state: State, query: str, item_kind=Optional[ItemKind]):
         super().__init__(state=state)
         self.query = query
+        self.item_kind = item_kind
 
     async def fetch_items(self):
         data = await self._state._http._query(
             query=SEARCH_QUERY,
-            variables={"query": self.query},
+            variables={
+                "query": self.query,
+                "itemKind": str(self.item_kind) if self.item_kind else None,
+            },
         )
         return data["data"]["itemSearch"]["items"]

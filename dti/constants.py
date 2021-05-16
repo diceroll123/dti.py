@@ -99,8 +99,8 @@ query($itemIds: [ID!]!) {
 
 SEARCH_TO_FIT = (
     """
-query($query: String!, $speciesId: ID!, $colorId: ID!, $offset: Int, $limit: Int, $size: LayerImageSize!) {
-  itemSearchToFit(query: $query, speciesId: $speciesId, colorId: $colorId, offset: $offset, limit: $limit) {
+query($query: String!, $fitsPet: FitsPetSearchFilter!, $speciesId: ID!, $colorId: ID!, $itemKind: ItemKindSearchFilter, $offset: Int, $limit: Int, $size: LayerImageSize!) {
+  itemSearch(query: $query, fitsPet: $fitsPet, itemKind: $itemKind, offset: $offset, limit: $limit) {
     items {
       ...ItemProperties
       appearanceOn(speciesId: $speciesId, colorId: $colorId) {
@@ -115,8 +115,8 @@ query($query: String!, $speciesId: ID!, $colorId: ID!, $offset: Int, $limit: Int
 
 SEARCH_QUERY = (
     """
-query($query: String!) {
-  itemSearch(query: $query) {
+query($query: String!, $itemKind: ItemKindSearchFilter) {
+  itemSearch(query: $query, itemKind: $itemKind) {
     items {
       ...ItemProperties
     }

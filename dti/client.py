@@ -7,7 +7,7 @@ from .constants import (
     OUTFIT,
 )
 from .decorators import _require_state
-from .enums import LayerImageSize, PetPose
+from .enums import ItemKind, LayerImageSize, PetPose
 from .errors import (
     InvalidColorSpeciesPair,
     MissingPetAppearance,
@@ -249,7 +249,9 @@ class Client:
             The corresponding Neopet that matches the name provided.
         """
 
-        return await Neopet._fetch_by_name(pet_name=pet_name, size=size, state=self._state)
+        return await Neopet._fetch_by_name(
+            pet_name=pet_name, size=size, state=self._state
+        )
 
     @_require_state
     async def fetch_outfit(
@@ -300,6 +302,7 @@ class Client:
         query: Optional[str] = None,
         item_name: Optional[str] = None,
         item_names: Optional[List[str]] = None,
+        item_kind: Optional[ItemKind] = None,
         species_id: Optional[int] = None,
         color_id: Optional[int] = None,
         item_ids: Optional[List[Union[str, int]]] = None,
@@ -320,6 +323,8 @@ class Client:
             The ID of the color you're trying to find items for. Only used when `query` is supplied. If so, this is mandatory.
         size: Optional[:class:`LayerImageSize`]
             The desired size for the render. Only used when `query` is supplied. If so, this is optional. If size is not supplied, it defaults to `LayerImageSize.SIZE_600`.
+        item_kind: Optional[:class:`ItemKind`]
+            The desired kind of item you're trying to find. Can significantly reduce your search query.
         per_page: Optional[:class:`int`]
             The desired amount of items per results-page. Defaults to 30. Only used when `query` is supplied with `species_id` and `color_id`.
         item_name: Optional[:class:`str`]
@@ -356,13 +361,14 @@ class Client:
                 species_id=species_id,
                 color_id=color_id,
                 size=size,
+                item_kind=item_kind,
                 per_page=per_page,
                 state=self._state,
             )
         elif _names:
             searcher = ItemSearchNames(names=_names, state=self._state)
         elif query:
-            searcher = ItemSearch(query=query, state=self._state)
+            searcher = ItemSearch(query=query, item_kind=item_kind, state=self._state)
         elif item_ids:
             searcher = ItemIDSearch(item_ids=item_ids, state=self._state)
 

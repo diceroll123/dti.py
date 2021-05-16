@@ -18,6 +18,7 @@ from .decorators import _require_state
 from .enums import (
     AppearanceLayerKnownGlitch,
     AppearanceLayerType,
+    ItemKind,
     LayerImageSize,
     PetPose,
     try_enum,
@@ -612,10 +613,8 @@ class Item(Object):
         The description of the item.
     thumbnail_url: :class:`str`
         The item image URL.
-    is_nc: :class:`bool`
-        Whether or not the item is an NC-only item.
-    is_pb: :class:`bool`
-        Whether or not the item is a paintbrush color item, such as an Aisha's collar.
+    kind: :class:`ItemKind`
+        The kind of item this is. Can be `NC` for Neocash, `NP` for Neopoint items, or `PB` for paintbrush items.
     rarity: :class:`int`
         The item's rarity on Neopets.
     appearance: Optional[:class:`ItemAppearance`]
@@ -629,11 +628,10 @@ class Item(Object):
         "_state",
         "id",
         "name",
+        "kind",
         "description",
         "thumbnail_url",
         "appearance",
-        "is_nc",
-        "is_pb",
         "rarity",
         "waka_value",
     )
@@ -644,8 +642,14 @@ class Item(Object):
         self.name: str = data.get("name")
         self.description: str = data.get("description")
         self.thumbnail_url: str = data.get("thumbnailUrl")
-        self.is_nc: bool = data.get("isNc")
-        self.is_pb: bool = data.get("isPb")
+
+        _kind = None
+        if data.get("isNc"):
+            _kind = ItemKind.NC
+        if data.get("isPb"):
+            _kind = ItemKind.PB
+        self.kind = _kind or ItemKind.NP
+
         self.rarity: int = int(data.get("rarityIndex"))
         self.waka_value: Optional[str] = data.get("wakaValueText")
 
@@ -653,11 +657,6 @@ class Item(Object):
         self.appearance: Optional[ItemAppearance] = appearance_data and ItemAppearance(
             appearance_data, self
         )
-
-    @property
-    def is_np(self) -> bool:
-        """:class:`bool`: Whether or not the item is an NP-only item."""
-        return not self.is_nc and not self.is_pb
 
     @property
     def legacy_url(self) -> str:

@@ -25,6 +25,12 @@ class _DTIEnum(Enum):
         return int(self.value)
 
 
+class ItemKind(_DTIEnum):
+    NC = auto()
+    NP = auto()
+    PB = auto()
+
+
 class LayerImageSize(_DTIEnum):
     """Represents the desired render size of a customization, in pixels."""
 
