@@ -1,17 +1,12 @@
 from __future__ import annotations
 
-import asyncio
 import datetime
-import functools
 import io
 import logging
 import os
 import urllib.parse
-from io import BytesIO
 from typing import TYPE_CHECKING, List, Optional, Sequence, Tuple, Union
 from urllib.parse import urlencode
-
-from PIL import Image
 
 from .constants import (
     CLOSEST_POSES_IN_ORDER,
@@ -28,10 +23,10 @@ from .enums import (
     try_enum,
 )
 from .errors import (
-    NullAssetImage,
     InvalidColorSpeciesPair,
     MissingPetAppearance,
     NeopetNotFound,
+    NullAssetImage,
 )
 from .mixins import Object
 from .state import BitField, State
@@ -474,7 +469,7 @@ class PetAppearance(Object):
         except TypeError:
             # expected str, NoneType found
             missing = [layer for layer in layers if layer.image_url is None]
-            raise NullAssetImage(f'Null image URLs found in this render: {missing}')
+            raise NullAssetImage(f"Null image URLs found in this render: {missing}")
 
         return f"https://impress-2020.openneo.net/api/outfitImage?size={size_px}&layerUrls={layer_urls}"
 
@@ -885,7 +880,9 @@ class Neopet:
                 "An error occurred while trying to gather this pet's data."
             )
 
-        pet_appearance = PetAppearance(data=pet_on_neo["petAppearance"], size=size, state=state)
+        pet_appearance = PetAppearance(
+            data=pet_on_neo["petAppearance"], size=size, state=state
+        )
 
         neopet = await Neopet._fetch_assets_for(
             species=pet_appearance.species,

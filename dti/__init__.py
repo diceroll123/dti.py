@@ -4,8 +4,6 @@ __license__ = "MIT"
 __copyright__ = "Copyright 2020-present diceroll123"
 __version__ = "0.0.1a"
 
-import logging
-
 from .client import Client
 from .enums import *
 from .errors import *
