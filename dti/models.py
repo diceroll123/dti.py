@@ -1016,6 +1016,31 @@ class Neopet:
 
         await pet_appearance.render(fp, items=self.items, seek_begin=seek_begin)
 
+    @staticmethod
+    async def from_outfit(
+        outfit: Outfit, size: Optional[LayerImageSize] = None
+    ) -> Neopet:
+        """|coro|
+
+        Converts an Outfit object into a Neopet object, which is a little more flexible.
+
+        Parameters
+        -----------
+        outfit: :class:`Outfit`
+            The Outfit you'd like to convert to a Neopet object.
+        size: Optional[:class:`LayerImageSize`]
+            The desired size for the image. If one is not supplied, it defaults to the outfit's size.
+        """
+
+        return await Neopet._fetch_assets_for(
+            species=outfit.pet_appearance.species,
+            color=outfit.pet_appearance.color,
+            pose=outfit.pet_appearance.pose,
+            size=size or outfit.size,
+            item_ids=[item.id for item in outfit.worn_items],
+            state=outfit._state,
+        )
+
 
 class Outfit(Object):
     """Represents a DTI Outfit.
@@ -1155,10 +1180,9 @@ class Outfit(Object):
         fp: Union[:class:`io.BufferedIOBase`, :class:`os.PathLike`]
             A file-like object opened in binary mode and write mode (`wb`).
         pose: Optional[:class:`PetPose`]
-            The desired pet pose for the render. Defaults to the current neopets' pose.
+            The desired pet pose for the render. Defaults to the outfit's pose.
         size: Optional[:class:`LayerImageSize`]
-            The desired size for the render. Defaults to the current neopets' pose if there is one,
-            otherwise defaults to LayerImageSize.SIZE_600.
+            The desired size for the render. Defaults to the current outfit's pose.
         seek_begin: :class:`bool`
             Whether to seek to the beginning of the file after saving is successfully done.
 
@@ -1168,17 +1192,18 @@ class Outfit(Object):
             A layer's asset image is broken somehow on DTI's side.
         """
 
-        if pose:
-            # if there's a pose, we have to rebuild
-            neopet = await Neopet._fetch_assets_for(
-                species=self.pet_appearance.species,
-                color=self.pet_appearance.color,
-                pose=pose or self.pet_appearance.pose,
-                size=size or self.size,
-                item_ids=[item.id for item in self.worn_items],
-                state=self._state,
-            )
-            await neopet.render(fp, seek_begin=seek_begin)
+        # if there's a pose or size change, we have to rebuild as a Neopet render
+        rebuild = False
+
+        if pose and pose != self.pet_appearance.pose:
+            rebuild = True
+
+        if size and size != self.size:
+            rebuild = True
+
+        if rebuild:
+            neopet = await Neopet.from_outfit(self, size or self.size)
+            await neopet.render(fp, pose=pose, seek_begin=seek_begin)
         else:
             # render from outfit ID
             fp.write(await self.read(size=size or self.size))
