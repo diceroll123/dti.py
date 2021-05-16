@@ -716,6 +716,8 @@ class Neopet:
         The Neopets' color.
     pose: :class:`PetPose`
         The Neopets' pose.
+    size: :class:`LayerImageSize`
+        The size of the rendered image.
     appearances: List[:class:`PetAppearance`]
         A list of the pet's appearances. This is essentially just a PetAppearance for each valid PetPose
     items: List[:class:`Item`]
@@ -755,7 +757,7 @@ class Neopet:
         self.appearances: List[PetAppearance] = appearances
         self.items: List[Item] = items or []
         self.name: Optional[str] = name
-        self.size: Optional[LayerImageSize] = size
+        self.size: LayerImageSize = size or LayerImageSize.SIZE_600
         self.pose: PetPose = pose
         self._valid_poses: BitField = valid_poses
 
@@ -1051,6 +1053,8 @@ class Outfit(Object):
         The outfit's DTI ID.
     name: Optional[:class:`str`]
         The outfit's name on DTI. Can be None.
+    size: :class:`LayerImageSize`
+        The size of the rendered image.
     creator: Optional[:class:`User`]
         The outfit's creator. Can be None if the outfit was made anonymously.
     pet_appearance: :class:`PetAppearance`
@@ -1121,7 +1125,7 @@ class Outfit(Object):
         Parameters
         -----------
         size: Optional[:class:`LayerImageSize`]
-            The desired size for the image. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
+            The desired size for the image. If one is not supplied, it defaults to the outfit's size.
 
         Returns
         --------
@@ -1146,7 +1150,7 @@ class Outfit(Object):
         Parameters
         -----------
         size: Optional[LayerImageSize]
-            The desired size for the image. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
+            The desired size for the image. If one is not supplied, it defaults to the outfit's size.
 
         Returns
         -------
@@ -1182,7 +1186,7 @@ class Outfit(Object):
         pose: Optional[:class:`PetPose`]
             The desired pet pose for the render. Defaults to the outfit's pose.
         size: Optional[:class:`LayerImageSize`]
-            The desired size for the render. Defaults to the current outfit's pose.
+            The desired size for the render. Defaults to the outfit's pose.
         seek_begin: :class:`bool`
             Whether to seek to the beginning of the file after saving is successfully done.
 
