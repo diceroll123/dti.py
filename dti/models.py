@@ -428,7 +428,9 @@ class PetAppearance(Object):
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<PetAppearance {joined}>"
 
-    def _render_layers(self, items: Optional[Sequence[Item]]) -> List[AppearanceLayer]:
+    def _render_layers(
+        self, items: Optional[Sequence[Item]] = None
+    ) -> List[AppearanceLayer]:
         # Returns the image layers' images in order from bottom to top.
 
         all_layers = list(self.layers)
