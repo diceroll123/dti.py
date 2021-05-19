@@ -137,11 +137,11 @@ class Color(Object):
 
         .. describe:: hash(x)
 
-            Returns the color' hash.
+            Returns the color's hash.
 
         .. describe:: str(x)
 
-            Returns the color' name.
+            Returns the color's name.
 
     Attributes
     -----------
@@ -343,7 +343,7 @@ class AppearanceLayer(Object):
 
 
 class PetAppearance(Object):
-    """Represents the renderable state of a Neopet.
+    """Represents the render-able state of a Neopet.
 
     .. container:: operations
 
@@ -746,8 +746,8 @@ class Neopet:
         color: Color,
         valid_poses: BitField,
         pose: PetPose,
-        appearances: List[PetAppearance],
-        items: Optional[List[Item]] = None,
+        appearances: Sequence[PetAppearance],
+        items: Optional[Sequence[Item]] = None,
         size: Optional[LayerImageSize] = None,
         name: Optional[str] = None,
         state: State,
@@ -755,8 +755,8 @@ class Neopet:
         self._state = state
         self.species: Species = species
         self.color: Color = color
-        self.appearances: List[PetAppearance] = appearances
-        self.items: List[Item] = items or []
+        self.appearances: Sequence[PetAppearance] = appearances
+        self.items: Sequence[Item] = items or []
         self.name: Optional[str] = name
         self.size: LayerImageSize = size or LayerImageSize.SIZE_600
         self.pose: PetPose = pose
@@ -769,8 +769,8 @@ class Neopet:
         species: Species,
         color: Color,
         pose: PetPose,
-        item_ids: Optional[List[Union[str, int]]] = None,
-        item_names: Optional[List[str]] = None,
+        item_ids: Optional[Sequence[Union[str, int]]] = None,
+        item_names: Optional[Sequence[str]] = None,
         size: Optional[LayerImageSize] = None,
         name: Optional[str] = None,
         state: State,
