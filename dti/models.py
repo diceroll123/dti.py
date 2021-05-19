@@ -676,7 +676,7 @@ class Item(Object):
         return self.name
 
     def __repr__(self):
-        return f"<Item id={self.id} name={self.name!r} is_np={self.is_np} is_nc={self.is_nc} is_pb={self.is_pb} rarity={self.rarity}>"
+        return f"<Item id={self.id} name={self.name!r} kind={self.kind} rarity={self.rarity}>"
 
 
 class User(Object):
@@ -703,7 +703,7 @@ class User(Object):
         return self.username
 
     def __repr__(self):
-        return f"<User id={self.id} username={self.username}>"
+        return f"<User id={self.id} username={self.username!r}>"
 
 
 class Neopet:
@@ -1043,6 +1043,21 @@ class Neopet:
             item_ids=[item.id for item in outfit.worn_items],
             state=outfit._state,
         )
+
+    def __repr__(self):
+        attrs = [
+            ("species", self.species),
+            ("color", self.color),
+            ("pose", self.pose),
+            ("size", self.size),
+            ("appearances", [f"<{a.id}-{a.pose.name}>" for a in self.appearances]),
+            ("items", [item.id for item in self.items] or None),
+        ]
+        if self.name:
+            # let's put the name in front if there is one.
+            attrs.insert(0, ("name", self.name))
+        joined = " ".join("%s=%r" % t for t in attrs)
+        return f"<Neopet {joined}>"
 
 
 class Outfit(Object):
