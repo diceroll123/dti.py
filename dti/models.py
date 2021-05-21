@@ -1149,14 +1149,9 @@ class Outfit(Object):
             The image url of an outfit.
         """
 
-        params = {
-            "id": self.id,
-            "size": str(size or self.size)[-3:],
-            "updatedAt": int(self.updated_at.timestamp()),
-        }
-
-        encoded = urllib.parse.urlencode(params)
-        return f"https://impress-2020.openneo.net/api/outfitImage?{encoded}"
+        updated_at = int(self.updated_at.timestamp())
+        size = str(size or self.size)[-3:]
+        return f"https://impress-2020.openneo.net/outfits/{self.id}/v/{updated_at}/{size}.png"
 
     async def read(self, size: Optional[LayerImageSize] = None) -> bytes:
         """|coro|
