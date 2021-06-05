@@ -4,10 +4,10 @@ import datetime
 import io
 import logging
 import os
-import urllib.parse
 from typing import TYPE_CHECKING, List, Optional, Sequence, Tuple, Union
 from urllib.parse import urlencode
 
+from . import utils
 from .constants import (
     CLOSEST_POSES_IN_ORDER,
     GRAB_PET_APPEARANCES_WITH_ITEMS_BY_IDS,
@@ -463,18 +463,16 @@ class PetAppearance(Object):
             The DTI server-side-rendering image url of a Neopet appearance.
         """
 
-        size_px = int(str(self.size)[-3:])
-
         layers = self._render_layers(items)
 
         try:
-            layer_urls = ",".join(layer.image_url for layer in layers)
+            layer_urls = [layer.image_url for layer in layers]
         except TypeError:
             # expected str, NoneType found
             missing = [layer for layer in layers if layer.image_url is None]
             raise NullAssetImage(f"Null image URLs found in this render: {missing}")
 
-        return f"https://impress-2020.openneo.net/api/outfitImage?size={size_px}&layerUrls={layer_urls}"
+        return utils.build_layers_url(layer_urls, size=self.size)
 
     async def read(self, items: Optional[Sequence[Item]] = None) -> bytes:
         """|coro|
