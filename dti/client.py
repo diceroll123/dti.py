@@ -121,10 +121,10 @@ class Client:
         """
 
         if not isinstance(species, Species):
-            species = await self.get_species(species)
+            species = await self.get_species(species)  # type: ignore
 
         if not isinstance(color, Color):
-            color = await self.get_color(color)
+            color = await self.get_color(color)  # type: ignore
 
         if isinstance(species, Species) and isinstance(color, Color):
             return await self._state._get_bit(species_id=species.id, color_id=color.id)
@@ -157,10 +157,10 @@ class Client:
         """
 
         if not isinstance(species, Species):
-            species = await self.get_species(species)
+            species = await self.get_species(species)  # type: ignore
 
         if not isinstance(color, Color):
-            color = await self.get_color(color)
+            color = await self.get_color(color)  # type: ignore
 
         if isinstance(species, Species) and isinstance(color, Color):
             return await self._state._check(
@@ -206,10 +206,10 @@ class Client:
         """
 
         if not isinstance(species, Species):
-            species = await self.get_species(species)
+            species = await self.get_species(species)  # type: ignore
 
         if not isinstance(color, Color):
-            color = await self.get_color(color)
+            color = await self.get_color(color)  # type: ignore
 
         if not isinstance(species, Species) or not isinstance(color, Color):
             raise InvalidColorSpeciesPair("Invalid Species/Color provided")
@@ -453,10 +453,10 @@ class Client:
         """
 
         if not isinstance(species, Species):
-            species = await self.get_species(species)
+            species = await self.get_species(species)  # type: ignore
 
         if not isinstance(color, Color):
-            color = await self.get_color(color)
+            color = await self.get_color(color)  # type: ignore
 
         valid = await self.check(species=species, color=color)
 
@@ -468,8 +468,8 @@ class Client:
         data = await self._state._http._query(
             GRAB_PET_APPEARANCES_BY_IDS,
             variables={
-                "speciesId": species.id,
-                "colorId": color.id,
+                "speciesId": species.id,  # type: ignore
+                "colorId": color.id,  # type: ignore
                 "size": str(size),
             },
         )

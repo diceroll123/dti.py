@@ -46,6 +46,19 @@ if TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
+__all__ = (
+    "Species",
+    "Color",
+    "Zone",
+    "AppearanceLayer",
+    "PetAppearance",
+    "ItemAppearance",
+    "Item",
+    "User",
+    "Neopet",
+    "Outfit",
+)
+
 
 class Species(Object):
     """Represents a Neopets species.
@@ -81,6 +94,9 @@ class Species(Object):
         "id",
         "name",
     )
+
+    if TYPE_CHECKING:
+        id: int
 
     def __init__(self, *, state: State, data: SpeciesPayload):
         self._state = state
@@ -473,9 +489,15 @@ class PetAppearance(Object):
         """
 
         layers = self._render_layers(items)
+        layer_urls: List[str] = []
 
         try:
-            layer_urls = [layer.image_url for layer in layers]
+            for layer in layers:
+                img = layer.image_url
+                if img:
+                    layer_urls.append(img)
+                    continue
+                raise TypeError
         except TypeError:
             # expected str, NoneType found
             missing = [layer for layer in layers if layer.image_url is None]
@@ -529,10 +551,14 @@ class PetAppearance(Object):
             Whether to seek to the beginning of the file after saving is successfully done.
         """
 
-        fp.write(await self.read(items=items))
-
-        if seek_begin and isinstance(fp, io.BufferedIOBase):
-            fp.seek(0)
+        data = await self.read(items=items)
+        if isinstance(fp, io.BufferedIOBase):
+            fp.write(data)
+            if seek_begin:
+                fp.seek(0)
+        else:
+            with open(fp, "wb") as f:
+                f.write(data)
 
 
 class ItemAppearance(Object):
@@ -663,9 +689,10 @@ class Item(Object):
         self.waka_value: Optional[str] = data.get("wakaValueText")
 
         appearance_data = data.get("appearanceOn", None)
-        self.appearance: Optional[ItemAppearance] = appearance_data and ItemAppearance(
-            appearance_data, self
-        )
+        if appearance_data:
+            self.appearance = ItemAppearance(appearance_data, self)
+        else:
+            self.appearance = None
 
     @property
     def legacy_url(self) -> str:
@@ -1157,7 +1184,7 @@ class Outfit(Object):
         """
 
         updated_at = int(self.updated_at.timestamp())
-        size = str(size or self.size)[-3:]
+        size = str(size or self.size)[-3:]  # type: ignore
         return f"https://impress-2020.openneo.net/outfits/{self.id}/v/{updated_at}/{size}.png"
 
     async def read(self, size: Optional[LayerImageSize] = None) -> bytes:
@@ -1228,10 +1255,15 @@ class Outfit(Object):
             await neopet.render(fp, pose=pose, seek_begin=seek_begin)
         else:
             # render from outfit ID
-            fp.write(await self.read(size=size or self.size))
+            data = await self.read(size=size or self.size)
 
-            if seek_begin and isinstance(fp, io.BufferedIOBase):
-                fp.seek(0)
+            if isinstance(fp, io.BufferedIOBase):
+                fp.write(data)
+                if seek_begin:
+                    fp.seek(0)
+            else:
+                with open(fp, "wb") as f:
+                    f.write(data)
 
     def __repr__(self):
         attrs = [

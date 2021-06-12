@@ -1,5 +1,9 @@
+from typing import Union
+
+
 class Object:
     __slots__ = ()
+    id: Union[int, str]
 
     def __eq__(self, other):
         return isinstance(other, self.__class__) and other.id == self.id
