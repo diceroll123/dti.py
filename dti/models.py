@@ -262,9 +262,6 @@ class AppearanceLayer(Object):
         The appearance layer's DTI ID. Guaranteed unique across all layers of all types.
     parent: Union[:class:`ItemAppearance`, :class:`PetAppearance`]
         The respective owner of this layer, an ItemAppearance or a PetAppearance.
-    image_url: Optional[:class:`str`]
-        The appearance layer's PNG image url. If this is None, the item has a complex movie-based image.
-        Rendering these will raise an error.
     asset_remote_id: :class:`int`
         The appearance layer's Neopets ID. Guaranteed unique across layers of the *same* type, but
         not of different types. That is, it's allowed and common for an item
@@ -282,7 +279,7 @@ class AppearanceLayer(Object):
         "id",
         "parent",
         "zone",
-        "image_url",
+        "_image_url",
         "asset_type",
         "asset_remote_id",
         "known_glitches",
@@ -297,7 +294,7 @@ class AppearanceLayer(Object):
         self._state = parent._state
         self.id: int = int(data["id"])
         self.parent: Union[ItemAppearance, PetAppearance] = parent
-        self.image_url: Optional[str] = data["imageUrl"]
+        self._image_url: Optional[str] = data["imageUrl"]
         self.asset_remote_id: int = int(data["remoteId"])
         self.zone: Zone = Zone(data["zone"])
         self.known_glitches: Optional[List[AppearanceLayerKnownGlitch]] = [
@@ -310,6 +307,17 @@ class AppearanceLayer(Object):
             if isinstance(parent, PetAppearance)
             else AppearanceLayerType.OBJECT
         )
+
+    @property
+    def image_url(self) -> Optional[str]:
+        """Optional[:class:`str`]: The appearance layer's PNG image url. If this is None, the item has a complex movie-based image.
+        Rendering these will raise an error.
+        """
+
+        if self._image_url is None:
+            return None
+
+        return utils.url_sanitizer(self._image_url)
 
     async def read(self) -> bytes:
         """|coro|
@@ -415,6 +423,7 @@ class PetAppearance(Object):
 
     @property
     def url(self) -> str:
+        """:class:`str`: The URL of this pet appearance as an editable outfit."""
         return f"https://impress-2020.openneo.net/outfits/new?species={self.species.id}&color={self.color.id}&pose={self.pose.name}&state={self.id}"
 
     def __repr__(self):
@@ -641,7 +650,7 @@ class Item(Object):
         self.id: int = int(data["id"])
         self.name: str = data.get("name")
         self.description: str = data.get("description")
-        self.thumbnail_url: str = data.get("thumbnailUrl")
+        self.thumbnail_url: str = utils.url_sanitizer(data.get("thumbnailUrl"))
 
         _kind = None
         if data.get("isNc"):

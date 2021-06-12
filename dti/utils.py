@@ -1,8 +1,9 @@
 from typing import List, Optional
+from urllib.parse import urljoin, urlparse
 
 from .enums import LayerImageSize
 
-__all__ = ("build_layers_url",)
+__all__ = ("build_layers_url", "url_sanitizer")
 
 
 def build_layers_url(layers: List[str], *, size: Optional[LayerImageSize] = None):
@@ -19,3 +20,18 @@ def build_layers_url(layers: List[str], *, size: Optional[LayerImageSize] = None
     joined = ",".join(layers)
 
     return f"https://impress-2020.openneo.net/api/outfitImage?size={size}&layerUrls={joined}"
+
+
+def url_sanitizer(url: str) -> str:
+    """Convenience method to clean up URLs provided by DTI. Some neo-urls do not include an http/s scheme.
+
+    Parameters
+    -----------
+    url: :class:`str`
+        The string of the url to sanitize.
+    """
+
+    if "images.neopets.com" == urlparse(url).netloc:
+        return urljoin(base="http://images.neopets.com/", url=url)
+
+    return url
