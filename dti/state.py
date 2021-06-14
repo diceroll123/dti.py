@@ -94,11 +94,15 @@ class BitField(int):
 
 class ValidField:
     __slots__ = ("species_count", "color_count", "_data")
+    species_count: int
+    color_count: int
+    _data: bytes
 
     def __init__(self, data: Optional[bytes] = None):
         if data is None:
             self.species_count = 0
             self.color_count = 0
+            self._data = b""
             return
         # the first byte is the amount of species
         # the second byte is the amount of colors
@@ -127,6 +131,10 @@ class ValidField:
             return bit > 0
 
         return bit.check(pose)
+
+    def __len__(self) -> int:
+        """:class:`int`: Returns the amount of valid color/species combinations."""
+        return sum(bit > 0 for bit in self._data)
 
 
 class State:
