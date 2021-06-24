@@ -22,6 +22,19 @@ class MissingPetAppearance(DTIException):
     pass
 
 
+class InvalidColor(DTIException):
+    """An exception that is thrown when an invalid color is passed into the color cache."""
+
+    pass
+
+
+class InvalidSpecies(DTIException):
+
+    """An exception that is thrown when an invalid species is passed into the species cache."""
+
+    pass
+
+
 class InvalidColorSpeciesPair(DTIException):
     """An exception that is thrown when trying to create an invalid Color/Species pair"""
 

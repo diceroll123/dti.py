@@ -9,8 +9,10 @@ from .constants import (
 from .decorators import _require_state
 from .enums import ItemKind, LayerImageSize, PetPose
 from .errors import (
+    InvalidColor,
     InvalidColorSpeciesPair,
     MissingPetAppearance,
+    InvalidSpecies,
     NoIteratorsFound,
     OutfitNotFound,
 )
@@ -66,7 +68,7 @@ class Client:
         return list(self._state._colors.values())
 
     @_require_state
-    async def get_species(self, name_or_id: Union[int, str]) -> Optional[Species]:
+    async def get_species(self, name_or_id: Union[int, str]) -> Species:
         """|coro|
 
         Parameters
@@ -74,14 +76,22 @@ class Client:
         name_or_id: Union[:class:`int`, :class:`str`]
             The name, or ID of the desired Species. Case-insensitive.
 
+        Raises
+        -------
+        ~dti.InvalidSpecies
+            The species does not exist.
+
         Returns
         --------
-        Optional[:class:`Species`]: Returns a species by name or ID, if it exists. Otherwise returns `None`.
+        :class:`Species`: Returns a species by name or ID.
         """
-        return self._state._species[name_or_id]
+        species = self._state._species[name_or_id]
+        if species is None:
+            raise InvalidSpecies()
+        return species
 
     @_require_state
-    async def get_color(self, name_or_id: Union[int, str]) -> Optional[Color]:
+    async def get_color(self, name_or_id: Union[int, str]) -> Color:
         """|coro|
 
         Parameters
@@ -89,11 +99,19 @@ class Client:
         name_or_id: Union[:class:`int`, :class:`str`]
             The name, or ID of the desired Color. Case-insensitive.
 
+        Raises
+        -------
+        ~dti.InvalidColor
+            The color does not exist.
+
         Returns
         --------
-        Optional[:class:`Color`]: Returns a color by name or ID, if it exists. Otherwise returns `None`.
+        :class:`Color`: Returns a color by name or ID.
         """
-        return self._state._colors[name_or_id]
+        color = self._state._colors[name_or_id]
+        if color is None:
+            raise InvalidColor()
+        return color
 
     async def get_bit(
         self,
@@ -115,27 +133,31 @@ class Client:
         color: Union[:class:`int`, :class:`str`, :class:`Color`]
             The name, or ID, or Color object of the desired Color. Case-insensitive.
 
+        Raises
+        -------
+        ~dti.InvalidColor
+            The color does not exist.
+        ~dti.InvalidSpecies
+            The species does not exist.
+
         Returns
         --------
         :class:`BitField`: Returns the bit array field for a given pet species/color.
         """
 
         if not isinstance(species, Species):
-            species = await self.get_species(species)  # type: ignore
+            species = await self.get_species(species)
 
         if not isinstance(color, Color):
-            color = await self.get_color(color)  # type: ignore
+            color = await self.get_color(color)
 
-        if isinstance(species, Species) and isinstance(color, Color):
-            return await self._state._get_bit(species_id=species.id, color_id=color.id)
-
-        return BitField(0)
+        return await self._state._get_bit(species_id=species.id, color_id=color.id)
 
     async def check(
         self,
         *,
-        species: Union[int, str, Species],
-        color: Union[int, str, Color],
+        species: Species,
+        color: Color,
         pose: Optional[PetPose] = None,
     ) -> bool:
         """|coro|
@@ -156,18 +178,9 @@ class Client:
         :class:`bool`: Whether or not this species/color/pose combo exists.
         """
 
-        if not isinstance(species, Species):
-            species = await self.get_species(species)  # type: ignore
-
-        if not isinstance(color, Color):
-            color = await self.get_color(color)  # type: ignore
-
-        if isinstance(species, Species) and isinstance(color, Color):
-            return await self._state._check(
-                species_id=species.id, color_id=color.id, pose=pose
-            )
-
-        return False
+        return await self._state._check(
+            species_id=species.id, color_id=color.id, pose=pose
+        )
 
     async def fetch_neopet(
         self,
@@ -443,6 +456,10 @@ class Client:
 
         Raises
         -------
+        ~dti.InvalidColor
+            The color does not exist.
+        ~dti.InvalidSpecies
+            The species does not exist.
         ~dti.InvalidColorSpeciesPair
             This species/color combo does not exist, according to DTI.
 
@@ -453,10 +470,10 @@ class Client:
         """
 
         if not isinstance(species, Species):
-            species = await self.get_species(species)  # type: ignore
+            species = await self.get_species(species)
 
         if not isinstance(color, Color):
-            color = await self.get_color(color)  # type: ignore
+            color = await self.get_color(color)
 
         valid = await self.check(species=species, color=color)
 
