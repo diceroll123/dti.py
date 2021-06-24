@@ -139,7 +139,7 @@ class ValidField:
 
 class State:
     __slots__ = (
-        "_http",
+        "http",
         "_lock",
         "_update_lock",
         "_valid_pairs",
@@ -174,10 +174,10 @@ class State:
         # this lock is so updating only happens once at a time, since it can be manually called
         self._update_lock = asyncio.Lock()
 
-        self._http = HTTPClient(proxy=proxy)
+        self.http = HTTPClient(proxy=proxy)
 
     async def _fetch_species_and_color(self):
-        data = await self._http._query(query=ALL_SPECIES_AND_COLORS)
+        data = await self.http._query(query=ALL_SPECIES_AND_COLORS)
         data = data["data"]
         from .models import Color, Species
 
@@ -243,7 +243,7 @@ class State:
             self._colors.clear()
             self._species.clear()
 
-            self._valid_pairs = ValidField(await self._http._fetch_valid_pet_poses())
+            self._valid_pairs = ValidField(await self.http._fetch_valid_pet_poses())
             await self._fetch_species_and_color()
 
             self._cached = True

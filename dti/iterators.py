@@ -74,7 +74,7 @@ class ItemIDSearch(DTISearch):
         self.item_ids = item_ids
 
     async def fetch_items(self):
-        data = await self._state._http._query(
+        data = await self._state.http._query(
             query=SEARCH_ITEM_IDS,
             variables={"itemIds": self.item_ids},
         )
@@ -122,7 +122,7 @@ class ItemSearchToFit(PaginatedDTISearch):
         self.size = size or LayerImageSize.SIZE_600
 
     async def fetch_items(self):
-        data = await self._state._http._query(
+        data = await self._state.http._query(
             query=SEARCH_TO_FIT,
             variables={
                 "query": self.query,
@@ -160,7 +160,7 @@ class ItemSearchNames(DTISearch):
             variables = {"names": self.names}
             key = "itemsByName"
 
-        data = await self._state._http._query(query=query, variables=variables)
+        data = await self._state.http._query(query=query, variables=variables)
 
         items = data["data"][key]
 
@@ -179,7 +179,7 @@ class ItemSearch(DTISearch):
         self.item_kind = item_kind
 
     async def fetch_items(self):
-        data = await self._state._http._query(
+        data = await self._state.http._query(
             query=SEARCH_QUERY,
             variables={
                 "query": self.query,

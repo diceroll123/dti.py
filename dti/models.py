@@ -2,18 +2,11 @@ from __future__ import annotations
 
 import datetime
 import io
-import logging
 import os
-from typing import TYPE_CHECKING, List, Optional, Sequence, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Sequence, Set, Tuple, Union
 from urllib.parse import urlencode
 
 from . import utils
-from .constants import (
-    CLOSEST_POSES_IN_ORDER,
-    GRAB_PET_APPEARANCES_WITH_ITEMS_BY_IDS,
-    GRAB_PET_APPEARANCES_WITH_ITEMS_BY_NAMES,
-    PET_ON_NEOPETS,
-)
 from .decorators import _require_state
 from .enums import (
     AppearanceLayerKnownGlitch,
@@ -23,12 +16,7 @@ from .enums import (
     PetPose,
     try_enum,
 )
-from .errors import (
-    InvalidColorSpeciesPair,
-    MissingPetAppearance,
-    NeopetNotFound,
-    NullAssetImage,
-)
+from .errors import InvalidColorSpeciesPair, MissingPetAppearance, NullAssetImage
 from .mixins import Object
 from .state import BitField, State
 
@@ -43,8 +31,6 @@ if TYPE_CHECKING:
         SpeciesPayload,
         ZonePayload,
     )
-
-log = logging.getLogger(__name__)
 
 __all__ = (
     "Species",
@@ -352,7 +338,7 @@ class AppearanceLayer(Object):
         """
         if self.image_url is None:
             raise NullAssetImage(f"Layer image missing: {self!r}")
-        return await self._state._http._fetch_binary_data(self.image_url)
+        return await self._state.http._fetch_binary_data(self.image_url)
 
     def __repr__(self):
         attrs = [
@@ -460,7 +446,7 @@ class PetAppearance(Object):
 
         all_layers = list(self.layers)
         item_restricted_zones: List[Zone] = []
-        all_restricted_zones: List[Zone] = []
+        all_restricted_zones: Set[Zone] = set()
         if items:
             render_items, _ = _render_items(items)
             for item in render_items:
@@ -521,7 +507,7 @@ class PetAppearance(Object):
         :class:`bytes`
             The content of the rendered image.
         """
-        return await self._state._http._fetch_binary_data(self.image_url(items=items))
+        return await self._state.http._fetch_binary_data(self.image_url(items=items))
 
     async def render(
         self,
@@ -754,8 +740,8 @@ class Neopet:
         The Neopets' pose.
     size: :class:`LayerImageSize`
         The size of the rendered image.
-    appearances: List[:class:`PetAppearance`]
-        A list of the pet's appearances. This is essentially just a PetAppearance for each valid PetPose
+    appearance: :class:`PetAppearance`
+        The appearance of this pet's species + color + pose + size.
     items: List[:class:`Item`]
         A list of the items that will be applied to the pet. Can be empty.
     name: Optional[:class:`str`]
@@ -767,7 +753,7 @@ class Neopet:
         "_state",
         "species",
         "color",
-        "appearances",
+        "appearance",
         "items",
         "name",
         "pose",
@@ -781,7 +767,7 @@ class Neopet:
         color: Color,
         valid_poses: BitField,
         pose: PetPose,
-        appearances: Sequence[PetAppearance],
+        appearance: PetAppearance,
         items: Optional[Sequence[Item]] = None,
         size: Optional[LayerImageSize] = None,
         name: Optional[str] = None,
@@ -790,7 +776,7 @@ class Neopet:
         self._state = state
         self.species: Species = species
         self.color: Color = color
-        self.appearances: Sequence[PetAppearance] = appearances
+        self.appearance = appearance
         self.items: Sequence[Item] = items or []
         self.name: Optional[str] = name
         self.size: LayerImageSize = size or LayerImageSize.SIZE_600
@@ -819,57 +805,18 @@ class Neopet:
 
         size = size or LayerImageSize.SIZE_600
 
-        variables = {
-            "speciesId": species.id,
-            "colorId": color.id,
-            "size": str(size),
-        }
+        key = "itemsByName" if item_names else "items"
+        data = await state.http.fetch_assets_for(
+            species=species,
+            color=color,
+            pose=pose,
+            item_ids=item_ids,
+            item_names=item_names,
+            size=size,
+        )
 
-        if item_names:
-            variables["names"] = item_names or []
-            query = GRAB_PET_APPEARANCES_WITH_ITEMS_BY_NAMES
-            key = "itemsByName"
-        else:
-            variables["allItemIds"] = item_ids or []
-            query = GRAB_PET_APPEARANCES_WITH_ITEMS_BY_IDS
-            key = "items"
-
-        data = await state._http._query(query=query, variables=variables)
-
-        if data is None:
-            # an error we were not prepared for has occurred, let's find it!
-            log.critical(
-                f"Somehow, the API returned null for a query. Params: {variables!r}"
-            )
-            raise NeopetNotFound(
-                "An error occurred while trying to gather this pet's data."
-            )
-
-        error = data.get("error", None)
-        if error:
-            if "it is undefined" in error["message"]:
-                raise InvalidColorSpeciesPair(
-                    f"According to DTI, the {species} species does not have the color {color}. If it's newly released, it must be modeled first!"
-                )
-
-            log.critical("Unhandled error occurred in data: " + str(data))
-            raise NeopetNotFound(
-                "An error occurred while trying to gather this pet's data."
-            )
-
-        if "data" not in data:
-            # an error we were not prepared for has occurred, let's find it!
-            log.critical("Unknown pet appearance data returned: " + str(data))
-            raise NeopetNotFound(
-                "An error occurred while trying to gather this pet's data."
-            )
-
-        data = data["data"]
         items = [Item(data=item, state=state) for item in data[key] if item is not None]
-        appearances = [
-            PetAppearance(data=appearance, size=size, state=state)
-            for appearance in data["petAppearances"]
-        ]
+        appearance = PetAppearance(data=data["petAppearance"], size=size, state=state)
 
         bit = await state._get_bit(species_id=species.id, color_id=color.id)
 
@@ -879,7 +826,7 @@ class Neopet:
             pose=pose,
             valid_poses=bit,
             items=items,
-            appearances=appearances,
+            appearance=appearance,
             name=name,
             size=size,
             state=state,
@@ -887,36 +834,13 @@ class Neopet:
 
     @classmethod
     async def _fetch_by_name(
-        cls, *, state: State, pet_name: str, size: Optional[LayerImageSize] = None
+        cls, *, state: State, pet_name: str, size: LayerImageSize
     ) -> Neopet:
         """Returns the data for a specific neopet, by name."""
 
         size = size or LayerImageSize.SIZE_600
 
-        data = await state._http._query(
-            query=PET_ON_NEOPETS,
-            variables={"petName": pet_name, "size": str(size)},
-        )
-
-        # the API responds with an error AND with [data][petOnNeopetsDotCom] being null,
-        # so let's just check the latter first
-        if "data" not in data:
-            # an error we were not prepared for has occurred, let's find it!
-            log.critical("Unknown pet appearance data returned: " + str(data))
-            raise NeopetNotFound(
-                "An error occurred while trying to gather this pet's data."
-            )
-
-        pet_on_neo = data["data"]["petOnNeopetsDotCom"]
-        if pet_on_neo is None:
-            raise NeopetNotFound("This pet does not seem to exist.")
-
-        error = data.get("errors")
-        if error:
-            log.critical("Unhandled error occurred in data: " + str(data))
-            raise NeopetNotFound(
-                "An error occurred while trying to gather this pet's data."
-            )
+        pet_on_neo = await state.http.fetch_neopet_by_name(name=pet_name, size=size)
 
         pet_appearance = PetAppearance(
             data=pet_on_neo["petAppearance"], size=size, state=state
@@ -941,13 +865,8 @@ class Neopet:
             "name": self.name or "",
             "species": self.species.id,
             "color": self.color.id,
+            "state": self.appearance.id,
         }
-
-        valid_poses = self.valid_poses()
-        if len(valid_poses):
-            appearance = self.get_pet_appearance(valid_poses[0])
-            if appearance:
-                params["state"] = appearance.id
 
         if self.items:
             objects, closet = _render_items(self.items)
@@ -964,11 +883,8 @@ class Neopet:
             "name": self.name or "",
             "species": self.species.id,
             "color": self.color.id,
+            "pose": str(self.pose),
         }
-
-        valid_poses = self.valid_poses()
-        if len(valid_poses):
-            params["pose"] = valid_poses[0]
 
         if self.items:
             objects, closet = _render_items(self.items)
@@ -979,27 +895,14 @@ class Neopet:
             params, doseq=True
         )
 
-    def get_pet_appearance(self, pose: PetPose) -> Optional[PetAppearance]:
-        """Optional[:class:`PetAppearance`]: Returns the pet appearance for the provided pet pose."""
-        for appearance in self.appearances:
-            if appearance.pose == pose:
-                return appearance
-        return None
-
     def check(self, pose: PetPose) -> bool:
         """:class:`bool`: Returns True if the pet pose provided is valid for the current species+color."""
         return self._valid_poses.check(pose)
-
-    def valid_poses(self, override_pose: Optional[PetPose] = None) -> List[PetPose]:
-        """List[:class:`PetPose`]: Returns a list of valid pet poses for the current species+color."""
-        pose = override_pose or self.pose
-        return [p for p in CLOSEST_POSES_IN_ORDER[pose] if self.check(pose=p)]
 
     async def render(
         self,
         fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
         pose: Optional[PetPose] = None,
-        pet_appearance: Optional[PetAppearance] = None,
         *,
         seek_begin: bool = True,
     ):
@@ -1021,8 +924,6 @@ class Neopet:
             A file-like object opened in binary mode and write mode (`wb`).
         pose: Optional[:class:`PetPose`]
             The desired pet pose for the render. Defaults to the current neopets' pose.
-        pet_appearance: Optional[:class:`PetAppearance`]
-            The desired pet appearance for the render. This overrides any pose passed in.
         seek_begin: :class:`bool`
             Whether to seek to the beginning of the file after saving is successfully done.
 
@@ -1032,25 +933,20 @@ class Neopet:
             A layer's asset image is broken somehow on DTI's side.
         """
 
-        if pet_appearance is None:
-            # You may override the pose here, if no appearance is passed in.
-            pose = pose or self.pose
+        pet_appearance = self.appearance
 
-            valid_poses = self.valid_poses(pose)
-
-            if len(valid_poses) == 0:
+        if pose:
+            # override pose here
+            is_valid = self.check(pose)
+            if not is_valid:
                 raise MissingPetAppearance(
-                    f'Pet Appearance <"{self.species.id}-{self.color.id}-{pose.name}"> does not exist with any poses.'
+                    f'Pet Appearance <"{self.species.id}-{self.color.id}-{pose.name}"> does not exist.'
                 )
 
-            pose = valid_poses[0]
-
-            pet_appearance = self.get_pet_appearance(pose=pose)
-
-        if pet_appearance is None:
-            raise MissingPetAppearance(
-                f'Pet Appearance <"{self.species.id}-{self.color.id}"> does not exist.'
+            data = await self._state.http.fetch_appearance(
+                species=self.species, color=self.color, pose=pose, size=self.size
             )
+            pet_appearance = PetAppearance(data=data, size=self.size, state=self._state)
 
         await pet_appearance.render(fp, items=self.items, seek_begin=seek_begin)
 
@@ -1079,13 +975,37 @@ class Neopet:
             state=outfit._state,
         )
 
+    @staticmethod
+    async def from_appearance(
+        appearance: PetAppearance, size: Optional[LayerImageSize] = None
+    ) -> Neopet:
+        """|coro|
+
+        Converts a PetAppearance object into a Neopet object, which is a little more flexible.
+
+        Parameters
+        -----------
+        appearance: :class:`PetAppearance`
+            The PetAppearance you'd like to convert to a Neopet object.
+        size: Optional[:class:`LayerImageSize`]
+            The desired size for the image. If one is not supplied, it defaults to the outfit's size.
+        """
+
+        return await Neopet._fetch_assets_for(
+            species=appearance.species,
+            color=appearance.color,
+            pose=appearance.pose,
+            size=size or appearance.size,
+            state=appearance._state,
+        )
+
     def __repr__(self):
         attrs = [
             ("species", self.species),
             ("color", self.color),
             ("pose", self.pose),
             ("size", self.size),
-            ("appearances", [f"<{a.id}-{a.pose.name}>" for a in self.appearances]),
+            ("appearance", self.appearance),
             ("items", [item.id for item in self.items] or None),
         ]
         if self.name:
@@ -1203,7 +1123,7 @@ class Outfit(Object):
         :class:`bytes`
             The content of the rendered image.
         """
-        return await self._state._http._fetch_binary_data(self.image_url(size=size))
+        return await self._state.http._fetch_binary_data(self.image_url(size=size))
 
     async def render(
         self,

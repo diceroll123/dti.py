@@ -148,10 +148,10 @@ query($name: String!) {
 )
 
 # grab pet appearances
-GRAB_PET_APPEARANCES_WITH_ITEMS_BY_IDS = (
+GRAB_PET_APPEARANCE_WITH_ITEMS_BY_IDS = (
     """
-query ($allItemIds: [ID!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSize!) {
-  petAppearances(speciesId: $speciesId, colorId: $colorId) {
+query ($allItemIds: [ID!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSize!, $pose: Pose!) {
+  petAppearance(speciesId: $speciesId, colorId: $colorId, pose: $pose) {
     ...PetAppearanceForOutfitPreview
   }
   items(ids: $allItemIds) {
@@ -166,10 +166,10 @@ query ($allItemIds: [ID!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSiz
     + FRAGMENT_PET_APPEARANCE
 )
 
-GRAB_PET_APPEARANCES_WITH_ITEMS_BY_NAMES = (
+GRAB_PET_APPEARANCE_WITH_ITEMS_BY_NAMES = (
     """
-query ($names: [String!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSize!) {
-  petAppearances(speciesId: $speciesId, colorId: $colorId) {
+query ($names: [String!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSize!, $pose: Pose!) {
+  petAppearance(speciesId: $speciesId, colorId: $colorId, pose: $pose) {
     ...PetAppearanceForOutfitPreview
   }
   itemsByName(names: $names) {
@@ -181,6 +181,18 @@ query ($names: [String!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSize
 }"""
     + FRAGMENT_ITEM_APPEARANCE
     + FRAGMENT_ITEM_PROPERTIES
+    + FRAGMENT_PET_APPEARANCE
+)
+
+# grab pet appearance by species + color + pose
+GRAB_PET_APPEARANCE_BY_SPECIES_COLOR_POSE = (
+    """
+query($speciesId: ID!, $colorId: ID!, $size: LayerImageSize!, $pose: Pose!) {
+  petAppearance(speciesId: $speciesId, colorId: $colorId, pose: $pose) {
+    ...PetAppearanceForOutfitPreview
+  }
+}
+"""
     + FRAGMENT_PET_APPEARANCE
 )
 

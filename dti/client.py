@@ -1,20 +1,12 @@
 from typing import List, Optional, Union
 
-from .constants import (
-    GRAB_PET_APPEARANCE_BY_ID,
-    GRAB_PET_APPEARANCES_BY_IDS,
-    GRAB_ZONES,
-    OUTFIT,
-)
 from .decorators import _require_state
 from .enums import ItemKind, LayerImageSize, PetPose
 from .errors import (
     InvalidColor,
     InvalidColorSpeciesPair,
-    MissingPetAppearance,
     InvalidSpecies,
     NoIteratorsFound,
-    OutfitNotFound,
 )
 from .iterators import (
     DTISearch,
@@ -262,6 +254,8 @@ class Client:
             The corresponding Neopet that matches the name provided.
         """
 
+        size = size or LayerImageSize.SIZE_600
+
         return await Neopet._fetch_by_name(
             pet_name=pet_name, size=size, state=self._state
         )
@@ -294,20 +288,9 @@ class Client:
 
         size = size or LayerImageSize.SIZE_600
 
-        data = await self._state._http._query(
-            OUTFIT,
-            variables={
-                "outfitId": outfit_id,
-                "size": str(size),
-            },
-        )
+        data = await self._state.http.fetch_outfit(id=outfit_id, size=size)
 
-        outfit_data = data["data"]["outfit"]
-
-        if outfit_data is None:
-            raise OutfitNotFound(f"Outfit (ID: {outfit_id}) not found.")
-
-        return Outfit(data=outfit_data, size=size, state=self._state)
+        return Outfit(data=data, size=size, state=self._state)
 
     def search(
         self,
@@ -393,6 +376,65 @@ class Client:
         return searcher
 
     async def fetch_appearance(
+        self,
+        *,
+        species: Union[int, str, Species],
+        color: Union[int, str, Color],
+        pose: PetPose,
+        size: Optional[LayerImageSize] = None,
+    ) -> PetAppearance:
+        """|coro|
+
+        Fetches the pet appearance of a provided species/color/pose.
+
+        Parameters
+        -----------
+        species: Union[:class:`int`, :class:`str`, :class:`Species`]
+            The name, or ID, or Species object of the desired Species. Case-insensitive.
+        color: Union[:class:`int`, :class:`str`, :class:`Color`]
+            The name, or ID, or Color object of the desired Color. Case-insensitive.
+        pose: :class:`PetPose`
+            The desired pet pose for the appearance.
+        size: Optional[:class:`LayerImageSize`]
+            The desired size for the pet appearance image layers. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
+
+        Raises
+        -------
+        ~dti.InvalidColor
+            The color does not exist.
+        ~dti.InvalidSpecies
+            The species does not exist.
+        ~dti.InvalidColorSpeciesPair
+            This species/color combo does not exist, according to DTI.
+        ~dti.MissingPetAppearance
+            The Pet Appearance is not found on DTI.
+
+        Returns
+        --------
+        :class:`PetAppearance`
+            The corresponding pet appearance.
+        """
+
+        if not isinstance(species, Species):
+            species = await self.get_species(species)
+
+        if not isinstance(color, Color):
+            color = await self.get_color(color)
+
+        valid = await self.check(species=species, color=color, pose=pose)
+
+        if not valid:
+            raise InvalidColorSpeciesPair("Invalid Species/Color/Pose provided")
+
+        size = size or LayerImageSize.SIZE_600
+
+        data = await self._state.http.fetch_appearance(
+            species=species, color=color, pose=pose, size=size
+        )
+
+        return PetAppearance(data=data, size=size, state=self._state)
+
+    async def fetch_appearance_by_id(
         self, appearance_id: int, size: Optional[LayerImageSize] = None
     ) -> PetAppearance:
         """|coro|
@@ -416,23 +458,13 @@ class Client:
         :class:`PetAppearance`
             The corresponding pet appearance.
         """
-
         size = size or LayerImageSize.SIZE_600
 
-        data = await self._state._http._query(
-            GRAB_PET_APPEARANCE_BY_ID,
-            variables={
-                "appearanceId": appearance_id,
-                "size": str(size),
-            },
+        data = await self._state.http.fetch_appearance_by_id(
+            id=appearance_id, size=size
         )
 
-        appearance_data = data["data"]["petAppearanceById"]
-
-        if appearance_data is None:
-            raise MissingPetAppearance(f"Pet Appearance ID: {appearance_id} not found.")
-
-        return PetAppearance(data=appearance_data, size=size, state=self._state)
+        return PetAppearance(data=data, size=size, state=self._state)
 
     async def fetch_appearances(
         self,
@@ -482,23 +514,12 @@ class Client:
 
         size = size or LayerImageSize.SIZE_600
 
-        data = await self._state._http._query(
-            GRAB_PET_APPEARANCES_BY_IDS,
-            variables={
-                "speciesId": species.id,  # type: ignore
-                "colorId": color.id,  # type: ignore
-                "size": str(size),
-            },
+        data = await self._state.http.fetch_appearances(
+            species=species, color=color, size=size
         )
 
-        appearance_data = data["data"]["petAppearances"]
-
-        return [
-            PetAppearance(data=app_data, size=size, state=self._state)
-            for app_data in appearance_data
-        ]
+        return [PetAppearance(data=d, size=size, state=self._state) for d in data]
 
     async def fetch_all_zones(self) -> List[Zone]:
-        zone_data = await self._state._http._query(GRAB_ZONES)
-        zones = zone_data["data"]["allZones"]
-        return [Zone(data) for data in zones]
+        data = await self._state.http.fetch_all_zones()
+        return [Zone(d) for d in data]
