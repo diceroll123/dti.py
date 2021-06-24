@@ -459,7 +459,8 @@ class PetAppearance(Object):
         # Returns the image layers' images in order from bottom to top.
 
         all_layers = list(self.layers)
-        item_restricted_zones = []
+        item_restricted_zones: List[Zone] = []
+        all_restricted_zones: List[Zone] = []
         if items:
             render_items, _ = _render_items(items)
             for item in render_items:
@@ -467,7 +468,7 @@ class PetAppearance(Object):
 
                 item_restricted_zones.extend(item.appearance.restricted_zones)
 
-        all_restricted_zones = set(item_restricted_zones + self.restricted_zones)
+            all_restricted_zones = set(item_restricted_zones + self.restricted_zones)
 
         visible_layers = filter(
             lambda layer: layer.zone not in all_restricted_zones, all_layers
