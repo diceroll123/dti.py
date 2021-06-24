@@ -8,9 +8,9 @@ import logging
 
 from . import utils
 from .client import Client
+from .constants import *
 from .enums import *
 from .errors import *
 from .models import *
-from .constants import *
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())

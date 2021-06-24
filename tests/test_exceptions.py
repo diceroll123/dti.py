@@ -8,7 +8,7 @@ async def test_uncached_call() -> None:
     client = Client()
 
     cacheless_before = client._state.is_cached is False
-    await client.get_species("Red")
+    await client.get_color("Red")
     assert cacheless_before and client._state.is_cached
 
 
