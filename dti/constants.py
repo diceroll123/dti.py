@@ -220,6 +220,15 @@ query ($speciesId: ID!, $colorId: ID!, $size: LayerImageSize!) {
     + FRAGMENT_PET_APPEARANCE
 )
 
+# grab all pet appearance IDs for a species+color
+GRAB_PET_APPEARANCE_IDS = """
+query ($speciesId: ID!, $colorId: ID!) {
+  petAppearances(speciesId: $speciesId, colorId: $colorId) {
+    id
+  }
+}
+"""
+
 # grab pet data
 PET_ON_NEOPETS = (
     """

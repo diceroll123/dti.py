@@ -8,6 +8,7 @@ import httpx
 from .constants import (
     GRAB_PET_APPEARANCE_BY_ID,
     GRAB_PET_APPEARANCE_BY_SPECIES_COLOR_POSE,
+    GRAB_PET_APPEARANCE_IDS,
     GRAB_PET_APPEARANCE_WITH_ITEMS_BY_IDS,
     GRAB_PET_APPEARANCE_WITH_ITEMS_BY_NAMES,
     GRAB_PET_APPEARANCES_BY_IDS,
@@ -206,3 +207,16 @@ class HTTPClient:
             )
 
         return data["data"]
+
+    async def fetch_appearance_ids(
+        self, *, species: Species, color: Color
+    ) -> List[int]:
+        data = await self._query(
+            GRAB_PET_APPEARANCE_IDS,
+            variables=dict(speciesId=species.id, colorId=color.id),
+        )
+
+        ids: List[int] = []
+        for appearance in data["data"]["petAppearances"]:
+            ids.append(int(appearance["id"]))
+        return ids
