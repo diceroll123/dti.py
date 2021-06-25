@@ -386,7 +386,8 @@ class PetAppearance(Object):
     restricted_zones: List[:class:`Zone`]
         The restricted zones of the pet appearance. Outfits can't have conflicting restricted zones.
     is_glitched: :class:`bool`
-        Whether or not this appearance is marked as glitched.
+        Whether or not this appearance is marked as glitched. Not to be confused with the layers having their own
+        glitches, for that, check out :attr:`PetAppearance.has_glitches`.
     """
 
     __slots__ = (
@@ -422,6 +423,11 @@ class PetAppearance(Object):
         self.restricted_zones: List[Zone] = [
             Zone(restricted) for restricted in data["restrictedZones"]
         ]
+
+    @property
+    def has_glitches(self) -> bool:
+        """:class:`bool`: Whether or not any of the layers in this appearance are marked as glitched."""
+        return any(layer.known_glitches is not None for layer in self.layers)
 
     @property
     def url(self) -> str:
