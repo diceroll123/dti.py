@@ -901,6 +901,24 @@ class Neopet:
             params, doseq=True
         )
 
+    @property
+    def is_glitched(self) -> bool:
+        """:class:`bool`: Returns whether or not the render of this pet has any known glitches."""
+        if self.appearance.is_glitched:
+            return True
+
+        if self.appearance.has_glitches:
+            return True
+
+        items, _ = _render_items(self.items)
+        for item in items:
+            if item.appearance:
+                for layer in item.appearance.layers:
+                    if layer.known_glitches:
+                        return True
+
+        return False
+
     def check(self, pose: PetPose) -> bool:
         """:class:`bool`: Returns True if the pet pose provided is valid for the current species+color."""
         return self._valid_poses.check(pose)
