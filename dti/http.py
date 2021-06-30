@@ -118,7 +118,7 @@ class HTTPClient:
 
         return outfit_data
 
-    async def fetch_all_zones(self) -> ZonePayload:
+    async def fetch_all_zones(self) -> List[ZonePayload]:
         zone_data = await self._query(GRAB_ZONES)
         return zone_data["data"]["allZones"]
 

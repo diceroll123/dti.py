@@ -522,4 +522,4 @@ class Client:
 
     async def fetch_all_zones(self) -> List[Zone]:
         data = await self._state.http.fetch_all_zones()
-        return [Zone(d) for d in data]
+        return [Zone(data=d) for d in data]

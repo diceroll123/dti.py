@@ -456,6 +456,9 @@ class PetAppearance(Object):
         if items:
             render_items, _ = _render_items(items)
             for item in render_items:
+                if item.appearance is None:
+                    continue
+
                 all_layers.extend(item.appearance.layers)
 
                 item_restricted_zones.extend(item.appearance.restricted_zones)
@@ -1237,6 +1240,9 @@ def _render_items(items: Sequence[Item]) -> Tuple[List[Item], List[Item]]:
                 continue
 
             if temp not in temp_items:
+                continue
+
+            if item.appearance is None or temp.appearance is None:
                 continue
 
             intersect_1 = set(item.appearance.occupies).intersection(
