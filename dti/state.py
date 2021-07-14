@@ -176,7 +176,7 @@ class State:
 
         self.http = HTTPClient(proxy=proxy)
 
-    async def _fetch_species_and_color(self):
+    async def _fetch_species_and_color(self) -> None:
         data = await self.http._query(query=ALL_SPECIES_AND_COLORS)
         data = data["data"]
         from .models import Color, Species

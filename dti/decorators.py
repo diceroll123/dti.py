@@ -1,8 +1,9 @@
 import functools
 import inspect
+from typing import Any, Callable
 
 
-def _require_state(func):
+def _require_state(func: Callable[..., Any]):
     # for internal use only.
     # this decorator goes on just about all internal coroutines dealing with the state
     # we use this as an excuse to update the cache in long-running processes

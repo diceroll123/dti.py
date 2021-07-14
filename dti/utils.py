@@ -6,7 +6,7 @@ from .enums import LayerImageSize
 __all__ = ("build_layers_url", "url_sanitizer")
 
 
-def build_layers_url(layers: List[str], *, size: Optional[LayerImageSize] = None):
+def build_layers_url(layers: List[str], *, size: Optional[LayerImageSize] = None) -> str:
     """Convenience method to make the server-side-rendering URL of the provided layer URLs.
 
     Parameters
