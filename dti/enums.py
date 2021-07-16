@@ -4,6 +4,8 @@ from enum import Enum, auto
 __all__ = (
     "LayerImageSize",
     "PetPose",
+    "ItemKind",
+    "AppearanceLayerType",
     "AppearanceLayerKnownGlitch",
 )
 
