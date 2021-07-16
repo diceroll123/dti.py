@@ -1,5 +1,7 @@
 import asyncio
-from typing import Optional, Sequence, Union
+from typing import List, Optional, Sequence, Union
+
+from dti.types import ItemPayload
 
 from .constants import (
     SEARCH_ITEM_IDS,
@@ -24,7 +26,7 @@ class DTISearch:
     async def fetch_items(self):
         raise NotImplementedError
 
-    def post_fetch(self, items: Sequence[Item]):
+    def post_fetch(self, items: Sequence[ItemPayload]):
         # override these where needed to do things like adding to offset
         # this here, by default, will exhaust the searcher, with single-offset searchers in mind
         self._exhausted = True
@@ -73,7 +75,7 @@ class ItemIDSearch(DTISearch):
         super().__init__(state=state)
         self.item_ids = item_ids
 
-    async def fetch_items(self):
+    async def fetch_items(self) -> List[ItemPayload]:
         data = await self._state.http._query(
             query=SEARCH_ITEM_IDS,
             variables={"itemIds": self.item_ids},
@@ -89,10 +91,10 @@ class PaginatedDTISearch(DTISearch):
         self.offset = 0
         self.per_page = 0
 
-    async def fetch_items(self):
+    async def fetch_items(self) -> List[ItemPayload]:
         raise NotImplementedError
 
-    def post_fetch(self, items: Sequence[Item]):
+    def post_fetch(self, items: Sequence[ItemPayload]):
         self.offset += self.per_page
 
         # when we find the last page, don't try another next time
@@ -121,7 +123,7 @@ class ItemSearchToFit(PaginatedDTISearch):
         self.per_page = per_page
         self.size = size or LayerImageSize.SIZE_600
 
-    async def fetch_items(self):
+    async def fetch_items(self) -> List[ItemPayload]:
         data = await self._state.http._query(
             query=SEARCH_TO_FIT,
             variables={
@@ -150,7 +152,7 @@ class ItemSearchNames(DTISearch):
         super().__init__(state=state)
         self.names = names
 
-    async def fetch_items(self):
+    async def fetch_items(self) -> List[ItemPayload]:
         if len(self.names) == 1:
             query = SEARCH_QUERY_EXACT_SINGLE
             variables = {"name": self.names[0]}
@@ -178,7 +180,7 @@ class ItemSearch(DTISearch):
         self.query = query
         self.item_kind = item_kind
 
-    async def fetch_items(self):
+    async def fetch_items(self) -> List[ItemPayload]:
         data = await self._state.http._query(
             query=SEARCH_QUERY,
             variables={
