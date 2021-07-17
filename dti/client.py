@@ -521,5 +521,14 @@ class Client:
         return [PetAppearance(data=d, size=size, state=self._state) for d in data]
 
     async def fetch_all_zones(self) -> List[Zone]:
+        """|coro|
+
+        Fetches all appearance zones for a customization.
+
+        Returns
+        --------
+        List[:class:`Zone`]
+            A list of all Zones.
+        """
         data = await self._state.http.fetch_all_zones()
         return [Zone(data=d) for d in data]
