@@ -532,3 +532,27 @@ class Client:
         """
         data = await self._state.http.fetch_all_zones()
         return [Zone(data=d) for d in data]
+
+    async def fetch_appearance_ids(
+        self,
+        *,
+        species: Union[int, str, Species],
+        color: Union[int, str, Color],
+    ) -> List[int]:
+        """|coro|
+
+        Fetches all appearance ids for a given species+color.
+
+        Returns
+        --------
+        List[:class:`int`]
+            A list of the pet appearance IDs.
+        """
+
+        if not isinstance(species, Species):
+            species = await self.get_species(species)
+
+        if not isinstance(color, Color):
+            color = await self.get_color(color)
+
+        return await self._state.http.fetch_appearance_ids(species=species, color=color)
