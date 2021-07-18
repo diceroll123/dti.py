@@ -16,7 +16,6 @@ from .constants import (
     OUTFIT,
     PET_ON_NEOPETS,
 )
-from .enums import PetPose
 from .errors import (
     InvalidColorSpeciesPair,
     MissingPetAppearance,
@@ -25,7 +24,7 @@ from .errors import (
 )
 
 if TYPE_CHECKING:
-    from .enums import LayerImageSize
+    from .enums import LayerImageSize, PetPose
     from .models import Color, Species
     from .types import (
         FetchAssetsPayload,

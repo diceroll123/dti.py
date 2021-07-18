@@ -1134,8 +1134,8 @@ class Outfit(Object):
         """
 
         updated_at = int(self.updated_at.timestamp())
-        size = str(size or self.size)[-3:]  # type: ignore
-        return f"https://impress-2020.openneo.net/outfits/{self.id}/v/{updated_at}/{size}.png"
+        size_str = str(size or self.size)[-3:]
+        return f"https://impress-2020.openneo.net/outfits/{self.id}/v/{updated_at}/{size_str}.png"
 
     async def read(self, size: Optional[LayerImageSize] = None) -> bytes:
         """|coro|

@@ -18,10 +18,10 @@ def build_layers_url(
     size: Optional[:class:`LayerImageSize`]
         The desired size for the render. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
     """
-    size = str(size or LayerImageSize.SIZE_600)[-3:]  # type: ignore
+    size_str = str(size or LayerImageSize.SIZE_600)[-3:]
     joined = ",".join(layers)
 
-    return f"https://impress-2020.openneo.net/api/outfitImage?size={size}&layerUrls={joined}"
+    return f"https://impress-2020.openneo.net/api/outfitImage?size={size_str}&layerUrls={joined}"
 
 
 def url_sanitizer(url: str) -> str:
