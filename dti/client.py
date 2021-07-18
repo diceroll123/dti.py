@@ -203,6 +203,15 @@ class Client:
         pose: Optional[:class:`PetPose`]
             The desired pet pose for the render. If one is not supplied, it may be chosen at random.
 
+        Raises
+        -------
+        ~dti.InvalidColor
+            The color does not exist.
+        ~dti.InvalidSpecies
+            The species does not exist.
+        ~dti.InvalidColorSpeciesPair
+            This species/color/pose combo does not exist, according to DTI.
+
         Returns
         --------
         :class:`Neopet`
@@ -210,13 +219,15 @@ class Client:
         """
 
         if not isinstance(species, Species):
-            species = await self.get_species(species)  # type: ignore
+            species = await self.get_species(species)
 
         if not isinstance(color, Color):
-            color = await self.get_color(color)  # type: ignore
+            color = await self.get_color(color)
 
-        if not isinstance(species, Species) or not isinstance(color, Color):
-            raise InvalidColorSpeciesPair("Invalid Species/Color provided")
+        valid = await self.check(species=species, color=color, pose=pose)
+
+        if not valid:
+            raise InvalidColorSpeciesPair("Invalid Species/Color/Pose provided")
 
         return await Neopet._fetch_assets_for(
             species=species,
@@ -543,6 +554,15 @@ class Client:
 
         Fetches all appearance ids for a given species+color.
 
+        Raises
+        -------
+        ~dti.InvalidColor
+            The color does not exist.
+        ~dti.InvalidSpecies
+            The species does not exist.
+        ~dti.InvalidColorSpeciesPair
+            This species/color combo does not exist, according to DTI.
+
         Returns
         --------
         List[:class:`int`]
@@ -554,5 +574,10 @@ class Client:
 
         if not isinstance(color, Color):
             color = await self.get_color(color)
+
+        valid = await self.check(species=species, color=color)
+
+        if not valid:
+            raise InvalidColorSpeciesPair("Invalid Species/Color/Pose provided")
 
         return await self._state.http.fetch_appearance_ids(species=species, color=color)
