@@ -7,7 +7,6 @@ from .constants import (
     SEARCH_ITEM_IDS,
     SEARCH_QUERY,
     SEARCH_QUERY_EXACT_MULTIPLE,
-    SEARCH_QUERY_EXACT_SINGLE,
     SEARCH_TO_FIT,
 )
 from .enums import ItemKind, LayerImageSize
@@ -23,7 +22,7 @@ class DTISearch:
         self._items: asyncio.Queue = asyncio.Queue(maxsize=per_page or 0)
         self._exhausted = False
 
-    async def fetch_items(self):
+    async def fetch_items(self) -> List[ItemPayload]:
         raise NotImplementedError
 
     def post_fetch(self, items: Sequence[ItemPayload]):
@@ -31,7 +30,7 @@ class DTISearch:
         # this here, by default, will exhaust the searcher, with single-offset searchers in mind
         self._exhausted = True
 
-    async def _fill_items(self):
+    async def _fill_items(self) -> None:
         items = await self.fetch_items()
 
         for item in items:
@@ -45,8 +44,8 @@ class DTISearch:
     def __aiter__(self):
         return self
 
-    async def flatten(self):
-        ret = []
+    async def flatten(self) -> List[Item]:
+        ret: List[Item] = []
         while True:
             try:
                 item = await self.next()
@@ -55,7 +54,7 @@ class DTISearch:
             else:
                 ret.append(item)
 
-    async def next(self):
+    async def next(self) -> Item:
         if self._items.empty() and not self._exhausted:
             await self._fill_items()
 
@@ -153,18 +152,11 @@ class ItemSearchNames(DTISearch):
         self.names = names
 
     async def fetch_items(self) -> List[ItemPayload]:
-        if len(self.names) == 1:
-            query = SEARCH_QUERY_EXACT_SINGLE
-            variables = {"name": self.names[0]}
-            key = "itemByName"
-        else:
-            query = SEARCH_QUERY_EXACT_MULTIPLE
-            variables = {"names": self.names}
-            key = "itemsByName"
+        data = await self._state.http._query(
+            query=SEARCH_QUERY_EXACT_MULTIPLE, variables={"names": self.names}
+        )
 
-        data = await self._state.http._query(query=query, variables=variables)
-
-        items = data["data"][key]
+        items: Union[ItemPayload, List[ItemPayload]] = data["data"]["itemsByName"]
 
         # ensure we're working with iterable lists of items
         # when we search for a single item, it returns just the item, so we pur it in a list
@@ -175,7 +167,9 @@ class ItemSearchNames(DTISearch):
 
 class ItemSearch(DTISearch):
     # a regular search query
-    def __init__(self, *, state: State, query: str, item_kind=Optional[ItemKind]):
+    def __init__(
+        self, *, state: State, query: str, item_kind: Optional[ItemKind] = None
+    ):
         super().__init__(state=state)
         self.query = query
         self.item_kind = item_kind

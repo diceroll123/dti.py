@@ -8,36 +8,35 @@ PetPoseType = Literal[
     "SICK_MASC",
     "SICK_FEM",
     "UNCONVERTED",
-    "UKNOWN",
+    "UNKNOWN",
 ]
 
 
-class SpeciesPayload(TypedDict):
+class _BaseObject(TypedDict):
     id: str
+
+
+class SpeciesPayload(_BaseObject):
     name: str
 
 
-class ColorPayload(TypedDict):
-    id: str
+class ColorPayload(_BaseObject):
     name: str
 
 
-class ZonePayload(TypedDict):
-    id: str
+class ZonePayload(_BaseObject):
     depth: int
     label: str
 
 
-class AppearanceLayerPayload(TypedDict):
-    id: str
+class AppearanceLayerPayload(_BaseObject):
     imageUrl: Optional[str]
     remoteId: str
     zone: ZonePayload
     knownGlitches: List[str]
 
 
-class PetAppearancePayload(TypedDict):
-    id: str
+class PetAppearancePayload(_BaseObject):
     bodyId: str
     isGlitched: bool
     color: ColorPayload
@@ -47,14 +46,12 @@ class PetAppearancePayload(TypedDict):
     restrictedZones: List[ZonePayload]
 
 
-class ItemAppearancePayload(TypedDict):
-    id: str
+class ItemAppearancePayload(_BaseObject):
     layers: List[AppearanceLayerPayload]
     restrictedZones: List[ZonePayload]
 
 
-class ItemPayload(TypedDict):
-    id: str
+class ItemPayload(_BaseObject):
     name: str
     description: str
     thumbnailUrl: str
@@ -65,13 +62,11 @@ class ItemPayload(TypedDict):
     appearanceOn: Optional[ItemAppearancePayload]
 
 
-class UserPayload(TypedDict):
-    id: str
+class UserPayload(_BaseObject):
     username: str
 
 
-class OutfitPayload(TypedDict):
-    id: str
+class OutfitPayload(_BaseObject):
     name: Optional[str]
     petAppearance: PetAppearancePayload
     wornItems: List[ItemPayload]
@@ -79,3 +74,19 @@ class OutfitPayload(TypedDict):
     creator: Optional[UserPayload]
     createdAt: str
     updatedAt: str
+
+
+# these are specific to the "fetch_neopet_by_name" http method.
+class FetchedWornItemsPayload(_BaseObject):
+    pass
+
+
+class FetchedNeopetPayload(TypedDict):
+    petAppearance: PetAppearancePayload
+    wornItems: List[FetchedWornItemsPayload]
+
+
+# specific to the "fetch_assets_for" http method
+class FetchAssetsPayload(TypedDict):
+    items: List[ItemPayload]
+    petAppearance: PetAppearancePayload

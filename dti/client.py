@@ -1,6 +1,5 @@
 from typing import List, Optional, Union
 
-from .decorators import _require_state
 from .enums import ItemKind, LayerImageSize, PetPose
 from .errors import (
     InvalidColor,
@@ -39,27 +38,26 @@ class Client:
     ):
         self._state = State(cache_timeout=cache_timeout, proxy=proxy)
 
-    async def invalidate(self):
+    async def invalidate(self) -> None:
         """|coro|
 
         A way to force the internal cache to update."""
         await self._state._update(force=True)
 
-    @_require_state
     async def all_species(self) -> List[Species]:
         """|coro|
 
         List[:class:`Species`]: Returns a list of all species."""
+        await self._state._lock_and_update()
         return list(self._state._species.values())
 
-    @_require_state
     async def all_colors(self) -> List[Color]:
         """|coro|
 
         List[:class:`Color`]: Returns a list of all colors."""
+        await self._state._lock_and_update()
         return list(self._state._colors.values())
 
-    @_require_state
     async def get_species(self, name_or_id: Union[int, str]) -> Species:
         """|coro|
 
@@ -77,12 +75,12 @@ class Client:
         --------
         :class:`Species`: Returns a species by name or ID.
         """
+        await self._state._lock_and_update()
         species = self._state._species[name_or_id]
         if species is None:
             raise InvalidSpecies()
         return species
 
-    @_require_state
     async def get_color(self, name_or_id: Union[int, str]) -> Color:
         """|coro|
 
@@ -100,6 +98,7 @@ class Client:
         --------
         :class:`Color`: Returns a color by name or ID.
         """
+        await self._state._lock_and_update()
         color = self._state._colors[name_or_id]
         if color is None:
             raise InvalidColor()
@@ -260,7 +259,6 @@ class Client:
             pet_name=pet_name, size=size, state=self._state
         )
 
-    @_require_state
     async def fetch_outfit(
         self, outfit_id: int, size: Optional[LayerImageSize] = None
     ) -> Outfit:
@@ -285,6 +283,8 @@ class Client:
         :class:`Outfit`
             The corresponding outfit that matches the ID.
         """
+
+        await self._state._lock_and_update()
 
         size = size or LayerImageSize.SIZE_600
 
@@ -341,7 +341,7 @@ class Client:
         """
 
         searcher: Optional[DTISearch] = None
-        _names = []
+        _names: List[str] = []
 
         per_page = per_page or 30
 

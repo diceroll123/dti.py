@@ -137,16 +137,6 @@ query($names: [String!]!) {
     + FRAGMENT_ITEM_PROPERTIES
 )
 
-SEARCH_QUERY_EXACT_SINGLE = (
-    """
-query($name: String!) {
-  itemByName(name: $name) {
-    ...ItemProperties
-  }
-}"""
-    + FRAGMENT_ITEM_PROPERTIES
-)
-
 # grab pet appearances
 GRAB_PET_APPEARANCE_WITH_ITEMS_BY_IDS = (
     """
@@ -172,7 +162,7 @@ query ($names: [String!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSize
   petAppearance(speciesId: $speciesId, colorId: $colorId, pose: $pose) {
     ...PetAppearanceForOutfitPreview
   }
-  itemsByName(names: $names) {
+  items: itemsByName(names: $names) {
     ...ItemProperties
     appearanceOn(speciesId: $speciesId, colorId: $colorId) {
       ...ItemAppearanceForOutfitPreview

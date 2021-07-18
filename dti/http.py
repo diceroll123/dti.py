@@ -27,7 +27,13 @@ from .errors import (
 if TYPE_CHECKING:
     from .enums import LayerImageSize
     from .models import Color, Species
-    from .types import OutfitPayload, PetAppearancePayload, ZonePayload
+    from .types import (
+        FetchAssetsPayload,
+        FetchedNeopetPayload,
+        OutfitPayload,
+        PetAppearancePayload,
+        ZonePayload,
+    )
 
 log = logging.getLogger(__name__)
 
@@ -122,7 +128,9 @@ class HTTPClient:
         zone_data = await self._query(GRAB_ZONES)
         return zone_data["data"]["allZones"]
 
-    async def fetch_neopet_by_name(self, name: str, size: LayerImageSize):
+    async def fetch_neopet_by_name(
+        self, name: str, size: LayerImageSize
+    ) -> FetchedNeopetPayload:
         data = await self._query(
             query=PET_ON_NEOPETS,
             variables={"petName": name, "size": str(size)},
@@ -159,7 +167,7 @@ class HTTPClient:
         item_ids: Optional[Sequence[Union[str, int]]] = None,
         item_names: Optional[Sequence[str]] = None,
         size: Optional[LayerImageSize] = None,
-    ):
+    ) -> FetchAssetsPayload:
         # basically the fullest single-purpose dataset we can grab from DTI
 
         variables = {
@@ -216,7 +224,4 @@ class HTTPClient:
             variables=dict(speciesId=species.id, colorId=color.id),
         )
 
-        ids: List[int] = []
-        for appearance in data["data"]["petAppearances"]:
-            ids.append(int(appearance["id"]))
-        return ids
+        return [int(appearance["id"]) for appearance in data["data"]["petAppearances"]]

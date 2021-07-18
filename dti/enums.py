@@ -7,6 +7,7 @@ __all__ = (
     "ItemKind",
     "AppearanceLayerType",
     "AppearanceLayerKnownGlitch",
+    "try_enum",
 )
 
 from typing import Any

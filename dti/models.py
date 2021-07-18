@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, List, Optional, Sequence, Set, Tuple, Union
 from urllib.parse import urlencode
 
 from . import utils
-from .decorators import _require_state
 from .enums import (
     AppearanceLayerKnownGlitch,
     AppearanceLayerType,
@@ -89,8 +88,9 @@ class Species(Object):
         self.id = int(data["id"])
         self.name: str = data["name"]
 
-    @_require_state
     async def _color_iterator(self, valid: bool = True) -> List[Color]:
+        await self._state._lock_and_update()
+
         found = []
         for color_id in range(1, self._state._valid_pairs.color_count + 1):
             is_valid = self._state._valid_pairs._check(
@@ -164,8 +164,9 @@ class Color(Object):
         self.id: int = int(data["id"])
         self.name: str = data["name"]
 
-    @_require_state
     async def _species_iterator(self, valid: bool = True) -> List[Species]:
+        await self._state._lock_and_update()
+
         found = []
         for species_id in range(1, self._state._valid_pairs.species_count + 1):
             is_valid = self._state._valid_pairs._check(
@@ -524,7 +525,7 @@ class PetAppearance(Object):
         *,
         items: Optional[Sequence[Item]] = None,
         seek_begin: bool = True,
-    ):
+    ) -> None:
         """|coro|
 
         Outputs the rendered pet with the desired emotion + gender presentation to the file-like object passed.
@@ -814,7 +815,6 @@ class Neopet:
 
         size = size or LayerImageSize.SIZE_600
 
-        key = "itemsByName" if item_names else "items"
         data = await state.http.fetch_assets_for(
             species=species,
             color=color,
@@ -824,7 +824,9 @@ class Neopet:
             size=size,
         )
 
-        items = [Item(data=item, state=state) for item in data[key] if item is not None]
+        items = [
+            Item(data=item, state=state) for item in data["items"] if item is not None
+        ]
         appearance = PetAppearance(data=data["petAppearance"], size=size, state=state)
 
         bit = await state._get_bit(species_id=species.id, color_id=color.id)
@@ -932,7 +934,7 @@ class Neopet:
         pose: Optional[PetPose] = None,
         *,
         seek_begin: bool = True,
-    ):
+    ) -> None:
         """|coro|
 
         Outputs the rendered pet with the desired emotion + gender presentation to the file-like object passed.
@@ -1159,7 +1161,7 @@ class Outfit(Object):
         size: Optional[LayerImageSize] = None,
         *,
         seek_begin: bool = True,
-    ):
+    ) -> None:
         """|coro|
 
         Outputs the rendered pet with the desired emotion + gender presentation to the file-like object passed.

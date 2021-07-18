@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import time
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, Dict, Optional, TypeVar, Union
 
 from .constants import ALL_SPECIES_AND_COLORS
 from .enums import PetPose
@@ -12,6 +12,8 @@ from .http import HTTPClient
 
 if TYPE_CHECKING:
     from . import Color, Species
+
+S = TypeVar("S", bound="State")
 
 
 class _NameDict(dict):
@@ -155,8 +157,8 @@ class State:
     ):
         # colors and species below are accessed by the string version of their ID AND/OR lower-cased names
         # alternatively you can list them out by doing self._colors.values()
-        self._colors = _NameDict()
-        self._species = _NameDict()
+        self._colors: Dict[Union[str, int], Color] = _NameDict()
+        self._species: Dict[Union[str, int], Species] = _NameDict()
         self._cached = False
         self._last_update = 0.0
 
@@ -175,6 +177,10 @@ class State:
         self._update_lock = asyncio.Lock()
 
         self.http = HTTPClient(proxy=proxy)
+
+    async def _lock_and_update(self) -> None:
+        async with self._lock:
+            await self._update()
 
     async def _fetch_species_and_color(self) -> None:
         data = await self.http._query(query=ALL_SPECIES_AND_COLORS)
@@ -232,7 +238,7 @@ class State:
                 species_id=species_id, color_id=color_id, pose=pose
             )
 
-    async def _update(self, force: Optional[bool] = False):
+    async def _update(self: S, force: Optional[bool] = False) -> S:
         async with self._update_lock:
             # forces cache, if outdated
             if force is False and not self.is_outdated:
