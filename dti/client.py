@@ -147,8 +147,8 @@ class Client:
     async def check(
         self,
         *,
-        species: Species,
-        color: Color,
+        species: Union[int, str, Species],
+        color: Union[int, str, Color],
         pose: Optional[PetPose] = None,
     ) -> bool:
         """|coro|
@@ -164,10 +164,23 @@ class Client:
         pose: Optional[:class:`PetPose`]
             The desired pet pose. If this value is `None`, this function just checks if the species/color combo exists.
 
+        Raises
+        -------
+        ~dti.InvalidColor
+            The color does not exist.
+        ~dti.InvalidSpecies
+            The species does not exist.
+
         Returns
         --------
         :class:`bool`: Whether or not this species/color/pose combo exists.
         """
+
+        if not isinstance(species, Species):
+            species = await self.get_species(species)
+
+        if not isinstance(color, Color):
+            color = await self.get_color(color)
 
         return await self._state._check(
             species_id=species.id, color_id=color.id, pose=pose
