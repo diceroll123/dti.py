@@ -329,7 +329,7 @@ class AppearanceLayer(Object):
 
         Raises
         ------
-        BrokenAssetImage
+        ~dti.NullAssetImage
             The image URL for this asset was returned by DTI as a null object.
 
         Returns
@@ -478,6 +478,11 @@ class PetAppearance(Object):
         -----------
         items: Optional[Sequence[:class:`Item`]]
             An optional list of items to render on this appearance.
+
+        Raises
+        -------
+        ~dti.NullAssetImage
+            The species does not exist.
 
         Returns
         --------

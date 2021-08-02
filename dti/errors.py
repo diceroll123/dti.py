@@ -54,7 +54,7 @@ class NoIteratorsFound(DTIException):
 
 
 class NullAssetImage(DTIException):
-    """An exception that is thrown when the biology/object image is null and must be reported to fix."""
+    """An exception that is thrown when the biology/object image is null and must be reported to fix. Alternatively, the item does not have a PNG/SVG appearance, and only a Movie appearance."""
 
     pass
 
