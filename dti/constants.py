@@ -12,7 +12,6 @@ fragment ItemProperties on Item {
   rarityIndex
   isNc
   isPb
-  wakaValueText
 }"""
 
 FRAGMENT_USER_PROPERTIES = """

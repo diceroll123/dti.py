@@ -656,9 +656,6 @@ class Item(Object):
         The item's rarity on Neopets.
     appearance: Optional[:class:`ItemAppearance`]
         The item appearance object for this item on a particular PetAppearance. Can be `None`.
-    waka_value: Optional[:class:`str`]
-        The value of the item on waka's guide, according to wakaguide.com. Will be None is the value is unknown,
-        or if there's an error getting the data.
     """
 
     __slots__ = (
@@ -670,7 +667,6 @@ class Item(Object):
         "thumbnail_url",
         "appearance",
         "rarity",
-        "waka_value",
     )
 
     def __init__(self, *, data: ItemPayload, state: State):
@@ -688,7 +684,6 @@ class Item(Object):
         self.kind = _kind or ItemKind.NP
 
         self.rarity: int = int(data.get("rarityIndex"))
-        self.waka_value: Optional[str] = data.get("wakaValueText")
 
         appearance_data = data.get("appearanceOn", None)
         if appearance_data:

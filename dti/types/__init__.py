@@ -58,7 +58,6 @@ class ItemPayload(_BaseObject):
     isNc: bool
     isPb: bool
     rarityIndex: str
-    wakaValueText: str
     appearanceOn: Optional[ItemAppearancePayload]
 
 
