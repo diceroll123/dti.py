@@ -17,9 +17,9 @@ from .enums import (
 )
 from .errors import InvalidColorSpeciesPair, MissingPetAppearance, NullAssetImage
 from .mixins import Object
-from .state import BitField, State
 
 if TYPE_CHECKING:
+    from .state import BitField, State
     from .types import (
         AppearanceLayerPayload,
         ColorPayload,
@@ -91,7 +91,7 @@ class Species(Object):
     async def _color_iterator(self, valid: bool = True) -> List[Color]:
         await self._state._lock_and_update()
 
-        found = []
+        found: List[Color] = []
         for color_id in range(1, self._state._valid_pairs.color_count + 1):
             is_valid = self._state._valid_pairs._check(
                 species_id=self.id, color_id=color_id
@@ -167,7 +167,7 @@ class Color(Object):
     async def _species_iterator(self, valid: bool = True) -> List[Species]:
         await self._state._lock_and_update()
 
-        found = []
+        found: List[Species] = []
         for species_id in range(1, self._state._valid_pairs.species_count + 1):
             is_valid = self._state._valid_pairs._check(
                 species_id=species_id, color_id=self.id
@@ -1039,7 +1039,7 @@ class Neopet:
         ]
         if self.name:
             # let's put the name in front if there is one.
-            attrs.insert(0, ("name", self.name))
+            attrs.insert(0, ("name", self.name))  # type: ignore
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<Neopet {joined}>"
 

@@ -85,7 +85,7 @@ class AppearanceLayerKnownGlitch(Enum):
     REQUIRES_OTHER_BODY_SPECIFIC_ASSETS = "REQUIRES_OTHER_BODY_SPECIFIC_ASSETS"
 
 
-def try_enum(cls, val) -> Any:
+def try_enum(cls, val: Any) -> Any:
     try:
         return cls(val)
     except TypeError:

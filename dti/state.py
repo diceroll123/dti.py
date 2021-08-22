@@ -11,7 +11,7 @@ from .errors import InvalidPairBytes
 from .http import HTTPClient
 
 if TYPE_CHECKING:
-    from . import Color, Species
+    from .models import Color, Species
 
 S = TypeVar("S", bound="State")
 
@@ -20,7 +20,7 @@ class _NameDict(dict):
     # this is only to be used by DTIState
     # for the sole purpose of easily searching colors/species by name
     # that said, we're throwing away any error prevention outside of these rules
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Optional[str]:
         key = str(key)
         # will never raise a KeyError, but will return None instead
         with contextlib.suppress(KeyError):
