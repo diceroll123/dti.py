@@ -1,7 +1,7 @@
-import asyncio
-from typing import List, Optional, Sequence, Union
+from __future__ import annotations
 
-from dti.types import ItemPayload
+import asyncio
+from typing import List, Optional, Sequence, TYPE_CHECKING, Union
 
 from .constants import (
     SEARCH_ITEM_IDS,
@@ -13,6 +13,9 @@ from .enums import ItemKind, LayerImageSize
 from .errors import InvalidItemID
 from .models import Item
 from .state import State
+
+if TYPE_CHECKING:
+    from .types import ItemPayload
 
 
 class DTISearch:
