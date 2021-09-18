@@ -3,7 +3,7 @@ from __future__ import annotations
 import datetime
 import io
 import os
-from typing import TYPE_CHECKING, List, Optional, Sequence, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Set, Tuple, Union
 from urllib.parse import urlencode
 
 from . import utils
@@ -526,7 +526,7 @@ class PetAppearance(Object):
 
     async def render(
         self,
-        fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
+        fp: Union[str, bytes, os.PathLike[Any], io.BufferedIOBase],
         *,
         items: Optional[Sequence[Item]] = None,
         seek_begin: bool = True,
@@ -726,7 +726,7 @@ class User(Object):
         "username",
     )
 
-    def __init__(self, **data):
+    def __init__(self, **data: str):
         self.id: int = int(data["id"])
         self.username: str = data["username"]
 
@@ -872,7 +872,7 @@ class Neopet:
     def legacy_closet_url(self) -> str:
         """:class:`str`: Returns the legacy closet URL for a Neopet customization."""
 
-        params = {
+        params: Dict[str, Any] = {
             "name": self.name or "",
             "species": self.species.id,
             "color": self.color.id,
@@ -890,7 +890,7 @@ class Neopet:
     def closet_url(self) -> str:
         """:class:`str`: Returns the closet URL for a Neopet customization."""
 
-        params = {
+        params: Dict[str, Any] = {
             "name": self.name or "",
             "species": self.species.id,
             "color": self.color.id,
@@ -930,7 +930,7 @@ class Neopet:
 
     async def render(
         self,
-        fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
+        fp: Union[str, bytes, os.PathLike[Any], io.BufferedIOBase],
         pose: Optional[PetPose] = None,
         *,
         seek_begin: bool = True,
@@ -1156,7 +1156,7 @@ class Outfit(Object):
 
     async def render(
         self,
-        fp: Union[str, bytes, os.PathLike, io.BufferedIOBase],
+        fp: Union[str, bytes, os.PathLike[Any], io.BufferedIOBase],
         pose: Optional[PetPose] = None,
         size: Optional[LayerImageSize] = None,
         *,
