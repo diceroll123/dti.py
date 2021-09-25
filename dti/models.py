@@ -906,6 +906,15 @@ class Neopet:
             params, doseq=True
         )
 
+    def clear_closet(self) -> None:
+        """Removes items from the closet that would not be rendered to the pet appearance."""
+        _, closet = _render_items(self.items)
+        new_items: List[Item] = []
+        for item in self.items:
+            if item not in closet:
+                new_items.append(item)
+        self.items = new_items
+
     @property
     def is_glitched(self) -> bool:
         """:class:`bool`: Returns whether or not the render of this pet has any known glitches."""
