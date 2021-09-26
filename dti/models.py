@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import datetime
 import io
 import os
@@ -554,13 +555,15 @@ class PetAppearance(Object):
         """
 
         data = await self.read(items=items)
-        if isinstance(fp, io.BufferedIOBase):
-            fp.write(data)
-            if seek_begin:
-                fp.seek(0)
-        else:
-            with open(fp, "wb") as f:
-                f.write(data)
+        def write():
+            if isinstance(fp, io.BufferedIOBase):
+                fp.write(data)
+                if seek_begin:
+                    fp.seek(0)
+            else:
+                with open(fp, "wb") as f:
+                    f.write(data)
+        await asyncio.get_running_loop().run_in_executor(None, write)
 
 
 class ItemAppearance(Object):
