@@ -1,5 +1,5 @@
 from typing import List, Optional
-from urllib.parse import urljoin, urlparse
+from urllib.parse import quote, urljoin, urlparse
 
 from .enums import LayerImageSize
 
@@ -19,7 +19,7 @@ def build_layers_url(
         The desired size for the render. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
     """
     size_str = str(size or LayerImageSize.SIZE_600)[-3:]
-    joined = ",".join(layers)
+    joined = ",".join(quote(layer) for layer in layers)
 
     return f"https://impress-2020.openneo.net/api/outfitImage?size={size_str}&layerUrls={joined}"
 
