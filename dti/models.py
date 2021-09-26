@@ -555,6 +555,7 @@ class PetAppearance(Object):
         """
 
         data = await self.read(items=items)
+
         def write():
             if isinstance(fp, io.BufferedIOBase):
                 fp.write(data)
@@ -563,6 +564,7 @@ class PetAppearance(Object):
             else:
                 with open(fp, "wb") as f:
                     f.write(data)
+
         await asyncio.get_running_loop().run_in_executor(None, write)
 
 
@@ -1219,13 +1221,16 @@ class Outfit(Object):
             # render from outfit ID
             data = await self.read(size=size or self.size)
 
-            if isinstance(fp, io.BufferedIOBase):
-                fp.write(data)
-                if seek_begin:
-                    fp.seek(0)
-            else:
-                with open(fp, "wb") as f:
-                    f.write(data)
+            def write():
+                if isinstance(fp, io.BufferedIOBase):
+                    fp.write(data)
+                    if seek_begin:
+                        fp.seek(0)
+                else:
+                    with open(fp, "wb") as f:
+                        f.write(data)
+
+            await asyncio.get_running_loop().run_in_executor(None, write)
 
     def __repr__(self):
         attrs = [
