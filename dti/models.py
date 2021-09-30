@@ -978,7 +978,7 @@ class Neopet:
 
         pet_appearance = self.appearance
 
-        if pose:
+        if pose is not None and pose != self.pose:
             # override pose here
             is_valid = self.check(pose)
             if not is_valid:
