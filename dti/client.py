@@ -42,21 +42,21 @@ class Client:
         """|coro|
 
         A way to force the internal cache to update."""
-        await self._state._update(force=True)
+        await self._state._update(force=True)  # type: ignore
 
     async def all_species(self) -> List[Species]:
         """|coro|
 
         List[:class:`Species`]: Returns a list of all species."""
-        await self._state._lock_and_update()
-        return list(self._state._species.values())
+        await self._state._lock_and_update()  # type: ignore
+        return list(self._state._species.values())  # type: ignore
 
     async def all_colors(self) -> List[Color]:
         """|coro|
 
         List[:class:`Color`]: Returns a list of all colors."""
-        await self._state._lock_and_update()
-        return list(self._state._colors.values())
+        await self._state._lock_and_update()  # type: ignore
+        return list(self._state._colors.values())  # type: ignore
 
     async def get_species(self, name_or_id: Union[int, str]) -> Species:
         """|coro|
@@ -75,8 +75,8 @@ class Client:
         --------
         :class:`Species`: Returns a species by name or ID.
         """
-        await self._state._lock_and_update()
-        species = self._state._species[name_or_id]
+        await self._state._lock_and_update()  # type: ignore
+        species = self._state._species[name_or_id]  # type: ignore
         if species is None:
             raise InvalidSpecies()
         return species
@@ -98,8 +98,8 @@ class Client:
         --------
         :class:`Color`: Returns a color by name or ID.
         """
-        await self._state._lock_and_update()
-        color = self._state._colors[name_or_id]
+        await self._state._lock_and_update()  # type: ignore
+        color = self._state._colors[name_or_id]  # type: ignore
         if color is None:
             raise InvalidColor()
         return color
@@ -142,7 +142,7 @@ class Client:
         if not isinstance(color, Color):
             color = await self.get_color(color)
 
-        return await self._state._get_bit(species_id=species.id, color_id=color.id)
+        return await self._state._get_bit(species_id=species.id, color_id=color.id)  # type: ignore
 
     async def check(
         self,
@@ -182,7 +182,7 @@ class Client:
         if not isinstance(color, Color):
             color = await self.get_color(color)
 
-        return await self._state._check(
+        return await self._state._check(  # type: ignore
             species_id=species.id, color_id=color.id, pose=pose
         )
 
@@ -242,7 +242,7 @@ class Client:
         if not valid:
             raise InvalidColorSpeciesPair("Invalid Species/Color/Pose provided")
 
-        return await Neopet._fetch_assets_for(
+        return await Neopet._fetch_assets_for(  # type: ignore
             species=species,
             color=color,
             item_names=item_names,
@@ -279,7 +279,7 @@ class Client:
 
         size = size or LayerImageSize.SIZE_600
 
-        return await Neopet._fetch_by_name(
+        return await Neopet._fetch_by_name(  # type: ignore
             pet_name=pet_name, size=size, state=self._state
         )
 
@@ -308,7 +308,7 @@ class Client:
             The corresponding outfit that matches the ID.
         """
 
-        await self._state._lock_and_update()
+        await self._state._lock_and_update()  # type: ignore
 
         size = size or LayerImageSize.SIZE_600
 

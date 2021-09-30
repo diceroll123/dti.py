@@ -90,15 +90,15 @@ class Species(Object):
         self.name: str = data["name"]
 
     async def _color_iterator(self, valid: bool = True) -> List[Color]:
-        await self._state._lock_and_update()
+        await self._state._lock_and_update()  # type: ignore
 
         found: List[Color] = []
-        for color_id in range(1, self._state._valid_pairs.color_count + 1):
-            is_valid = self._state._valid_pairs._check(
+        for color_id in range(1, self._state._valid_pairs.color_count + 1):  # type: ignore
+            is_valid = self._state._valid_pairs._check(  # type: ignore
                 species_id=self.id, color_id=color_id
             )
             if is_valid == valid:
-                found.append(self._state._colors[color_id])
+                found.append(self._state._colors[color_id])  # type: ignore
         return found
 
     async def colors(self) -> List[Color]:
@@ -166,15 +166,15 @@ class Color(Object):
         self.name: str = data["name"]
 
     async def _species_iterator(self, valid: bool = True) -> List[Species]:
-        await self._state._lock_and_update()
+        await self._state._lock_and_update()  # type: ignore
 
         found: List[Species] = []
-        for species_id in range(1, self._state._valid_pairs.species_count + 1):
-            is_valid = self._state._valid_pairs._check(
+        for species_id in range(1, self._state._valid_pairs.species_count + 1):  # type: ignore
+            is_valid = self._state._valid_pairs._check(  # type: ignore
                 species_id=species_id, color_id=self.id
             )
             if is_valid == valid:
-                found.append(self._state._species[species_id])
+                found.append(self._state._species[species_id])  # type: ignore
         return found
 
     async def species(self) -> List[Species]:
@@ -295,7 +295,7 @@ class AppearanceLayer(Object):
         parent: Union[ItemAppearance, PetAppearance],
         data: AppearanceLayerPayload,
     ):
-        self._state = parent._state
+        self._state = parent._state  # type: ignore
         self.id: int = int(data["id"])
         self.parent: Union[ItemAppearance, PetAppearance] = parent
         self._image_url: Optional[str] = data["imageUrl"]
@@ -340,7 +340,7 @@ class AppearanceLayer(Object):
         """
         if self.image_url is None:
             raise NullAssetImage(f"Layer image missing: {self!r}")
-        return await self._state.http._fetch_binary_data(self.image_url)
+        return await self._state.http._fetch_binary_data(self.image_url)  # type: ignore
 
     def __repr__(self):
         attrs = [
@@ -523,7 +523,7 @@ class PetAppearance(Object):
         :class:`bytes`
             The content of the rendered image.
         """
-        return await self._state.http._fetch_binary_data(self.image_url(items=items))
+        return await self._state.http._fetch_binary_data(self.image_url(items=items))  # type: ignore
 
     async def render(
         self,
@@ -609,7 +609,7 @@ class ItemAppearance(Object):
     )
 
     def __init__(self, data: ItemAppearancePayload, item: Item):
-        self._state = item._state
+        self._state = item._state  # type: ignore
         self.id: str = data["id"]
         self.item: Item = item
         self.layers: List[AppearanceLayer] = [
@@ -813,7 +813,7 @@ class Neopet:
     ) -> Neopet:
         """Returns the data for a species+color+pose combo, optionally with items, an image size, and a name for internal usage."""
 
-        if not await state._check(species_id=species.id, color_id=color.id):
+        if not await state._check(species_id=species.id, color_id=color.id):  # type: ignore
             raise InvalidColorSpeciesPair(
                 f"According to DTI, the {species} species does not have the color {color}. If it's newly released, it must be modeled first!"
             )
@@ -834,7 +834,7 @@ class Neopet:
         ]
         appearance = PetAppearance(data=data["petAppearance"], size=size, state=state)
 
-        bit = await state._get_bit(species_id=species.id, color_id=color.id)
+        bit = await state._get_bit(species_id=species.id, color_id=color.id)  # type: ignore
 
         return Neopet(
             species=species,
@@ -1015,7 +1015,7 @@ class Neopet:
             pose=outfit.pet_appearance.pose,
             size=size or outfit.size,
             item_ids=[item.id for item in outfit.worn_items],
-            state=outfit._state,
+            state=outfit._state,  # type: ignore
         )
 
     @staticmethod
@@ -1039,7 +1039,7 @@ class Neopet:
             color=appearance.color,
             pose=appearance.pose,
             size=size or appearance.size,
-            state=appearance._state,
+            state=appearance._state,  # type: ignore
         )
 
     @property
@@ -1171,7 +1171,7 @@ class Outfit(Object):
         :class:`bytes`
             The content of the rendered image.
         """
-        return await self._state.http._fetch_binary_data(self.image_url(size=size))
+        return await self._state.http._fetch_binary_data(self.image_url(size=size))  # type: ignore
 
     async def render(
         self,

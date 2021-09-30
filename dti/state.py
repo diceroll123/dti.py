@@ -227,14 +227,14 @@ class State:
     async def _get_bit(self, *, species_id: int, color_id: int) -> BitField:
         await self._update()
         async with self._lock:
-            return self._valid_pairs._get_bit(species_id=species_id, color_id=color_id)
+            return self._valid_pairs._get_bit(species_id=species_id, color_id=color_id)  # type: ignore
 
     async def _check(
         self, *, species_id: int, color_id: int, pose: Optional[PetPose] = None
     ) -> bool:
         await self._update()
         async with self._lock:
-            return self._valid_pairs._check(
+            return self._valid_pairs._check(  # type: ignore
                 species_id=species_id, color_id=color_id, pose=pose
             )
 
@@ -249,7 +249,7 @@ class State:
             self._colors.clear()
             self._species.clear()
 
-            self._valid_pairs = ValidField(await self.http._fetch_valid_pet_poses())
+            self._valid_pairs = ValidField(await self.http._fetch_valid_pet_poses())  # type: ignore
             await self._fetch_species_and_color()
 
             self._cached = True
