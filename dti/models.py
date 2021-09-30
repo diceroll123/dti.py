@@ -1042,6 +1042,11 @@ class Neopet:
             state=appearance._state,
         )
 
+    @property
+    def image_url(self) -> str:
+        """:class:`str`: Convenience property for getting a Neopet's pet appearance render url."""
+        return self.appearance.image_url(self.items)
+
     def __repr__(self):
         attrs = [
             ("species", self.species),
