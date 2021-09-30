@@ -192,7 +192,7 @@ class Client:
         species: Union[int, str, Species],
         color: Union[int, str, Color],
         item_names: Optional[List[str]] = None,
-        item_ids: Optional[List[Union[str, int]]] = None,
+        item_ids: Optional[List[int]] = None,
         size: Optional[LayerImageSize] = None,
         pose: Optional[PetPose] = None,
     ) -> Neopet:
@@ -209,7 +209,7 @@ class Client:
             The name, or ID, or Color object of the desired Color. Case-insensitive.
         item_names: Optional[List[:class:`str`]]
             A list of item names to search for + add to the items of the Neopet.
-        item_ids: Optional[List[Union[:class:`str`, :class:`int`]]]
+        item_ids: Optional[List[:class:`int`]]
             A list of item IDs to search for + add to the items of the Neopet.
         size: Optional[:class:`LayerImageSize`]
             The desired size for the render. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
@@ -325,7 +325,7 @@ class Client:
         item_kind: Optional[ItemKind] = None,
         species_id: Optional[int] = None,
         color_id: Optional[int] = None,
-        item_ids: Optional[List[Union[str, int]]] = None,
+        item_ids: Optional[List[int]] = None,
         size: Optional[LayerImageSize] = None,
         per_page: Optional[int] = None,
     ) -> DTISearch:
@@ -351,7 +351,7 @@ class Client:
             The name of one item to search for. Case sensitive, and must be an exact search. Invalid results will be `None`.
         item_names: Optional[List[:class:`str`]]
             A list of item names to search for. Case sensitive, and must be an exact search. Invalid results will be `None`.
-        item_ids: Optional[List[Union[:class:`str`, :class:`int`]]]
+        item_ids: Optional[List[:class:`int`]]
             A list of item IDs to search for + add to the items of the Neopet. ***All*** item IDs ***must*** be valid, or :class:`InvalidItemID` will be raised.
 
         Raises
