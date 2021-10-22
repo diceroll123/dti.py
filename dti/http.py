@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 
 import httpx
 
@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     from .enums import LayerImageSize, PetPose
     from .models import Color, Species
     from .types import (
+        ID,
         FetchAssetsPayload,
         FetchedNeopetPayload,
         OutfitPayload,
@@ -38,13 +39,24 @@ log = logging.getLogger(__name__)
 
 
 class HTTPClient:
-    __slots__ = ("_proxy",)
+    __slots__ = ("_proxy", "_retries")
     API_BASE = "https://impress-2020.openneo.net/api"
 
-    def __init__(self, *, proxy: Optional[str] = None):
+    def __init__(
+        self,
+        *,
+        proxy: Optional[Union[str, Dict[str, str]]] = None,
+        retries: int = 3,
+    ):
         self._proxy = proxy
+        self._retries = retries
 
-    async def _query(self, query, variables=None, **kwargs) -> Dict:
+    async def _query(
+        self,
+        query: str,
+        variables: Optional[Dict[str, Any]] = None,
+        **kwargs: Dict[str, Any],
+    ) -> Dict[Any, Any]:
         # for graphql queries
         kwargs["headers"] = {
             "Content-Type": "application/json",
@@ -52,14 +64,15 @@ class HTTPClient:
             "Accept-Encoding": "gzip, deflate, br",
         }
 
-        payload = {"query": query}
+        payload: Dict[str, Any] = {"query": query}
         if variables:
             payload["variables"] = variables
 
         async with httpx.AsyncClient(
-            proxies=self._proxy, transport=httpx.AsyncHTTPTransport(retries=3)
+            proxies=self._proxy,  # type: ignore
+            transport=httpx.AsyncHTTPTransport(retries=self._retries),
         ) as client:
-            response = await client.post(
+            response = await client.post(  # type: ignore
                 f"{self.API_BASE}/graphql", json=payload, **kwargs
             )
             return response.json()
@@ -69,7 +82,8 @@ class HTTPClient:
 
     async def _fetch_binary_data(self, url: str) -> bytes:
         async with httpx.AsyncClient(
-            proxies=self._proxy, transport=httpx.AsyncHTTPTransport(retries=3)
+            proxies=self._proxy,  # type: ignore
+            transport=httpx.AsyncHTTPTransport(retries=self._retries),
         ) as client:
             response = await client.get(url)
             return response.read()
@@ -78,7 +92,8 @@ class HTTPClient:
         self, *, id: int, size: LayerImageSize
     ) -> PetAppearancePayload:
         data = await self._query(
-            GRAB_PET_APPEARANCE_BY_ID, variables={"appearanceId": id, "size": str(size)}
+            GRAB_PET_APPEARANCE_BY_ID,
+            variables={"appearanceId": str(id), "size": str(size)},
         )
 
         appearance_data = data["data"]["petAppearanceById"]
@@ -163,13 +178,13 @@ class HTTPClient:
         species: Species,
         color: Color,
         pose: PetPose,
-        item_ids: Optional[Sequence[Union[str, int]]] = None,
+        item_ids: Optional[Sequence[ID]] = None,
         item_names: Optional[Sequence[str]] = None,
         size: Optional[LayerImageSize] = None,
     ) -> FetchAssetsPayload:
         # basically the fullest single-purpose dataset we can grab from DTI
 
-        variables = {
+        variables: Dict[str, Any] = {
             "speciesId": species.id,
             "colorId": color.id,
             "size": str(size),

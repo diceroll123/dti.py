@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional, TypedDict
+from typing import List, Literal, Optional, TypedDict, TypeVar, Union
 
 PetPoseType = Literal[
     "HAPPY_MASC",
@@ -89,3 +89,6 @@ class FetchedNeopetPayload(TypedDict):
 class FetchAssetsPayload(TypedDict):
     items: List[ItemPayload]
     petAppearance: PetAppearancePayload
+
+
+ID = TypeVar("ID", bound=Union[str, int])

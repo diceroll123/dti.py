@@ -22,6 +22,7 @@ from .mixins import Object
 if TYPE_CHECKING:
     from .state import BitField, State
     from .types import (
+        ID,
         AppearanceLayerPayload,
         ColorPayload,
         ItemAppearancePayload,
@@ -805,7 +806,7 @@ class Neopet:
         species: Species,
         color: Color,
         pose: PetPose,
-        item_ids: Optional[Sequence[Union[str, int]]] = None,
+        item_ids: Optional[Sequence[ID]] = None,
         item_names: Optional[Sequence[str]] = None,
         size: Optional[LayerImageSize] = None,
         name: Optional[str] = None,

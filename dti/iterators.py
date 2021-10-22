@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import asyncio
-from typing import List, Optional, Sequence, TYPE_CHECKING, Union
+from asyncio.queues import Queue
+from typing import TYPE_CHECKING, Any, List, Optional, Sequence, Union
 
 from .constants import (
     SEARCH_ITEM_IDS,
@@ -22,7 +23,7 @@ class DTISearch:
     # this is a base class
     def __init__(self, *, state: State, per_page: Optional[int] = None):
         self._state = state
-        self._items: asyncio.Queue = asyncio.Queue(maxsize=per_page or 0)
+        self._items: Queue[Optional[Item]] = Queue(maxsize=per_page or 0)
         self._exhausted = False
 
     async def fetch_items(self) -> List[ItemPayload]:
@@ -52,12 +53,14 @@ class DTISearch:
         while True:
             try:
                 item = await self.next()
+                if item is None:
+                    raise StopAsyncIteration
             except StopAsyncIteration:
                 return ret
             else:
                 ret.append(item)
 
-    async def next(self) -> Item:
+    async def next(self) -> Optional[Item]:
         if self._items.empty() and not self._exhausted:
             await self._fill_items()
 
@@ -78,7 +81,7 @@ class ItemIDSearch(DTISearch):
         self.item_ids = item_ids
 
     async def fetch_items(self) -> List[ItemPayload]:
-        data = await self._state.http._query(
+        data = await self._state.http._query(  # type: ignore
             query=SEARCH_ITEM_IDS,
             variables={"itemIds": self.item_ids},
         )
@@ -88,7 +91,7 @@ class ItemIDSearch(DTISearch):
 
 
 class PaginatedDTISearch(DTISearch):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self.offset = 0
         self.per_page = 0
@@ -126,7 +129,7 @@ class ItemSearchToFit(PaginatedDTISearch):
         self.size = size or LayerImageSize.SIZE_600
 
     async def fetch_items(self) -> List[ItemPayload]:
-        data = await self._state.http._query(
+        data = await self._state.http._query(  # type: ignore
             query=SEARCH_TO_FIT,
             variables={
                 "query": self.query,
@@ -155,7 +158,7 @@ class ItemSearchNames(DTISearch):
         self.names = names
 
     async def fetch_items(self) -> List[ItemPayload]:
-        data = await self._state.http._query(
+        data = await self._state.http._query(  # type: ignore
             query=SEARCH_QUERY_EXACT_MULTIPLE, variables={"names": self.names}
         )
 
@@ -178,7 +181,7 @@ class ItemSearch(DTISearch):
         self.item_kind = item_kind
 
     async def fetch_items(self) -> List[ItemPayload]:
-        data = await self._state.http._query(
+        data = await self._state.http._query(  # type: ignore
             query=SEARCH_QUERY,
             variables={
                 "query": self.query,
