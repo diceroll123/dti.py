@@ -547,8 +547,8 @@ class PetAppearance(Object):
 
         Parameters
         -----------
-        fp: Union[:class:`io.BufferedIOBase`, :class:`os.PathLike`]
-            A file-like object opened in binary mode and write mode (`wb`).
+        fp: Union[:class:`str`, :class:`bytes`, :class:`io.BufferedIOBase`, :class:`os.PathLike`]
+            A path string, or a file-like object opened in binary mode and write mode (`wb`).
         items: Optional[Sequence[:class:`Item`]]
             An optional list of items to render on this appearance.
         seek_begin: :class:`bool`
@@ -964,8 +964,8 @@ class Neopet:
 
         Parameters
         -----------
-        fp: Union[:class:`io.BufferedIOBase`, :class:`os.PathLike`]
-            A file-like object opened in binary mode and write mode (`wb`).
+        fp: Union[:class:`str`, :class:`bytes`, :class:`io.BufferedIOBase`, :class:`os.PathLike`]
+            A path string, or a file-like object opened in binary mode and write mode (`wb`).
         pose: Optional[:class:`PetPose`]
             The desired pet pose for the render. Defaults to the current neopets' pose.
         seek_begin: :class:`bool`
@@ -1196,8 +1196,8 @@ class Outfit(Object):
 
         Parameters
         -----------
-        fp: Union[:class:`io.BufferedIOBase`, :class:`os.PathLike`]
-            A file-like object opened in binary mode and write mode (`wb`).
+        fp: Union[:class:`str`, :class:`bytes`, :class:`io.BufferedIOBase`, :class:`os.PathLike`]
+            A path string, or a file-like object opened in binary mode and write mode (`wb`).
         pose: Optional[:class:`PetPose`]
             The desired pet pose for the render. Defaults to the outfit's pose.
         size: Optional[:class:`LayerImageSize`]
