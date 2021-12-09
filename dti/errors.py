@@ -10,6 +10,12 @@ class NeopetNotFound(DTIException):
     pass
 
 
+class MissingModelData(DTIException):
+    """An exception that is thrown when a pet's data isn't in DTI's database yet."""
+
+    pass
+
+
 class OutfitNotFound(DTIException):
     """An exception that is thrown when searching a DTI outfit by ID returns nothing"""
 
@@ -29,7 +35,6 @@ class InvalidColor(DTIException):
 
 
 class InvalidSpecies(DTIException):
-
     """An exception that is thrown when an invalid species is passed into the species cache."""
 
     pass

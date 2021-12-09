@@ -18,6 +18,7 @@ from .constants import (
 )
 from .errors import (
     InvalidColorSpeciesPair,
+    MissingModelData,
     MissingPetAppearance,
     NeopetNotFound,
     OutfitNotFound,
@@ -159,16 +160,28 @@ class HTTPClient:
                 "An error occurred while trying to gather this pet's data."
             )
 
-        pet_on_neo = data["data"]["petOnNeopetsDotCom"]
-        if pet_on_neo is None:
-            raise NeopetNotFound("This pet does not seem to exist.")
+        errors = data.get("errors")
+        if errors:
+            # let's tackle the known errors first...
+            # errors are a list of dicts, let's loop for any we know!
 
-        error = data.get("errors")
-        if error:
+            for e in errors:
+                if (
+                    "This pet's modeling data isn't loaded into our database yet, sorry!"
+                    in e["message"]
+                ):
+                    raise MissingModelData(
+                        "This pet's modeling data isn't loaded into DTI yet! Go model it on Classic DTI!"
+                    )
+
             log.critical("Unhandled error occurred in data: " + str(data))
             raise NeopetNotFound(
                 "An error occurred while trying to gather this pet's data."
             )
+
+        pet_on_neo = data["data"]["petOnNeopetsDotCom"]
+        if pet_on_neo is None:
+            raise NeopetNotFound("This pet does not seem to exist.")
 
         return pet_on_neo
 
