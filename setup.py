@@ -1,10 +1,17 @@
 import contextlib
+import re
 
 from setuptools import setup
 
-import dti
+with open("dti/__init__.py") as f:
+    version = re.search(
+        r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE
+    )
 
-version = dti.__version__
+if version is None:
+    raise RuntimeError("Version number is not set")
+
+version = version.group(1)
 
 if version.endswith(("a", "b", "rc")):
     # append version identifier based on commit count
