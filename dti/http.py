@@ -81,7 +81,7 @@ class HTTPClient:
             try:
                 return response.json()
             except json.decoder.JSONDecodeError as e:
-                raise HTTPException(e)
+                raise HTTPException(response, e)
 
     async def _fetch_valid_pet_poses(self) -> bytes:
         return await self._fetch_binary_data(self.API_BASE + "/validPetPoses")
