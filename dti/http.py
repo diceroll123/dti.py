@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 
@@ -17,6 +18,7 @@ from .constants import (
     PET_ON_NEOPETS,
 )
 from .errors import (
+    HTTPException,
     InvalidColorSpeciesPair,
     MissingModelData,
     MissingPetAppearance,
@@ -76,7 +78,10 @@ class HTTPClient:
             response = await client.post(  # type: ignore
                 f"{self.API_BASE}/graphql", json=payload, **kwargs
             )
-            return response.json()
+            try:
+                return response.json()
+            except json.decoder.JSONDecodeError as e:
+                raise HTTPException(e)
 
     async def _fetch_valid_pet_poses(self) -> bytes:
         return await self._fetch_binary_data(self.API_BASE + "/validPetPoses")

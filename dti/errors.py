@@ -68,3 +68,9 @@ class InvalidItemID(DTIException):
     """An exception that is thrown when an invalid item ID is searched. The whole search query fails."""
 
     pass
+
+
+class HTTPException(DTIException):
+    """An exception that is thrown when an HTTP request operation fails."""
+
+    pass
