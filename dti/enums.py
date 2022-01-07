@@ -10,7 +10,7 @@ __all__ = (
     "try_enum",
 )
 
-from typing import Any
+from typing import Any, Type, TypeVar
 
 
 class _DTIEnum(Enum):
@@ -85,7 +85,10 @@ class AppearanceLayerKnownGlitch(Enum):
     REQUIRES_OTHER_BODY_SPECIFIC_ASSETS = "REQUIRES_OTHER_BODY_SPECIFIC_ASSETS"
 
 
-def try_enum(cls, val: Any) -> Any:
+T = TypeVar("T")
+
+
+def try_enum(cls: Type[T], val: Any) -> T:
     try:
         return cls(val)
     except TypeError:
