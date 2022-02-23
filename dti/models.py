@@ -915,10 +915,7 @@ class Neopet:
     def clear_closet(self) -> None:
         """Removes items from the closet that would not be rendered to the pet appearance."""
         _, closet = _render_items(self.items)
-        new_items: List[Item] = []
-        for item in self.items:
-            if item not in closet:
-                new_items.append(item)
+        new_items = [item for item in self.items if item not in closet]
         self.items = new_items
 
     @property
