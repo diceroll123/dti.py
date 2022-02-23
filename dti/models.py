@@ -94,12 +94,12 @@ class Species(Object):
         await self._state._lock_and_update()  # type: ignore
 
         found: List[Color] = []
-        for color_id in range(1, self._state._valid_pairs.color_count + 1):  # type: ignore
+        for color_id, color in self._state._colors.items(): # type: ignore
             is_valid = self._state._valid_pairs._check(  # type: ignore
-                species_id=self.id, color_id=color_id
+                species_id=self.id, color_id=int(color_id)
             )
             if is_valid == valid:
-                found.append(self._state._colors[color_id])  # type: ignore
+                found.append(color)
         return found
 
     async def colors(self) -> List[Color]:
@@ -170,12 +170,12 @@ class Color(Object):
         await self._state._lock_and_update()  # type: ignore
 
         found: List[Species] = []
-        for species_id in range(1, self._state._valid_pairs.species_count + 1):  # type: ignore
+        for species_id, species in self._state._species.items():  # type: ignore
             is_valid = self._state._valid_pairs._check(  # type: ignore
-                species_id=species_id, color_id=self.id
+                species_id=int(species_id), color_id=self.id
             )
             if is_valid == valid:
-                found.append(self._state._species[species_id])  # type: ignore
+                found.append(species)
         return found
 
     async def species(self) -> List[Species]:
