@@ -13,27 +13,25 @@ from .http import HTTPClient
 if TYPE_CHECKING:
     from .models import Color, Species
 
+    T = TypeVar("T", Color, Species)
+
+
 S = TypeVar("S", bound="State")
 
 
-class _NameDict(dict):
+class _NameDict(Dict[Union[str, int], T]):
     # this is only to be used by DTIState
     # for the sole purpose of easily searching colors/species by name
     # that said, we're throwing away any error prevention outside of these rules
-    def __getitem__(self, key: str) -> Optional[str]:
-        key = str(key)
+    def __getitem__(self, key: Union[str, int]) -> Optional[T]:  # type: ignore
+        # lowercase to make it less annoying to search
+        search_key = str(key).lower()
         # will never raise a KeyError, but will return None instead
         with contextlib.suppress(KeyError):
             # this is the normal __getitem__ behavior
-            return dict.__getitem__(self, key)
+            return dict.__getitem__(self, search_key)  # type: ignore
 
-        # look for names now
-        # lowercase to make it less annoying to search
-        key = key.lower()
-        for v in self.values():
-            if key == v.name.lower():
-                return v
-        return None
+        return next((v for v in self.values() if search_key == v.name.lower()), None)
 
 
 class BitField(int):
@@ -183,7 +181,7 @@ class State:
             await self._update()
 
     async def _fetch_species_and_color(self) -> None:
-        data = await self.http._query(query=ALL_SPECIES_AND_COLORS)
+        data = await self.http._query(query=ALL_SPECIES_AND_COLORS)  # type: ignore
         data = data["data"]
         from .models import Color, Species
 

@@ -94,7 +94,7 @@ class Species(Object):
         await self._state._lock_and_update()  # type: ignore
 
         found: List[Color] = []
-        for color_id, color in self._state._colors.items(): # type: ignore
+        for color_id, color in self._state._colors.items():  # type: ignore
             is_valid = self._state._valid_pairs._check(  # type: ignore
                 species_id=self.id, color_id=int(color_id)
             )
@@ -502,10 +502,12 @@ class PetAppearance(Object):
                     layer_urls.append(img)
                     continue
                 raise TypeError
-        except TypeError:
+        except TypeError as e:
             # expected str, NoneType found
             missing = [layer for layer in layers if layer.image_url is None]
-            raise NullAssetImage(f"Null image URLs found in this render: {missing}")
+            raise NullAssetImage(
+                f"Null image URLs found in this render: {missing}"
+            ) from e
 
         return utils.build_layers_url(layer_urls, size=self.size)
 
@@ -678,24 +680,23 @@ class Item(Object):
     def __init__(self, *, data: ItemPayload, state: State):
         self._state = state
         self.id: int = int(data["id"])
-        self.name: str = data.get("name")
-        self.description: str = data.get("description")
-        self.thumbnail_url: str = utils.url_sanitizer(data.get("thumbnailUrl"))
+        self.name: str = data["name"]
+        self.description: str = data["description"]
+        self.thumbnail_url: str = utils.url_sanitizer(data["thumbnailUrl"])
+        self.appearance: Optional[ItemAppearance] = None
 
         _kind = None
         if data.get("isNc"):
             _kind = ItemKind.NC
         if data.get("isPb"):
             _kind = ItemKind.PB
-        self.kind = _kind or ItemKind.NP
+        self.kind: ItemKind = _kind or ItemKind.NP
 
-        self.rarity: int = int(data.get("rarityIndex"))
+        self.rarity: int = int(data["rarityIndex"])
 
         appearance_data = data.get("appearanceOn", None)
         if appearance_data:
             self.appearance = ItemAppearance(appearance_data, self)
-        else:
-            self.appearance = None
 
     @property
     def legacy_url(self) -> str:

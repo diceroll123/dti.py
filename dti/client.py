@@ -1,4 +1,4 @@
-from typing import List, Optional, Union
+from typing import AsyncIterator, List, Optional, Union
 
 from .enums import ItemKind, LayerImageSize, PetPose
 from .errors import (
@@ -14,7 +14,7 @@ from .iterators import (
     ItemSearchNames,
     ItemSearchToFit,
 )
-from .models import Color, Neopet, Outfit, PetAppearance, Species, Zone
+from .models import Color, Item, Neopet, Outfit, PetAppearance, Species, Zone
 from .state import BitField, State
 
 
@@ -328,7 +328,7 @@ class Client:
         item_ids: Optional[List[int]] = None,
         size: Optional[LayerImageSize] = None,
         per_page: Optional[int] = None,
-    ) -> DTISearch:
+    ) -> AsyncIterator[Item]:
         """|coro|
 
         This is a one-size-fits-most search function. Most of the parameters cannot be mixed and matched.

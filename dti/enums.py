@@ -64,15 +64,15 @@ class PetPose(int, _DTIEnum):
     UNKNOWN = 128
 
     @classmethod
-    def ideal(cls):
+    def ideal(cls) -> "PetPose":
         return random.choice([cls.HAPPY_FEM, cls.HAPPY_MASC])
 
     @classmethod
-    def all_fem(cls):
+    def all_fem(cls) -> int:
         return cls.SICK_FEM | cls.SAD_FEM | cls.HAPPY_FEM
 
     @classmethod
-    def all_masc(cls):
+    def all_masc(cls) -> int:
         return cls.SICK_MASC | cls.SAD_MASC | cls.HAPPY_MASC
 
 

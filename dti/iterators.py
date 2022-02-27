@@ -66,8 +66,8 @@ class DTISearch:
 
         try:
             return self._items.get_nowait()
-        except asyncio.QueueEmpty:
-            raise StopAsyncIteration
+        except asyncio.QueueEmpty as e:
+            raise StopAsyncIteration from e
 
     async def __anext__(self):
         return await self.next()

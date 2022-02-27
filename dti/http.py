@@ -81,10 +81,10 @@ class HTTPClient:
             try:
                 return response.json()
             except json.decoder.JSONDecodeError as e:
-                raise HTTPException(response, e)
+                raise HTTPException(response, e) from e
 
     async def _fetch_valid_pet_poses(self) -> bytes:
-        return await self._fetch_binary_data(self.API_BASE + "/validPetPoses")
+        return await self._fetch_binary_data(f"{self.API_BASE}/validPetPoses")
 
     async def _fetch_binary_data(self, url: str) -> bytes:
         async with httpx.AsyncClient(
@@ -160,7 +160,7 @@ class HTTPClient:
         # so let's just check the latter first
         if "data" not in data:
             # an error we were not prepared for has occurred, let's find it!
-            log.critical("Unknown pet appearance data returned: " + str(data))
+            log.critical(f"Unknown pet appearance data returned: {str(data)}")
             raise NeopetNotFound(
                 "An error occurred while trying to gather this pet's data."
             )
@@ -179,7 +179,7 @@ class HTTPClient:
                         "This pet's modeling data isn't loaded into DTI yet! Go model it on Classic DTI!"
                     )
 
-            log.critical("Unhandled error occurred in data: " + str(data))
+            log.critical(f"Unhandled error occurred in data: {str(data)}")
             raise NeopetNotFound(
                 "An error occurred while trying to gather this pet's data."
             )
