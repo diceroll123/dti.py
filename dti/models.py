@@ -1121,10 +1121,10 @@ class Outfit(Object):
         # in an effort to cut down on dependencies, at a small performance cost,
         # we will simply truncate the trailing "Z" from the timestamps
         # for more info see https://discuss.python.org/t/parse-z-timezone-suffix-in-datetime/2220
-        self.created_at = datetime.datetime.fromisoformat(
+        self.created_at: datetime.datetime = datetime.datetime.fromisoformat(
             data["createdAt"][:-1]
         ).replace(tzinfo=datetime.timezone.utc)
-        self.updated_at = datetime.datetime.fromisoformat(
+        self.updated_at: datetime.datetime = datetime.datetime.fromisoformat(
             data["updatedAt"][:-1]
         ).replace(tzinfo=datetime.timezone.utc)
 
