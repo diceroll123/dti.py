@@ -17,6 +17,10 @@ from .iterators import (
 from .models import Color, Item, Neopet, Outfit, PetAppearance, Species, Zone
 from .state import BitField, State
 
+__all__ = (
+    "Client",
+)
+
 
 class Client:
     """Represents a client connection that connects to DTI.

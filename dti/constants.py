@@ -1,6 +1,8 @@
 from .enums import PetPose
 
-__all__ = ("CLOSEST_POSES_IN_ORDER",)
+__all__ = (
+  "CLOSEST_POSES_IN_ORDER",
+)
 
 # fragments
 FRAGMENT_ITEM_PROPERTIES = """
