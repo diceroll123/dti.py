@@ -14,7 +14,8 @@ if TYPE_CHECKING:
     from .models import Color, Species
 
     T = TypeVar("T", Color, Species)
-
+else:
+    T = TypeVar("T")
 
 S = TypeVar("S", bound="State")
 
