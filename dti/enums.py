@@ -1,5 +1,5 @@
 import random
-from enum import Enum, IntFlag, auto
+from enum import Enum, auto
 from typing import Any, Type, TypeVar
 
 from typing_extensions import Self
@@ -50,7 +50,7 @@ class AppearanceLayerType(_DTIEnum):
     OBJECT = auto()
 
 
-class PetPose(_DTIEnum, IntFlag):
+class PetPose(int, _DTIEnum):
     """Represents a single pet pose. Each pose has an associated power-of-two value to easily
     create :class:`BitField` objects. This object acts like an :class:`int`.
     """
