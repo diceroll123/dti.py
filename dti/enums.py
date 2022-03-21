@@ -63,17 +63,12 @@ class PetPose(int, _DTIEnum):
     UNCONVERTED = 64
     UNKNOWN = 128
 
+    ALL_FEM = SICK_FEM | SAD_FEM | HAPPY_FEM
+    ALL_MASC = SICK_MASC | SAD_MASC | HAPPY_MASC
+
     @classmethod
     def ideal(cls) -> "PetPose":
         return random.choice([cls.HAPPY_FEM, cls.HAPPY_MASC])
-
-    @classmethod
-    def all_fem(cls) -> int:
-        return cls.SICK_FEM | cls.SAD_FEM | cls.HAPPY_FEM
-
-    @classmethod
-    def all_masc(cls) -> int:
-        return cls.SICK_MASC | cls.SAD_MASC | cls.HAPPY_MASC
 
 
 class AppearanceLayerKnownGlitch(Enum):
