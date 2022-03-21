@@ -47,7 +47,7 @@ setup(
     version=version,
     license="MIT",
     description="A Python wrapper for the Dress To Impress API",
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     packages=["dti", "dti.types"],
     include_package_data=True,
     install_requires=requirements,
