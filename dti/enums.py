@@ -1,5 +1,8 @@
 import random
-from enum import Enum, auto
+from enum import Enum, IntFlag, auto
+from typing import Any, Type, TypeVar
+
+from typing_extensions import Self
 
 __all__ = (
     "LayerImageSize",
@@ -10,15 +13,13 @@ __all__ = (
     "try_enum",
 )
 
-from typing import Any, Type, TypeVar
-
 
 class _DTIEnum(Enum):
-    def _generate_next_value_(name, start, count, last_values):
+    def _generate_next_value_(name, start, count, last_values):  # type: ignore
         return name
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: Any) -> Self:
         return cls[value]
 
     def __str__(self):
@@ -49,7 +50,7 @@ class AppearanceLayerType(_DTIEnum):
     OBJECT = auto()
 
 
-class PetPose(int, _DTIEnum):
+class PetPose(_DTIEnum, IntFlag):
     """Represents a single pet pose. Each pose has an associated power-of-two value to easily
     create :class:`BitField` objects. This object acts like an :class:`int`.
     """
@@ -67,7 +68,7 @@ class PetPose(int, _DTIEnum):
     ALL_MASC = SICK_MASC | SAD_MASC | HAPPY_MASC
 
     @classmethod
-    def ideal(cls) -> "PetPose":
+    def ideal(cls) -> Self:
         return random.choice([cls.HAPPY_FEM, cls.HAPPY_MASC])
 
 

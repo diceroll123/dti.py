@@ -1,2 +1,3 @@
 httpx
 httpx[brotli]
+typing_extensions
