@@ -62,7 +62,7 @@ class Client:
         await self._state._lock_and_update()  # type: ignore
         return list(self._state._colors.values())  # type: ignore
 
-    async def get_species(self, name_or_id: Union[int, str]) -> Species:
+    async def get_species(self, name_or_id: Union[int, str], /) -> Species:
         """|coro|
 
         Parameters
@@ -85,7 +85,7 @@ class Client:
             raise InvalidSpecies()
         return species
 
-    async def get_color(self, name_or_id: Union[int, str]) -> Color:
+    async def get_color(self, name_or_id: Union[int, str], /) -> Color:
         """|coro|
 
         Parameters
@@ -257,7 +257,7 @@ class Client:
         )
 
     async def fetch_neopet_by_name(
-        self, pet_name: str, size: Optional[LayerImageSize] = None
+        self, pet_name: str, /, size: Optional[LayerImageSize] = None
     ) -> Neopet:
         """|coro|
 
@@ -288,7 +288,7 @@ class Client:
         )
 
     async def fetch_outfit(
-        self, outfit_id: int, size: Optional[LayerImageSize] = None
+        self, outfit_id: int, /, size: Optional[LayerImageSize] = None
     ) -> Outfit:
         """|coro|
 
@@ -463,7 +463,7 @@ class Client:
         return PetAppearance(data=data, size=size, state=self._state)
 
     async def fetch_appearance_by_id(
-        self, appearance_id: int, size: Optional[LayerImageSize] = None
+        self, appearance_id: int, /, size: Optional[LayerImageSize] = None
     ) -> PetAppearance:
         """|coro|
 

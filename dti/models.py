@@ -474,7 +474,7 @@ class PetAppearance(Object):
 
         return sorted(visible_layers, key=lambda layer: layer.zone.depth)
 
-    def image_url(self, items: Optional[Sequence[Item]] = None) -> str:
+    def image_url(self, *, items: Optional[Sequence[Item]] = None) -> str:
         """
         Parameters
         -----------
@@ -511,7 +511,7 @@ class PetAppearance(Object):
 
         return utils.build_layers_url(layer_urls, size=self.size)
 
-    async def read(self, items: Optional[Sequence[Item]] = None) -> bytes:
+    async def read(self, *, items: Optional[Sequence[Item]] = None) -> bytes:
         """|coro|
 
         Retrieves the content of the server-side-rendered image of this pet appearance as a :class:`bytes` object.
@@ -531,6 +531,7 @@ class PetAppearance(Object):
     async def render(
         self,
         fp: Union[str, bytes, os.PathLike[Any], io.BufferedIOBase],
+        /,
         *,
         items: Optional[Sequence[Item]] = None,
         seek_begin: bool = True,
@@ -944,8 +945,9 @@ class Neopet:
     async def render(
         self,
         fp: Union[str, bytes, os.PathLike[Any], io.BufferedIOBase],
-        pose: Optional[PetPose] = None,
+        /,
         *,
+        pose: Optional[PetPose] = None,
         seek_begin: bool = True,
     ) -> None:
         """|coro|
@@ -994,7 +996,7 @@ class Neopet:
 
     @staticmethod
     async def from_outfit(
-        outfit: Outfit, size: Optional[LayerImageSize] = None
+        outfit: Outfit, /, *, size: Optional[LayerImageSize] = None
     ) -> Neopet:
         """|coro|
 
@@ -1019,7 +1021,7 @@ class Neopet:
 
     @staticmethod
     async def from_appearance(
-        appearance: PetAppearance, size: Optional[LayerImageSize] = None
+        appearance: PetAppearance, /, *, size: Optional[LayerImageSize] = None
     ) -> Neopet:
         """|coro|
 
@@ -1044,7 +1046,7 @@ class Neopet:
     @property
     def image_url(self) -> str:
         """:class:`str`: Convenience property for getting a Neopet's pet appearance render url."""
-        return self.appearance.image_url(self.items)
+        return self.appearance.image_url(items=self.items)
 
     def __repr__(self):
         attrs = [
@@ -1138,7 +1140,7 @@ class Outfit(Object):
         """:class:`str`: Returns the outfit URL for the ID provided."""
         return f"https://impress-2020.openneo.net/outfits/{self.id}"
 
-    def image_url(self, size: Optional[LayerImageSize] = None) -> str:
+    def image_url(self, *, size: Optional[LayerImageSize] = None) -> str:
         """
         Parameters
         -----------
@@ -1155,7 +1157,7 @@ class Outfit(Object):
         size_str = str(size or self.size)[-3:]
         return f"https://outfits.openneo-assets.net/outfits/{self.id}/v/{updated_at}/{size_str}.png"
 
-    async def read(self, size: Optional[LayerImageSize] = None) -> bytes:
+    async def read(self, *, size: Optional[LayerImageSize] = None) -> bytes:
         """|coro|
 
         Retrieves the content of the server-side-rendered image of this outfit as a :class:`bytes` object.
@@ -1175,9 +1177,10 @@ class Outfit(Object):
     async def render(
         self,
         fp: Union[str, bytes, os.PathLike[Any], io.BufferedIOBase],
+        /,
+        *,
         pose: Optional[PetPose] = None,
         size: Optional[LayerImageSize] = None,
-        *,
         seek_begin: bool = True,
     ) -> None:
         """|coro|
@@ -1219,7 +1222,7 @@ class Outfit(Object):
             rebuild = True
 
         if rebuild:
-            neopet = await Neopet.from_outfit(self, size or self.size)
+            neopet = await Neopet.from_outfit(self, size=size or self.size)
             await neopet.render(fp, pose=pose, seek_begin=seek_begin)
         else:
             # render from outfit ID

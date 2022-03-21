@@ -7,7 +7,7 @@ __all__ = ("build_layers_url", "url_sanitizer")
 
 
 def build_layers_url(
-    layers: List[str], *, size: Optional[LayerImageSize] = None
+    layers: List[str], /, *, size: Optional[LayerImageSize] = None
 ) -> str:
     """Convenience method to make the server-side-rendering URL of the provided layer URLs.
 
@@ -24,7 +24,7 @@ def build_layers_url(
     return f"https://impress-2020.openneo.net/api/outfitImage?size={size_str}&layerUrls={joined}"
 
 
-def url_sanitizer(url: str) -> str:
+def url_sanitizer(url: str, /) -> str:
     """Convenience method to clean up URLs provided by DTI. Some neo-urls do not include an http/s scheme.
 
     Parameters
