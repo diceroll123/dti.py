@@ -66,6 +66,9 @@ class PetPose(_DTIEnum, IntFlag):
 
     ALL_FEM = SICK_FEM | SAD_FEM | HAPPY_FEM
     ALL_MASC = SICK_MASC | SAD_MASC | HAPPY_MASC
+    ALL_HAPPY = HAPPY_FEM | HAPPY_MASC
+    ALL_SAD = SAD_FEM | SAD_MASC
+    ALL_SICK = SICK_FEM | SICK_MASC
 
     @classmethod
     def ideal(cls) -> Self:
