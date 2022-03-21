@@ -332,7 +332,7 @@ class Client:
         item_ids: Optional[List[int]] = None,
         size: Optional[LayerImageSize] = None,
         per_page: Optional[int] = None,
-    ) -> AsyncIterator[Item]:
+    ) -> DTISearch:
         """|coro|
 
         This is a one-size-fits-most search function. Most of the parameters cannot be mixed and matched.

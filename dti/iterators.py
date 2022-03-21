@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import asyncio
 from asyncio.queues import Queue
-from typing import TYPE_CHECKING, Any, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Any, AsyncIterator, List, Optional, Sequence, Union
 
 from .constants import (
     SEARCH_ITEM_IDS,
@@ -19,11 +19,11 @@ if TYPE_CHECKING:
     from .types import ItemPayload
 
 
-class DTISearch:
+class DTISearch(AsyncIterator[Item]):
     # this is a base class
     def __init__(self, *, state: State, per_page: Optional[int] = None):
         self._state = state
-        self._items: Queue[Optional[Item]] = Queue(maxsize=per_page or 0)
+        self._items: Queue[Item] = Queue(maxsize=per_page or 0)
         self._exhausted = False
 
     async def fetch_items(self) -> List[ItemPayload]:
@@ -40,8 +40,6 @@ class DTISearch:
         for item in items:
             if item:
                 await self._items.put(Item(data=item, state=self._state))
-            else:
-                await self._items.put(None)
 
         self.post_fetch(items)
 
@@ -53,14 +51,11 @@ class DTISearch:
         while True:
             try:
                 item = await self.next()
-                if item is None:
-                    raise StopAsyncIteration
+                ret.append(item)
             except StopAsyncIteration:
                 return ret
-            else:
-                ret.append(item)
 
-    async def next(self) -> Optional[Item]:
+    async def next(self) -> Item:
         if self._items.empty() and not self._exhausted:
             await self._fill_items()
 
