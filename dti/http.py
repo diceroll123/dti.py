@@ -165,8 +165,7 @@ class HTTPClient:
                 "An error occurred while trying to gather this pet's data."
             )
 
-        errors = data.get("errors")
-        if errors:
+        if errors := data.get("errors"):
             # let's tackle the known errors first...
             # errors are a list of dicts, let's loop for any we know!
 
@@ -227,8 +226,7 @@ class HTTPClient:
                 "An error occurred while trying to gather this pet's data."
             )
 
-        error = data.get("error", None)
-        if error:
+        if error := data.get("error", None):
             if "it is undefined" in error["message"]:
                 raise InvalidColorSpeciesPair(
                     f"According to DTI, the {species} species does not have the color {color}. If it's newly released, it must be modeled first!"

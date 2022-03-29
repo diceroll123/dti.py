@@ -6,7 +6,7 @@ Some notes:
 - Breaking changes are very likely to happen until this lib + DTI2020 are considered stable
 
 ## Installing
-**Python 3.8 or higher is suggested**
+**Python 3.8 or higher is needed**
 
 This project will likely never be put on PyPI, so you'll have to install the development version, from this repo.
 

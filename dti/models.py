@@ -541,18 +541,13 @@ class PetAppearance(Object):
 
         try:
             for layer in layers:
-                img = layer.image_url
-                if img:
+                if img := layer.image_url:
                     layer_urls.append(img)
                     continue
                 raise TypeError
         except TypeError as e:
-            # expected str, NoneType found
             missing = [layer for layer in layers if layer.image_url is None]
-            raise NullAssetImage(
-                f"Null image URLs found in this render: {missing}"
-            ) from e
-
+            raise NullAssetImage(f"Null image URLs found in this render: {missing}") from e
         return utils.build_layers_url(layer_urls, size=self.size)
 
     async def read(self, *, items: Optional[Sequence[Item]] = None) -> bytes:
@@ -739,8 +734,7 @@ class Item(Object):
 
         self.rarity: int = int(data["rarityIndex"])
 
-        appearance_data = data.get("appearanceOn", None)
-        if appearance_data:
+        if appearance_data := data.get("appearanceOn"):
             self.appearance = ItemAppearance(appearance_data, self)
 
     @property
