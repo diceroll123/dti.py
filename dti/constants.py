@@ -43,6 +43,7 @@ fragment PetAppearanceForOutfitPreview on PetAppearance {
   }
   layers {
     id
+    bodyId
     remoteId
     imageUrl(size: $size)
     knownGlitches
@@ -64,6 +65,7 @@ fragment ItemAppearanceForOutfitPreview on ItemAppearance {
   }
   layers {
     id
+    bodyId
     remoteId
     imageUrl(size: $size)
     knownGlitches

@@ -273,6 +273,8 @@ class AppearanceLayer(Object):
         layer and a pet layer to have the same asset_remote_id.
     asset_type: :class:`AppearanceLayerType`
         The appearance layer's asset type.
+    body_id: :class:`int`
+        The appearance layer's body ID.
     zone: :class:`Zone`
         The appearance layer's zone.
     known_glitches: Optional[List[:class:`AppearanceLayerKnownGlitch`]]
@@ -288,6 +290,7 @@ class AppearanceLayer(Object):
         "asset_type",
         "asset_remote_id",
         "known_glitches",
+        "body_id",
     )
 
     def __init__(
@@ -301,6 +304,7 @@ class AppearanceLayer(Object):
         self.parent: Union[ItemAppearance, PetAppearance] = parent
         self._image_url: Optional[str] = data["imageUrl"]
         self.asset_remote_id: int = int(data["remoteId"])
+        self.body_id: int = int(data["bodyId"])
         self.zone: Zone = Zone(data["zone"])
         self.known_glitches: Optional[List[AppearanceLayerKnownGlitch]] = [
             try_enum(AppearanceLayerKnownGlitch, glitch)
@@ -453,7 +457,7 @@ class PetAppearance(Object):
     ) -> List[AppearanceLayer]:
         # Returns the image layers' images in order from bottom to top.
 
-        all_layers = list(self.layers)
+        all_layers: List[AppearanceLayer] = list(self.layers)
         item_restricted_zones: List[Zone] = []
         all_restricted_zones: Set[Zone] = set()
         if items:
@@ -468,9 +472,49 @@ class PetAppearance(Object):
 
             all_restricted_zones = set(item_restricted_zones + self.restricted_zones)
 
-        visible_layers = filter(
-            lambda layer: layer.zone not in all_restricted_zones, all_layers
-        )
+        def _layer_filter(layer: AppearanceLayer) -> bool:
+            ##############################################
+            #            NOTES STOLEN FROM DTI           #
+            ##############################################
+
+            #  When an item restricts a zone, it hides pet layers of the same zone.
+            #  We use this to e.g. make a hat hide a hair ruff.
+            #     //
+            #  NOTE: Items' restricted layers also affect what items you can wear at
+            #        the same time. We don't enforce anything about that here, and
+            #        instead assume that the input by this point is valid!
+            if (
+                layer.asset_type == AppearanceLayerType.BIOLOGY
+                and layer.zone.id in item_restricted_zones
+            ):
+                return False
+
+            # When a pet appearance restricts or occupies a zone, or when the pet is
+            # Unconverted, it makes body-specific items incompatible. We use this to
+            # disallow UCs from wearing certain body-specific Biology Effects,
+            # Statics, etc, while still allowing non-body-specific items in those
+            # zones! (I think this happens for some Invisible pet stuff, too?)
+            if (
+                layer.asset_type == AppearanceLayerType.OBJECT
+                and layer.body_id != 0
+                and (
+                    self.pose == PetPose.UNCONVERTED
+                    or layer.zone.id in all_restricted_zones
+                )
+            ):
+                return False
+
+            # A pet appearance can also restrict its own zones. The Wraith Uni is an
+            # interesting example: it has a horn, but its zone restrictions hide it!
+            if (
+                layer.asset_type == AppearanceLayerType.BIOLOGY
+                and layer.zone.id in self.restricted_zones
+            ):
+                return False
+
+            return True
+
+        visible_layers = filter(_layer_filter, all_layers)
 
         return sorted(visible_layers, key=lambda layer: layer.zone.depth)
 
@@ -835,6 +879,7 @@ class Neopet:
         items = [
             Item(data=item, state=state) for item in data["items"] if item is not None
         ]
+
         appearance = PetAppearance(data=data["petAppearance"], size=size, state=state)
 
         bit = await state._get_bit(species_id=species.id, color_id=color.id)  # type: ignore

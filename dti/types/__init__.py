@@ -31,6 +31,7 @@ class ZonePayload(_BaseObject):
 
 class AppearanceLayerPayload(_BaseObject):
     imageUrl: Optional[str]
+    bodyId: str
     remoteId: str
     zone: ZonePayload
     knownGlitches: List[str]
