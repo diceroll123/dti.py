@@ -702,18 +702,16 @@ class Item(Object):
         The kind of item this is. Can be `NC` for Neocash, `NP` for Neopoint items, or `PB` for paintbrush items.
     rarity: :class:`int`
         The item's rarity on Neopets.
-    appearance: Optional[:class:`ItemAppearance`]
-        The item appearance object for this item on a particular PetAppearance. Can be `None`.
     """
 
     __slots__ = (
         "_state",
+        "_appearance",
         "id",
         "name",
         "kind",
         "description",
         "thumbnail_url",
-        "appearance",
         "rarity",
     )
 
@@ -723,7 +721,8 @@ class Item(Object):
         self.name: str = data["name"]
         self.description: str = data["description"]
         self.thumbnail_url: str = utils.url_sanitizer(data["thumbnailUrl"])
-        self.appearance: Optional[ItemAppearance] = None
+        self._appearance: Optional[ItemAppearance] = None
+        self.appearance = data.get("appearanceOn")
 
         _kind = None
         if data.get("isNc"):
@@ -734,8 +733,21 @@ class Item(Object):
 
         self.rarity: int = int(data["rarityIndex"])
 
-        if appearance_data := data.get("appearanceOn"):
-            self.appearance = ItemAppearance(appearance_data, self)
+    @property
+    def appearance(self) -> Optional[ItemAppearance]:
+        """The item appearance object for this item on a particular PetAppearance. Can be `None`."""
+        return self._appearance
+
+    @appearance.setter
+    def appearance(self, val: Optional[Union[ItemAppearancePayload, ItemAppearance]]):
+        if val is not None:
+            if isinstance(val, ItemAppearance):
+                self._appearance = val
+            else:
+                # assume it's a ItemAppearancePayload
+                self._appearance = ItemAppearance(val, self)
+        else:
+            self._appearance = None
 
     @property
     def legacy_url(self) -> str:
