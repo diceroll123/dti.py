@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
 import httpx
 
 from .constants import (
+    GRAB_ALL_APPEARANCES_FOR_COLOR,
     GRAB_PET_APPEARANCE_BY_ID,
     GRAB_PET_APPEARANCE_BY_SPECIES_COLOR_POSE,
     GRAB_PET_APPEARANCE_IDS,
@@ -255,3 +256,17 @@ class HTTPClient:
         )
 
         return [int(appearance["id"]) for appearance in data["data"]["petAppearances"]]
+
+    async def fetch_all_appearances_for_color(
+        self, color: Color, /, *, item_ids: List[int], size: LayerImageSize
+    ):
+        data = await self._query(
+            GRAB_ALL_APPEARANCES_FOR_COLOR,
+            variables=dict(
+                itemIds=item_ids,
+                preferredColorId=color.id,
+                size=str(size),
+            ),
+        )
+
+        return data["data"]

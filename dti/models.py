@@ -4,7 +4,18 @@ import asyncio
 import datetime
 import io
 import os
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Set, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Union,
+    overload,
+)
 from urllib.parse import urlencode
 
 from . import utils
@@ -547,7 +558,9 @@ class PetAppearance(Object):
                 raise TypeError
         except TypeError as e:
             missing = [layer for layer in layers if layer.image_url is None]
-            raise NullAssetImage(f"Null image URLs found in this render: {missing}") from e
+            raise NullAssetImage(
+                f"Null image URLs found in this render: {missing}"
+            ) from e
         return utils.build_layers_url(layer_urls, size=self.size)
 
     async def read(self, *, items: Optional[Sequence[Item]] = None) -> bytes:
@@ -899,6 +912,64 @@ class Neopet:
             appearance=appearance,
             name=name,
             size=size,
+            state=state,
+        )
+
+    @overload
+    @classmethod
+    async def _from_appearance(
+        cls,
+        pet_appearance: PetAppearance,
+        /,
+        *,
+        item: Optional[Item] = None,
+    ) -> Neopet:
+        ...
+
+    @overload
+    @classmethod
+    async def _from_appearance(
+        cls,
+        pet_appearance: PetAppearance,
+        /,
+        *,
+        items: Optional[Sequence[Item]] = None,
+    ) -> Neopet:
+        ...
+
+    @classmethod
+    async def _from_appearance(
+        cls,
+        pet_appearance: PetAppearance,
+        /,
+        *,
+        item: Optional[Item] = None,
+        items: Optional[Sequence[Item]] = None,
+    ) -> Neopet:
+        """Makes a single-use Neopet object, as opposed to Neopet.from_appearance, which is a more full object with all appearance data etc. This is for internal use only."""
+
+        species = pet_appearance.species
+        color = pet_appearance.color
+        state = pet_appearance._state
+
+        _items: List[Item] = []
+
+        if item:
+            _items.append(item)
+
+        if items:
+            _items.extend(items)
+
+        bit = await state._get_bit(species_id=species.id, color_id=color.id)  # type: ignore
+
+        return cls(
+            species=species,
+            color=color,
+            pose=pet_appearance.pose,
+            valid_poses=bit,
+            items=_items,
+            appearance=pet_appearance,
+            size=pet_appearance.size,
             state=state,
         )
 

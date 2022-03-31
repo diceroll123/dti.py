@@ -1,4 +1,6 @@
-from typing import AsyncIterator, List, Optional, Union
+import copy
+from collections import defaultdict
+from typing import DefaultDict, Dict, List, Optional, Union
 
 from .enums import ItemKind, LayerImageSize, PetPose
 from .errors import (
@@ -598,3 +600,64 @@ class Client:
             raise InvalidColorSpeciesPair("Invalid Species/Color/Pose provided")
 
         return await self._state.http.fetch_appearance_ids(species=species, color=color)
+
+    async def fetch_all_appearances(
+        self,
+        *,
+        item_id: Optional[int] = None,
+        item_ids: Optional[List[int]] = None,
+        color: Optional[Union[int, str, Color]] = None,
+        size: Optional[LayerImageSize] = None,
+    ) -> List[Neopet]:
+
+        _item_ids: List[int] = []
+
+        if item_id:
+            _item_ids.append(item_id)
+
+        if item_ids:
+            _item_ids.extend(item_ids)
+
+        if color is not None and not isinstance(color, Color):
+            color = await self.get_color(color)
+
+        if not isinstance(color, Color):
+            # DTI falls back to Blue, so we will as well!
+            color = await self.get_color("Blue")
+
+        size = size or LayerImageSize.SIZE_600
+
+        data = await self._state.http.fetch_all_appearances_for_color(color,
+            item_ids=_item_ids, size=size
+        )
+        all_pet_appearances = data["color"].pop("appliedToAllCompatibleSpecies")
+
+        all_items = data.pop("items", [])
+        item_map: DefaultDict[int, List[Item]] = defaultdict(list)  # bodyId, [Item]
+        return_neopets: List[Neopet] = []
+
+        for item in all_items:
+            item_appearances = item.pop("allAppearances")
+            # won't be needing that in there anymore
+            # the rest of this object is now just an Item
+            real_item = Item(data=item, state=self._state)
+
+            for item_appearance in item_appearances:
+                # please forgive me
+                body_id = int(item_appearance["id"].split("-")[-1])
+                new_item = copy.copy(real_item)
+                new_item.appearance = item_appearance
+                item_map[body_id].append(new_item)
+
+        for pet_appearance in all_pet_appearances:
+            appearance = PetAppearance(
+                state=self._state, size=size, data=pet_appearance["canonicalAppearance"]
+            )
+
+            neopet = await Neopet._from_appearance(
+                appearance, items=item_map[appearance.body_id]
+            )
+
+            return_neopets.append(neopet)
+
+        return return_neopets

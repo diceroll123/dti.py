@@ -266,6 +266,30 @@ query($outfitId: ID!, $size: LayerImageSize!) {
     + FRAGMENT_USER_PROPERTIES
 )
 
+# grab all appearances for a neopet color
+GRAB_ALL_APPEARANCES_FOR_COLOR = (
+    """
+query ($itemIds: [ID!]!, $preferredColorId: ID!, $size: LayerImageSize!) {
+  items(ids: $itemIds) {
+    ...ItemProperties
+    allAppearances {
+      ...ItemAppearanceForOutfitPreview
+    }
+  }
+  color(id: $preferredColorId) {
+    appliedToAllCompatibleSpecies {
+      canonicalAppearance {
+        ...PetAppearanceForOutfitPreview
+      }
+    }
+  }
+}
+"""
+    + FRAGMENT_ITEM_APPEARANCE
+    + FRAGMENT_ITEM_PROPERTIES
+    + FRAGMENT_PET_APPEARANCE
+)
+
 # grab zones
 GRAB_ZONES = """
 {
