@@ -471,7 +471,10 @@ class PetAppearance(Object):
 
         all_layers: List[AppearanceLayer] = list(self.layers)
         item_restricted_zones: List[Zone] = []
-        all_restricted_zones: Set[Zone] = set()
+        pet_occupied_and_restricted_zones: Set[Zone] = {
+            layer.zone for layer in all_layers
+        } | set(self.restricted_zones)
+
         if items:
             render_items, _ = _render_items(items)
             for item in render_items:
@@ -482,8 +485,6 @@ class PetAppearance(Object):
 
                 item_restricted_zones.extend(item.appearance.restricted_zones)
 
-            all_restricted_zones = set(item_restricted_zones + self.restricted_zones)
-
         def _layer_filter(layer: AppearanceLayer) -> bool:
             ##############################################
             #            NOTES STOLEN FROM DTI           #
@@ -491,13 +492,13 @@ class PetAppearance(Object):
 
             #  When an item restricts a zone, it hides pet layers of the same zone.
             #  We use this to e.g. make a hat hide a hair ruff.
-            #     //
+            #
             #  NOTE: Items' restricted layers also affect what items you can wear at
             #        the same time. We don't enforce anything about that here, and
             #        instead assume that the input by this point is valid!
             if (
                 layer.asset_type == AppearanceLayerType.BIOLOGY
-                and layer.zone.id in item_restricted_zones
+                and layer.zone in item_restricted_zones
             ):
                 return False
 
@@ -511,7 +512,7 @@ class PetAppearance(Object):
                 and layer.body_id != 0
                 and (
                     self.pose == PetPose.UNCONVERTED
-                    or layer.zone.id in all_restricted_zones
+                    or layer.zone in pet_occupied_and_restricted_zones
                 )
             ):
                 return False
@@ -520,7 +521,7 @@ class PetAppearance(Object):
             # interesting example: it has a horn, but its zone restrictions hide it!
             if (
                 layer.asset_type == AppearanceLayerType.BIOLOGY
-                and layer.zone.id in self.restricted_zones
+                and layer.zone in self.restricted_zones
             ):
                 return False
 
