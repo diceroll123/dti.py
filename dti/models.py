@@ -365,6 +365,7 @@ class AppearanceLayer(Object):
             ("zone", self.zone),
             ("url", self.image_url),
             ("parent", self.parent),
+            ("asset_type", self.asset_type),
         ]
         joined = " ".join("%s=%r" % t for t in attrs)
         return f"<AppearanceLayer {joined}>"
