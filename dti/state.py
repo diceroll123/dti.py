@@ -94,30 +94,45 @@ class BitField(int):
 
 
 class ValidField:
-    __slots__ = ("species_count", "color_count", "_data")
-    species_count: int
-    color_count: int
+    __slots__ = ("_data",)
     _data: bytes
 
     def __init__(self, data: Optional[bytes] = None):
         if data is None:
-            self.species_count = 0
-            self.color_count = 0
             self._data = b""
             return
-        # the first byte is the amount of species
-        # the second byte is the amount of colors
+
         # this pops them off the data table so we can cleanly search later :)
-        self.species_count, self.color_count, *self._data = data
+        self._data = data
 
         # this next if statement makes sure the above data is correct
-        if self.species_count * self.color_count != len(self._data):
+        if self.species_count * self.color_count != len(self.data):
             raise InvalidPairBytes("Invalid Pet-Pose bit table")
+
+    @property
+    def full_data(self) -> bytes:
+        """The full data blob, it's a binary mess. The first byte is the amount of species, and the second byte is the amount of colors."""
+        return self._data
+
+    @property
+    def species_count(self) -> int:
+        """The amount of species in this data blob."""
+        return self._data[0]
+
+    @property
+    def color_count(self) -> int:
+        """The amount of colors in this data blob."""
+        return self._data[1]
+
+    @property
+    def data(self) -> bytes:
+        """The full blob, without the species/color counts."""
+        return self._data[2:]
 
     def _get_bit(self, species_id: int, color_id: int) -> BitField:
         species_id -= 1
         color_id -= 1
-        return BitField(self._data[species_id * self.color_count + color_id])
+        return BitField(self.data[species_id * self.color_count + color_id])
 
     def _check(
         self,
@@ -135,7 +150,7 @@ class ValidField:
 
     def __len__(self) -> int:
         """:class:`int`: Returns the amount of valid color/species combinations."""
-        return sum(bit > 0 for bit in self._data)
+        return sum(bit > 0 for bit in self.data)
 
 
 class State:
