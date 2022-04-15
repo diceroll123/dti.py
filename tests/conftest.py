@@ -1,6 +1,7 @@
 import json
 import time
 from pathlib import Path
+from typing import Any, Dict
 
 import pytest
 from dti import Client
@@ -33,3 +34,9 @@ dti_c._state._species = _NameDict(
 @pytest.fixture
 def client() -> Client:
     return dti_c
+
+
+@pytest.fixture
+def zone_data() -> Dict[str, Any]:
+    # zone payload from Client.fetch_all_zones()
+    return json.loads((payloads / "client_fetch_all_zones.json").read_text())
