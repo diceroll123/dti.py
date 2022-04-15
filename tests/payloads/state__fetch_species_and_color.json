@@ -1,0 +1,680 @@
+{
+    "data": {
+        "allSpecies": [
+            {
+                "id": "1",
+                "name": "Acara"
+            },
+            {
+                "id": "2",
+                "name": "Aisha"
+            },
+            {
+                "id": "3",
+                "name": "Blumaroo"
+            },
+            {
+                "id": "4",
+                "name": "Bori"
+            },
+            {
+                "id": "5",
+                "name": "Bruce"
+            },
+            {
+                "id": "6",
+                "name": "Buzz"
+            },
+            {
+                "id": "7",
+                "name": "Chia"
+            },
+            {
+                "id": "8",
+                "name": "Chomby"
+            },
+            {
+                "id": "9",
+                "name": "Cybunny"
+            },
+            {
+                "id": "10",
+                "name": "Draik"
+            },
+            {
+                "id": "11",
+                "name": "Elephante"
+            },
+            {
+                "id": "12",
+                "name": "Eyrie"
+            },
+            {
+                "id": "13",
+                "name": "Flotsam"
+            },
+            {
+                "id": "14",
+                "name": "Gelert"
+            },
+            {
+                "id": "15",
+                "name": "Gnorbu"
+            },
+            {
+                "id": "16",
+                "name": "Grarrl"
+            },
+            {
+                "id": "17",
+                "name": "Grundo"
+            },
+            {
+                "id": "18",
+                "name": "Hissi"
+            },
+            {
+                "id": "19",
+                "name": "Ixi"
+            },
+            {
+                "id": "20",
+                "name": "Jetsam"
+            },
+            {
+                "id": "21",
+                "name": "Jubjub"
+            },
+            {
+                "id": "22",
+                "name": "Kacheek"
+            },
+            {
+                "id": "23",
+                "name": "Kau"
+            },
+            {
+                "id": "24",
+                "name": "Kiko"
+            },
+            {
+                "id": "25",
+                "name": "Koi"
+            },
+            {
+                "id": "26",
+                "name": "Korbat"
+            },
+            {
+                "id": "27",
+                "name": "Kougra"
+            },
+            {
+                "id": "28",
+                "name": "Krawk"
+            },
+            {
+                "id": "29",
+                "name": "Kyrii"
+            },
+            {
+                "id": "30",
+                "name": "Lenny"
+            },
+            {
+                "id": "31",
+                "name": "Lupe"
+            },
+            {
+                "id": "32",
+                "name": "Lutari"
+            },
+            {
+                "id": "33",
+                "name": "Meerca"
+            },
+            {
+                "id": "34",
+                "name": "Moehog"
+            },
+            {
+                "id": "35",
+                "name": "Mynci"
+            },
+            {
+                "id": "36",
+                "name": "Nimmo"
+            },
+            {
+                "id": "37",
+                "name": "Ogrin"
+            },
+            {
+                "id": "38",
+                "name": "Peophin"
+            },
+            {
+                "id": "39",
+                "name": "Poogle"
+            },
+            {
+                "id": "40",
+                "name": "Pteri"
+            },
+            {
+                "id": "41",
+                "name": "Quiggle"
+            },
+            {
+                "id": "42",
+                "name": "Ruki"
+            },
+            {
+                "id": "43",
+                "name": "Scorchio"
+            },
+            {
+                "id": "44",
+                "name": "Shoyru"
+            },
+            {
+                "id": "45",
+                "name": "Skeith"
+            },
+            {
+                "id": "46",
+                "name": "Techo"
+            },
+            {
+                "id": "47",
+                "name": "Tonu"
+            },
+            {
+                "id": "48",
+                "name": "Tuskaninny"
+            },
+            {
+                "id": "49",
+                "name": "Uni"
+            },
+            {
+                "id": "50",
+                "name": "Usul"
+            },
+            {
+                "id": "51",
+                "name": "Wocky"
+            },
+            {
+                "id": "52",
+                "name": "Xweetok"
+            },
+            {
+                "id": "53",
+                "name": "Yurble"
+            },
+            {
+                "id": "54",
+                "name": "Zafara"
+            },
+            {
+                "id": "55",
+                "name": "Vandagyre"
+            }
+        ],
+        "allColors": [
+            {
+                "id": "1",
+                "name": "Alien"
+            },
+            {
+                "id": "2",
+                "name": "Apple"
+            },
+            {
+                "id": "3",
+                "name": "Asparagus"
+            },
+            {
+                "id": "4",
+                "name": "Aubergine"
+            },
+            {
+                "id": "5",
+                "name": "Avocado"
+            },
+            {
+                "id": "6",
+                "name": "Baby"
+            },
+            {
+                "id": "7",
+                "name": "Biscuit"
+            },
+            {
+                "id": "8",
+                "name": "Blue"
+            },
+            {
+                "id": "9",
+                "name": "Blueberry"
+            },
+            {
+                "id": "10",
+                "name": "Brown"
+            },
+            {
+                "id": "11",
+                "name": "Camouflage"
+            },
+            {
+                "id": "12",
+                "name": "Carrot"
+            },
+            {
+                "id": "13",
+                "name": "Checkered"
+            },
+            {
+                "id": "14",
+                "name": "Chocolate"
+            },
+            {
+                "id": "15",
+                "name": "Chokato"
+            },
+            {
+                "id": "16",
+                "name": "Christmas"
+            },
+            {
+                "id": "17",
+                "name": "Clay"
+            },
+            {
+                "id": "18",
+                "name": "Cloud"
+            },
+            {
+                "id": "19",
+                "name": "Coconut"
+            },
+            {
+                "id": "20",
+                "name": "Custard"
+            },
+            {
+                "id": "21",
+                "name": "Darigan"
+            },
+            {
+                "id": "22",
+                "name": "Desert"
+            },
+            {
+                "id": "23",
+                "name": "Disco"
+            },
+            {
+                "id": "24",
+                "name": "Durian"
+            },
+            {
+                "id": "25",
+                "name": "Electric"
+            },
+            {
+                "id": "26",
+                "name": "Faerie"
+            },
+            {
+                "id": "27",
+                "name": "Fire"
+            },
+            {
+                "id": "28",
+                "name": "Garlic"
+            },
+            {
+                "id": "29",
+                "name": "Ghost"
+            },
+            {
+                "id": "30",
+                "name": "Glowing"
+            },
+            {
+                "id": "31",
+                "name": "Gold"
+            },
+            {
+                "id": "32",
+                "name": "Gooseberry"
+            },
+            {
+                "id": "33",
+                "name": "Grape"
+            },
+            {
+                "id": "34",
+                "name": "Green"
+            },
+            {
+                "id": "35",
+                "name": "Grey"
+            },
+            {
+                "id": "36",
+                "name": "Halloween"
+            },
+            {
+                "id": "37",
+                "name": "Ice"
+            },
+            {
+                "id": "38",
+                "name": "Invisible"
+            },
+            {
+                "id": "39",
+                "name": "Island"
+            },
+            {
+                "id": "40",
+                "name": "Jelly"
+            },
+            {
+                "id": "41",
+                "name": "Lemon"
+            },
+            {
+                "id": "42",
+                "name": "Lime"
+            },
+            {
+                "id": "43",
+                "name": "Mallow"
+            },
+            {
+                "id": "44",
+                "name": "Maraquan"
+            },
+            {
+                "id": "45",
+                "name": "Msp"
+            },
+            {
+                "id": "46",
+                "name": "Mutant"
+            },
+            {
+                "id": "47",
+                "name": "Orange"
+            },
+            {
+                "id": "48",
+                "name": "Pea"
+            },
+            {
+                "id": "49",
+                "name": "Peach"
+            },
+            {
+                "id": "50",
+                "name": "Pear"
+            },
+            {
+                "id": "51",
+                "name": "Pepper"
+            },
+            {
+                "id": "52",
+                "name": "Pineapple"
+            },
+            {
+                "id": "53",
+                "name": "Pink"
+            },
+            {
+                "id": "54",
+                "name": "Pirate"
+            },
+            {
+                "id": "55",
+                "name": "Plum"
+            },
+            {
+                "id": "56",
+                "name": "Plushie"
+            },
+            {
+                "id": "57",
+                "name": "Purple"
+            },
+            {
+                "id": "58",
+                "name": "Quigukiboy"
+            },
+            {
+                "id": "59",
+                "name": "Quigukigirl"
+            },
+            {
+                "id": "60",
+                "name": "Rainbow"
+            },
+            {
+                "id": "61",
+                "name": "Red"
+            },
+            {
+                "id": "62",
+                "name": "Robot"
+            },
+            {
+                "id": "63",
+                "name": "Royalboy"
+            },
+            {
+                "id": "64",
+                "name": "Royalgirl"
+            },
+            {
+                "id": "65",
+                "name": "Shadow"
+            },
+            {
+                "id": "66",
+                "name": "Silver"
+            },
+            {
+                "id": "67",
+                "name": "Sketch"
+            },
+            {
+                "id": "68",
+                "name": "Skunk"
+            },
+            {
+                "id": "69",
+                "name": "Snot"
+            },
+            {
+                "id": "70",
+                "name": "Snow"
+            },
+            {
+                "id": "71",
+                "name": "Speckled"
+            },
+            {
+                "id": "72",
+                "name": "Split"
+            },
+            {
+                "id": "73",
+                "name": "Sponge"
+            },
+            {
+                "id": "74",
+                "name": "Spotted"
+            },
+            {
+                "id": "75",
+                "name": "Starry"
+            },
+            {
+                "id": "76",
+                "name": "Strawberry"
+            },
+            {
+                "id": "77",
+                "name": "Striped"
+            },
+            {
+                "id": "78",
+                "name": "Thornberry"
+            },
+            {
+                "id": "79",
+                "name": "Tomato"
+            },
+            {
+                "id": "80",
+                "name": "Tyrannian"
+            },
+            {
+                "id": "81",
+                "name": "Usuki boy"
+            },
+            {
+                "id": "82",
+                "name": "Usuki girl"
+            },
+            {
+                "id": "83",
+                "name": "White"
+            },
+            {
+                "id": "84",
+                "name": "Yellow"
+            },
+            {
+                "id": "85",
+                "name": "Zombie"
+            },
+            {
+                "id": "86",
+                "name": "Onion"
+            },
+            {
+                "id": "87",
+                "name": "Magma"
+            },
+            {
+                "id": "88",
+                "name": "Relic"
+            },
+            {
+                "id": "89",
+                "name": "Woodland"
+            },
+            {
+                "id": "90",
+                "name": "Transparent"
+            },
+            {
+                "id": "91",
+                "name": "Maractite"
+            },
+            {
+                "id": "92",
+                "name": "8-bit"
+            },
+            {
+                "id": "93",
+                "name": "Swamp gas"
+            },
+            {
+                "id": "94",
+                "name": "Water"
+            },
+            {
+                "id": "95",
+                "name": "Wraith"
+            },
+            {
+                "id": "96",
+                "name": "Eventide"
+            },
+            {
+                "id": "97",
+                "name": "Elderlyboy"
+            },
+            {
+                "id": "98",
+                "name": "Elderlygirl"
+            },
+            {
+                "id": "99",
+                "name": "Stealthy"
+            },
+            {
+                "id": "100",
+                "name": "Dimensional"
+            },
+            {
+                "id": "101",
+                "name": "Agueena"
+            },
+            {
+                "id": "102",
+                "name": "Pastel"
+            },
+            {
+                "id": "103",
+                "name": "Ummagine"
+            },
+            {
+                "id": "104",
+                "name": "Polka Dot"
+            },
+            {
+                "id": "105",
+                "name": "Candy"
+            },
+            {
+                "id": "106",
+                "name": "Marble"
+            },
+            {
+                "id": "107",
+                "name": "Steampunk"
+            },
+            {
+                "id": "108",
+                "name": "Toy"
+            },
+            {
+                "id": "109",
+                "name": "Origami"
+            },
+            {
+                "id": "110",
+                "name": "Oil Paint"
+            },
+            {
+                "id": "111",
+                "name": "Mosaic"
+            },
+            {
+                "id": "112",
+                "name": "Burlap"
+            },
+            {
+                "id": "114",
+                "name": "Juppie Swirl"
+            }
+        ]
+    }
+}
