@@ -46,3 +46,17 @@ def zone_data() -> Dict[str, Any]:
 def outfit_data() -> Dict[str, Any]:
     # outfit payload from Client.fetch_outfit()
     return json.loads((payloads / "client_fetch_outfit.json").read_text())
+
+
+@pytest.fixture
+def assets_data() -> Dict[str, Any]:
+    # petAppearance payload from Neopet._fetch_assets_for()
+    return json.loads((payloads / "neopet__fetch_assets_for.json").read_text())
+
+
+@pytest.fixture
+def assets_data_unwearable() -> Dict[str, Any]:
+    # petAppearance payload from Neopet._fetch_assets_for()
+    return json.loads(
+        (payloads / "neopet__fetch_assets_for__unwearable.json").read_text()
+    )
