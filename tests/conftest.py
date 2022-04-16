@@ -40,3 +40,9 @@ def client() -> Client:
 def zone_data() -> Dict[str, Any]:
     # zone payload from Client.fetch_all_zones()
     return json.loads((payloads / "client_fetch_all_zones.json").read_text())
+
+
+@pytest.fixture
+def outfit_data() -> Dict[str, Any]:
+    # outfit payload from Client.fetch_outfit()
+    return json.loads((payloads / "client_fetch_outfit.json").read_text())
