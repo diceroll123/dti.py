@@ -34,6 +34,6 @@ def url_sanitizer(url: str, /) -> str:
     """
 
     if urlparse(url).netloc == "images.neopets.com":
-        return urljoin(base="http://images.neopets.com/", url=url)
+        return urljoin(base="https://images.neopets.com/", url=url)
 
     return url
