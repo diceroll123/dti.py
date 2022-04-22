@@ -1,6 +1,6 @@
 import copy
 from collections import defaultdict
-from typing import DefaultDict, Dict, List, Optional, Union
+from typing import DefaultDict, List, Optional, Union
 
 from .enums import ItemKind, LayerImageSize, PetPose
 from .errors import (
