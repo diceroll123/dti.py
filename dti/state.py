@@ -266,12 +266,10 @@ class State:
             if force is False and not self.is_outdated:
                 return self
 
-            self._valid_pairs = ValidField()
+            self._valid_pairs = ValidField(await self.http._fetch_valid_pet_poses())  # type: ignore
             self._cached = False
             self._colors.clear()
             self._species.clear()
-
-            self._valid_pairs = ValidField(await self.http._fetch_valid_pet_poses())  # type: ignore
             await self._fetch_species_and_color()
 
             self._cached = True
