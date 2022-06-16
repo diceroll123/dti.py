@@ -10,6 +10,10 @@ from .enums import PetPose
 from .errors import InvalidPairBytes
 from .http import HTTPClient
 
+__all__ = (
+    "ValidField",
+)
+
 if TYPE_CHECKING:
     from .models import Color, Species
 
@@ -94,6 +98,10 @@ class BitField(int):
 
 
 class ValidField:
+    """Represents the internal bitfield of species + color combinations.
+    This class is exposed to the library for monkeypatching data in. (Not recommended)
+    """
+
     __slots__ = ("_data",)
     _data: bytes
 
