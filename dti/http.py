@@ -32,6 +32,7 @@ if TYPE_CHECKING:
     from .models import Color, Species
     from .types import (
         ID,
+        FetchAllAppearancesPayload,
         FetchAssetsPayload,
         FetchedNeopetPayload,
         OutfitPayload,
@@ -260,7 +261,7 @@ class HTTPClient:
 
     async def fetch_all_appearances_for_color(
         self, color: Color, /, *, item_ids: List[int], size: LayerImageSize
-    ):
+    ) -> FetchAllAppearancesPayload:
         data = await self._query(
             GRAB_ALL_APPEARANCES_FOR_COLOR,
             variables=dict(

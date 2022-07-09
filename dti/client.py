@@ -82,7 +82,7 @@ class Client:
         :class:`Species`: Returns a species by name or ID.
         """
         await self._state._lock_and_update()  # type: ignore
-        species = self._state._species[name_or_id]  # type: ignore
+        species: Optional[Species] = self._state._species[name_or_id]  # type: ignore
         if species is None:
             raise InvalidSpecies()
         return species
@@ -105,7 +105,7 @@ class Client:
         :class:`Color`: Returns a color by name or ID.
         """
         await self._state._lock_and_update()  # type: ignore
-        color = self._state._colors[name_or_id]  # type: ignore
+        color: Optional[Color] = self._state._colors[name_or_id]  # type: ignore
         if color is None:
             raise InvalidColor()
         return color
@@ -627,17 +627,17 @@ class Client:
 
         size = size or LayerImageSize.SIZE_600
 
-        data = await self._state.http.fetch_all_appearances_for_color(color,
-            item_ids=_item_ids, size=size
+        data = await self._state.http.fetch_all_appearances_for_color(
+            color, item_ids=_item_ids, size=size
         )
-        all_pet_appearances = data["color"].pop("appliedToAllCompatibleSpecies")
+        all_pet_appearances = data["color"].get("appliedToAllCompatibleSpecies")
 
-        all_items = data.pop("items", [])
+        all_items = data.get("items", [])
         item_map: DefaultDict[int, List[Item]] = defaultdict(list)  # bodyId, [Item]
         return_neopets: List[Neopet] = []
 
         for item in all_items:
-            item_appearances = item.pop("allAppearances")
+            item_appearances = item.get("allAppearances")
             # won't be needing that in there anymore
             # the rest of this object is now just an Item
             real_item = Item(data=item, state=self._state)
@@ -654,7 +654,7 @@ class Client:
                 state=self._state, size=size, data=pet_appearance["canonicalAppearance"]
             )
 
-            neopet = await Neopet._from_appearance(
+            neopet = await Neopet._from_appearance(  # type: ignore
                 appearance, items=item_map[appearance.body_id]
             )
 

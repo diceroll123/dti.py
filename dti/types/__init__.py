@@ -52,13 +52,16 @@ class ItemAppearancePayload(_BaseObject):
     restrictedZones: List[ZonePayload]
 
 
-class ItemPayload(_BaseObject):
+class BaseItemPayload(_BaseObject):
     name: str
     description: str
     thumbnailUrl: str
     isNc: bool
     isPb: bool
     rarityIndex: str
+
+
+class ItemPayload(BaseItemPayload):
     appearanceOn: Optional[ItemAppearancePayload]
 
 
@@ -90,6 +93,24 @@ class FetchedNeopetPayload(TypedDict):
 class FetchAssetsPayload(TypedDict):
     items: List[ItemPayload]
     petAppearance: PetAppearancePayload
+
+
+# specific to the "fetch_all_appearances" http method
+class ItemAllAppearancesPayload(BaseItemPayload):
+    allAppearances: List[ItemAppearancePayload]
+
+
+class CanonicalAppearancePayload(TypedDict):
+    canonicalAppearance: PetAppearancePayload
+
+
+class ColorAppliedToAllCompatibleSpeciesPayload(TypedDict):
+    appliedToAllCompatibleSpecies: List[CanonicalAppearancePayload]
+
+
+class FetchAllAppearancesPayload(TypedDict):
+    items: List[ItemAllAppearancesPayload]
+    color: ColorAppliedToAllCompatibleSpeciesPayload
 
 
 ID = TypeVar("ID", bound=Union[str, int])
