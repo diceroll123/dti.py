@@ -3,14 +3,14 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import time
-from typing import TYPE_CHECKING, Dict, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Dict, TypeVar, Union
 
 from .constants import ALL_SPECIES_AND_COLORS
 from .enums import PetPose
 from .errors import InvalidPairBytes
 from .http import HTTPClient
 
-__all__ = (
+__all__: tuple[str, ...] = (
     "ValidField",
 )
 
@@ -28,7 +28,7 @@ class _NameDict(Dict[Union[str, int], T]):
     # this is only to be used by DTIState
     # for the sole purpose of easily searching colors/species by name
     # that said, we're throwing away any error prevention outside of these rules
-    def __getitem__(self, key: Union[str, int]) -> Optional[T]:  # type: ignore
+    def __getitem__(self, key: str | int) -> T | None:  # type: ignore
         # lowercase to make it less annoying to search
         search_key = str(key).lower()
         # will never raise a KeyError, but will return None instead
@@ -45,9 +45,9 @@ class BitField(int):
     power-of-two value, which are bitwise OR'd together to make this object's value.
     """
 
-    __slots__ = ()
+    __slots__: tuple[()] = ()
 
-    def check(self, pose: Union[PetPose, int]) -> bool:
+    def check(self, pose: PetPose | int) -> bool:
         """:class:`bool`: Returns whether or not this bit field contains the supplied pose."""
         return (self & pose) == pose
 
@@ -102,10 +102,10 @@ class ValidField:
     This class is exposed to the library for monkeypatching data in. (Not recommended)
     """
 
-    __slots__ = ("_data",)
+    __slots__: tuple[str, ...] = ("_data",)
     _data: bytes
 
-    def __init__(self, data: Optional[bytes] = None):
+    def __init__(self, data: bytes | None = None):
         if data is None:
             self._data = b""
             return
@@ -147,9 +147,9 @@ class ValidField:
         *,
         species_id: int,
         color_id: int,
-        pose: Optional[PetPose] = None,
+        pose: PetPose | None = None,
     ) -> bool:
-        bit = self._get_bit(species_id, color_id)
+        bit: BitField = self._get_bit(species_id, color_id)
 
         if pose is None:
             return bit > 0
@@ -162,7 +162,7 @@ class ValidField:
 
 
 class State:
-    __slots__ = (
+    __slots__: tuple[str, ...] = (
         "http",
         "_lock",
         "_update_lock",
@@ -175,14 +175,14 @@ class State:
     )
 
     def __init__(
-        self, cache_timeout: Optional[int] = None, proxy: Optional[str] = None
-    ):
+        self, cache_timeout: int | None = None, proxy: str | None = None
+    ) -> None:
         # colors and species below are accessed by the string version of their ID AND/OR lower-cased names
         # alternatively you can list them out by doing self._colors.values()
-        self._colors: Dict[Union[str, int], Color] = _NameDict()
-        self._species: Dict[Union[str, int], Species] = _NameDict()
-        self._cached = False
-        self._last_update = 0.0
+        self._colors: dict[str | int, Color] = _NameDict()
+        self._species: dict[str | int, Species] = _NameDict()
+        self._cached: bool = False
+        self._last_update: float = 0.0
 
         # 1h by default, 10s minimum to be kind to the API
         cache_timeout = cache_timeout or 3600
@@ -236,12 +236,12 @@ class State:
             return True
         return self._last_update < time.monotonic() - self._cache_timeout
 
-    async def _get_species(self, species: Union[int, str]) -> Optional[Species]:
+    async def _get_species(self, species: int | str) -> Species | None:
         await self._update()
         async with self._lock:
             return self._species[species]
 
-    async def _get_color(self, color: Union[int, str]) -> Optional[Color]:
+    async def _get_color(self, color: int | str) -> Color | None:
         await self._update()
         async with self._lock:
             return self._colors[color]
@@ -252,7 +252,7 @@ class State:
             return self._valid_pairs._get_bit(species_id=species_id, color_id=color_id)  # type: ignore
 
     async def _check(
-        self, *, species_id: int, color_id: int, pose: Optional[PetPose] = None
+        self, *, species_id: int, color_id: int, pose: PetPose | None = None
     ) -> bool:
         await self._update()
         async with self._lock:
@@ -260,10 +260,10 @@ class State:
                 species_id=species_id, color_id=color_id, pose=pose
             )
 
-    async def _update(self: S, force: Optional[bool] = False) -> S:
+    async def _update(self: S, force: bool = False) -> S:
         async with self._update_lock:
             # forces cache, if outdated
-            if force is False and not self.is_outdated:
+            if not force and not self.is_outdated:
                 return self
 
             self._valid_pairs = ValidField(await self.http._fetch_valid_pet_poses())  # type: ignore

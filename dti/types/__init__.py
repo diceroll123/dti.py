@@ -1,4 +1,6 @@
-from typing import List, Literal, Optional, TypedDict, TypeVar, Union
+from __future__ import annotations
+
+from typing import Literal, TypedDict, TypeVar, Union
 
 PetPoseType = Literal[
     "HAPPY_MASC",
@@ -30,11 +32,11 @@ class ZonePayload(_BaseObject):
 
 
 class AppearanceLayerPayload(_BaseObject):
-    imageUrl: Optional[str]
+    imageUrl: str | None
     bodyId: str
     remoteId: str
     zone: ZonePayload
-    knownGlitches: List[str]
+    knownGlitches: list[str]
 
 
 class PetAppearancePayload(_BaseObject):
@@ -43,13 +45,13 @@ class PetAppearancePayload(_BaseObject):
     color: ColorPayload
     species: SpeciesPayload
     pose: PetPoseType
-    layers: List[AppearanceLayerPayload]
-    restrictedZones: List[ZonePayload]
+    layers: list[AppearanceLayerPayload]
+    restrictedZones: list[ZonePayload]
 
 
 class ItemAppearancePayload(_BaseObject):
-    layers: List[AppearanceLayerPayload]
-    restrictedZones: List[ZonePayload]
+    layers: list[AppearanceLayerPayload]
+    restrictedZones: list[ZonePayload]
 
 
 class BaseItemPayload(_BaseObject):
@@ -62,7 +64,7 @@ class BaseItemPayload(_BaseObject):
 
 
 class ItemPayload(BaseItemPayload):
-    appearanceOn: Optional[ItemAppearancePayload]
+    appearanceOn: ItemAppearancePayload | None
 
 
 class UserPayload(_BaseObject):
@@ -70,11 +72,11 @@ class UserPayload(_BaseObject):
 
 
 class OutfitPayload(_BaseObject):
-    name: Optional[str]
+    name: str | None
     petAppearance: PetAppearancePayload
-    wornItems: List[ItemPayload]
-    closetedItems: List[ItemPayload]
-    creator: Optional[UserPayload]
+    wornItems: list[ItemPayload]
+    closetedItems: list[ItemPayload]
+    creator: UserPayload | None
     createdAt: str
     updatedAt: str
 
@@ -86,18 +88,18 @@ class FetchedWornItemsPayload(_BaseObject):
 
 class FetchedNeopetPayload(TypedDict):
     petAppearance: PetAppearancePayload
-    wornItems: List[FetchedWornItemsPayload]
+    wornItems: list[FetchedWornItemsPayload]
 
 
 # specific to the "fetch_assets_for" http method
 class FetchAssetsPayload(TypedDict):
-    items: List[ItemPayload]
+    items: list[ItemPayload]
     petAppearance: PetAppearancePayload
 
 
 # specific to the "fetch_all_appearances" http method
 class ItemAllAppearancesPayload(BaseItemPayload):
-    allAppearances: List[ItemAppearancePayload]
+    allAppearances: list[ItemAppearancePayload]
 
 
 class CanonicalAppearancePayload(TypedDict):
@@ -105,11 +107,11 @@ class CanonicalAppearancePayload(TypedDict):
 
 
 class ColorAppliedToAllCompatibleSpeciesPayload(TypedDict):
-    appliedToAllCompatibleSpecies: List[CanonicalAppearancePayload]
+    appliedToAllCompatibleSpecies: list[CanonicalAppearancePayload]
 
 
 class FetchAllAppearancesPayload(TypedDict):
-    items: List[ItemAllAppearancesPayload]
+    items: list[ItemAllAppearancesPayload]
     color: ColorAppliedToAllCompatibleSpeciesPayload
 
 

@@ -1,13 +1,17 @@
-from typing import List, Optional
+from __future__ import annotations
+
 from urllib.parse import quote, urljoin, urlparse
 
 from .enums import LayerImageSize
 
-__all__ = ("build_layers_url", "url_sanitizer")
+__all__: tuple[str, ...] = (
+    "build_layers_url",
+    "url_sanitizer",
+)
 
 
 def build_layers_url(
-    layers: List[str], /, *, size: Optional[LayerImageSize] = None
+    layers: list[str], /, *, size: LayerImageSize | None = None
 ) -> str:
     """Convenience method to make the server-side-rendering URL of the provided layer URLs.
 

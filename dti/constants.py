@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from .enums import PetPose
 
-__all__ = (
+__all__: tuple[str, ...] = (
   "CLOSEST_POSES_IN_ORDER",
 )
 

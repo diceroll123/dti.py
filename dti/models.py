@@ -4,19 +4,10 @@ import asyncio
 import datetime
 import io
 import os
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Union,
-    overload,
-)
+from typing import TYPE_CHECKING, Any, Sequence, overload
 from urllib.parse import urlencode
+
+from dti.types import FetchAssetsPayload, FetchedNeopetPayload
 
 from . import utils
 from .enums import (
@@ -44,7 +35,7 @@ if TYPE_CHECKING:
         ZonePayload,
     )
 
-__all__ = (
+__all__: tuple[str, ...] = (
     "Species",
     "Color",
     "Zone",
@@ -87,7 +78,7 @@ class Species(Object):
         The species ID.
     """
 
-    __slots__ = (
+    __slots__: tuple[str, ...] = (
         "_state",
         "id",
         "name",
@@ -96,15 +87,15 @@ class Species(Object):
     if TYPE_CHECKING:
         id: int
 
-    def __init__(self, *, state: State, data: SpeciesPayload):
+    def __init__(self, *, state: State, data: SpeciesPayload) -> None:
         self._state = state
         self.id = int(data["id"])
         self.name: str = data["name"]
 
-    async def _color_iterator(self, valid: bool = True) -> List[Color]:
+    async def _color_iterator(self, valid: bool = True) -> list[Color]:
         await self._state._lock_and_update()  # type: ignore
 
-        found: List[Color] = []
+        found: list[Color] = []
         for color_id, color in self._state._colors.items():  # type: ignore
             is_valid = self._state._valid_pairs._check(  # type: ignore
                 species_id=self.id, color_id=int(color_id)
@@ -113,27 +104,27 @@ class Species(Object):
                 found.append(color)
         return found
 
-    async def colors(self) -> List[Color]:
+    async def colors(self) -> list[Color]:
         """|coro|
 
         List[:class:`Color`]: Returns all colors this species can be painted.
         """
         return await self._color_iterator()
 
-    async def missing_colors(self) -> List[Color]:
+    async def missing_colors(self) -> list[Color]:
         """|coro|
 
         List[:class:`Color`]: Returns all colors this species can not be painted.
         """
         return await self._color_iterator(valid=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.id
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Species id={self.id} name={self.name!r}>"
 
 
@@ -166,21 +157,21 @@ class Color(Object):
         The color ID.
     """
 
-    __slots__ = (
+    __slots__: tuple[str, ...] = (
         "_state",
         "id",
         "name",
     )
 
-    def __init__(self, *, state: State, data: ColorPayload):
+    def __init__(self, *, state: State, data: ColorPayload) -> None:
         self._state = state
         self.id: int = int(data["id"])
         self.name: str = data["name"]
 
-    async def _species_iterator(self, valid: bool = True) -> List[Species]:
+    async def _species_iterator(self, valid: bool = True) -> list[Species]:
         await self._state._lock_and_update()  # type: ignore
 
-        found: List[Species] = []
+        found: list[Species] = []
         for species_id, species in self._state._species.items():  # type: ignore
             is_valid = self._state._valid_pairs._check(  # type: ignore
                 species_id=int(species_id), color_id=self.id
@@ -189,27 +180,27 @@ class Color(Object):
                 found.append(species)
         return found
 
-    async def species(self) -> List[Species]:
+    async def species(self) -> list[Species]:
         """|coro|
 
         List[:class:`Species`]: Returns all species this color can be painted on.
         """
         return await self._species_iterator()
 
-    async def missing_species(self) -> List[Species]:
+    async def missing_species(self) -> list[Species]:
         """|coro|
 
         List[:class:`Species`]: Returns all species this color can not be painted on.
         """
         return await self._species_iterator(valid=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __int__(self):
+    def __int__(self) -> int:
         return self.id
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Color id={self.id} name={self.name!r}>"
 
 
@@ -240,18 +231,18 @@ class Zone(Object):
         The zone depth.
     """
 
-    __slots__ = (
+    __slots__: tuple[str, ...] = (
         "id",
         "depth",
         "label",
     )
 
-    def __init__(self, data: ZonePayload):
+    def __init__(self, data: ZonePayload) -> None:
         self.id: int = int(data["id"])
         self.depth: int = data["depth"]
         self.label: str = data["label"]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Zone id={self.id} label={self.label!r} depth={self.depth}>"
 
 
@@ -292,7 +283,7 @@ class AppearanceLayer(Object):
         Known glitches for this appearance layer. Returns None if the list is empty.
     """
 
-    __slots__ = (
+    __slots__: tuple[str, ...] = (
         "_state",
         "id",
         "parent",
@@ -307,17 +298,17 @@ class AppearanceLayer(Object):
     def __init__(
         self,
         *,
-        parent: Union[ItemAppearance, PetAppearance],
+        parent: ItemAppearance | PetAppearance,
         data: AppearanceLayerPayload,
-    ):
-        self._state = parent._state  # type: ignore
+    ) -> None:
+        self._state: State = parent._state  # type: ignore
         self.id: int = int(data["id"])
-        self.parent: Union[ItemAppearance, PetAppearance] = parent
-        self._image_url: Optional[str] = data["imageUrl"]
+        self.parent: ItemAppearance | PetAppearance = parent
+        self._image_url: str | None = data["imageUrl"]
         self.asset_remote_id: int = int(data["remoteId"])
         self.body_id: int = int(data["bodyId"])
         self.zone: Zone = Zone(data["zone"])
-        self.known_glitches: Optional[List[AppearanceLayerKnownGlitch]] = [
+        self.known_glitches: list[AppearanceLayerKnownGlitch] | None = [
             try_enum(AppearanceLayerKnownGlitch, glitch)
             for glitch in data["knownGlitches"]
         ] or None
@@ -329,7 +320,7 @@ class AppearanceLayer(Object):
         )
 
     @property
-    def image_url(self) -> Optional[str]:
+    def image_url(self) -> str | None:
         """Optional[:class:`str`]: The appearance layer's PNG image url. If this is None, the item has a complex movie-based image.
         Rendering these will raise an error.
         """
@@ -358,8 +349,8 @@ class AppearanceLayer(Object):
             raise NullAssetImage(f"Layer image missing: {self!r}")
         return await self._state.http._fetch_binary_data(self.image_url)  # type: ignore
 
-    def __repr__(self):
-        attrs = [
+    def __repr__(self) -> str:
+        attrs: list[tuple[str, Any]] = [
             ("id", self.id),
             ("asset_remote_id", self.asset_remote_id),
             ("zone", self.zone),
@@ -409,7 +400,7 @@ class PetAppearance(Object):
         glitches, for that, check out :attr:`PetAppearance.has_glitches`.
     """
 
-    __slots__ = (
+    __slots__: tuple[str, ...] = (
         "_state",
         "id",
         "body_id",
@@ -424,7 +415,7 @@ class PetAppearance(Object):
 
     def __init__(
         self, *, state: State, size: LayerImageSize, data: PetAppearancePayload
-    ):
+    ) -> None:
         self._state = state
         self.id: int = int(data["id"])
         self.body_id: int = int(data["bodyId"])
@@ -436,10 +427,10 @@ class PetAppearance(Object):
         self.species: Species = Species(data=data["species"], state=state)
 
         self.pose: PetPose = PetPose(data["pose"])
-        self.layers: List[AppearanceLayer] = [
+        self.layers: list[AppearanceLayer] = [
             AppearanceLayer(parent=self, data=layer) for layer in data["layers"]
         ]
-        self.restricted_zones: List[Zone] = [
+        self.restricted_zones: list[Zone] = [
             Zone(restricted) for restricted in data["restrictedZones"]
         ]
 
@@ -453,8 +444,8 @@ class PetAppearance(Object):
         """:class:`str`: The URL of this pet appearance as an editable outfit."""
         return f"https://impress-2020.openneo.net/outfits/new?species={self.species.id}&color={self.color.id}&pose={self.pose.name}&state={self.id}"
 
-    def __repr__(self):
-        attrs = [
+    def __repr__(self) -> str:
+        attrs: list[tuple[str, Any]] = [
             ("id", self.id),
             ("species", self.species),
             ("color", self.color),
@@ -465,13 +456,13 @@ class PetAppearance(Object):
         return f"<PetAppearance {joined}>"
 
     def _render_layers(
-        self, items: Optional[Sequence[Item]] = None
-    ) -> List[AppearanceLayer]:
+        self, items: Sequence[Item] | None = None
+    ) -> list[AppearanceLayer]:
         # Returns the image layers' images in order from bottom to top.
 
-        all_layers: List[AppearanceLayer] = list(self.layers)
-        item_restricted_zones: List[Zone] = []
-        pet_occupied_and_restricted_zones: Set[Zone] = {
+        all_layers: list[AppearanceLayer] = list(self.layers)
+        item_restricted_zones: list[Zone] = []
+        pet_occupied_and_restricted_zones: set[Zone] = {
             layer.zone for layer in all_layers
         } | set(self.restricted_zones)
 
@@ -531,7 +522,7 @@ class PetAppearance(Object):
 
         return sorted(visible_layers, key=lambda layer: layer.zone.depth)
 
-    def image_url(self, *, items: Optional[Sequence[Item]] = None) -> str:
+    def image_url(self, *, items: Sequence[Item] | None = None) -> str:
         """
         Parameters
         -----------
@@ -549,8 +540,8 @@ class PetAppearance(Object):
             The DTI server-side-rendering image url of a Neopet appearance.
         """
 
-        layers = self._render_layers(items)
-        layer_urls: List[str] = []
+        layers: list[AppearanceLayer] = self._render_layers(items)
+        layer_urls: list[str] = []
 
         try:
             for layer in layers:
@@ -559,13 +550,15 @@ class PetAppearance(Object):
                     continue
                 raise TypeError
         except TypeError as e:
-            missing = [layer for layer in layers if layer.image_url is None]
+            missing: list[AppearanceLayer] = [
+                layer for layer in layers if layer.image_url is None
+            ]
             raise NullAssetImage(
                 f"Null image URLs found in this render: {missing}"
             ) from e
         return utils.build_layers_url(layer_urls, size=self.size)
 
-    async def read(self, *, items: Optional[Sequence[Item]] = None) -> bytes:
+    async def read(self, *, items: Sequence[Item] | None = None) -> bytes:
         """|coro|
 
         Retrieves the content of the server-side-rendered image of this pet appearance as a :class:`bytes` object.
@@ -584,10 +577,10 @@ class PetAppearance(Object):
 
     async def render(
         self,
-        fp: Union[str, bytes, os.PathLike[Any], io.BufferedIOBase],
+        fp: str | bytes | os.PathLike[Any] | io.BufferedIOBase,
         /,
         *,
-        items: Optional[Sequence[Item]] = None,
+        items: Sequence[Item] | None = None,
         seek_begin: bool = True,
     ) -> None:
         """|coro|
@@ -612,9 +605,9 @@ class PetAppearance(Object):
             Whether to seek to the beginning of the file after saving is successfully done.
         """
 
-        data = await self.read(items=items)
+        data: bytes = await self.read(items=items)
 
-        def write():
+        def write() -> None:
             if isinstance(fp, io.BufferedIOBase):
                 fp.write(data)
                 if seek_begin:
@@ -657,7 +650,7 @@ class ItemAppearance(Object):
         The zones that this item appearance occupies.
     """
 
-    __slots__ = (
+    __slots__: tuple[str, ...] = (
         "_state",
         "id",
         "item",
@@ -666,19 +659,19 @@ class ItemAppearance(Object):
         "occupies",
     )
 
-    def __init__(self, data: ItemAppearancePayload, item: Item):
-        self._state = item._state  # type: ignore
+    def __init__(self, data: ItemAppearancePayload, item: Item) -> None:
+        self._state: State = item._state  # type: ignore
         self.id: str = data["id"]
         self.item: Item = item
-        self.layers: List[AppearanceLayer] = [
+        self.layers: list[AppearanceLayer] = [
             AppearanceLayer(parent=self, data=layer) for layer in data["layers"]
         ]
-        self.restricted_zones: List[Zone] = [
+        self.restricted_zones: list[Zone] = [
             Zone(restricted) for restricted in data["restrictedZones"]
         ]
-        self.occupies: List[Zone] = [layer.zone for layer in self.layers]
+        self.occupies: list[Zone] = [layer.zone for layer in self.layers]
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<ItemAppearance id={self.id!r} item={self.item!r}>"
 
 
@@ -719,7 +712,7 @@ class Item(Object):
         The item's rarity on Neopets.
     """
 
-    __slots__ = (
+    __slots__: tuple[str, ...] = (
         "_state",
         "_appearance",
         "id",
@@ -730,13 +723,13 @@ class Item(Object):
         "rarity",
     )
 
-    def __init__(self, *, data: ItemPayload, state: State):
+    def __init__(self, *, data: ItemPayload, state: State) -> None:
         self._state = state
         self.id: int = int(data["id"])
         self.name: str = data["name"]
         self.description: str = data["description"]
         self.thumbnail_url: str = utils.url_sanitizer(data["thumbnailUrl"])
-        self._appearance: Optional[ItemAppearance] = None
+        self._appearance: ItemAppearance | None = None
         self.appearance = data.get("appearanceOn")
 
         _kind = None
@@ -749,12 +742,12 @@ class Item(Object):
         self.rarity: int = int(data["rarityIndex"])
 
     @property
-    def appearance(self) -> Optional[ItemAppearance]:
+    def appearance(self) -> ItemAppearance | None:
         """The item appearance object for this item on a particular PetAppearance. Can be `None`."""
         return self._appearance
 
     @appearance.setter
-    def appearance(self, val: Optional[Union[ItemAppearancePayload, ItemAppearance]]):
+    def appearance(self, val: ItemAppearancePayload | ItemAppearance | None) -> None:
         if val is not None:
             if isinstance(val, ItemAppearance):
                 self._appearance = val
@@ -776,10 +769,10 @@ class Item(Object):
         """:class:`str`: Returns the DTI URL for the item."""
         return f"https://impress-2020.openneo.net/items/{self.id}"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Item id={self.id} name={self.name!r} kind={self.kind} rarity={self.rarity}>"
 
 
@@ -794,19 +787,19 @@ class User(Object):
         The user's username.
     """
 
-    __slots__ = (
+    __slots__: tuple[str, ...] = (
         "id",
         "username",
     )
 
-    def __init__(self, **data: str):
+    def __init__(self, **data: str) -> None:
         self.id: int = int(data["id"])
         self.username: str = data["username"]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.username
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<User id={self.id} username={self.username!r}>"
 
 
@@ -831,7 +824,7 @@ class Neopet:
         The name of the Neopet, if one is supplied.
     """
 
-    __slots__ = (
+    __slots__: tuple[str, ...] = (
         "_valid_poses",
         "_state",
         "species",
@@ -851,17 +844,17 @@ class Neopet:
         valid_poses: BitField,
         pose: PetPose,
         appearance: PetAppearance,
-        items: Optional[Sequence[Item]] = None,
-        size: Optional[LayerImageSize] = None,
-        name: Optional[str] = None,
+        items: Sequence[Item] | None = None,
+        size: LayerImageSize | None = None,
+        name: str | None = None,
         state: State,
     ):
-        self._state = state
+        self._state: State = state
         self.species: Species = species
         self.color: Color = color
-        self.appearance = appearance
+        self.appearance: PetAppearance = appearance
         self.items: Sequence[Item] = items or []
-        self.name: Optional[str] = name
+        self.name: str | None = name
         self.size: LayerImageSize = size or LayerImageSize.SIZE_600
         self.pose: PetPose = pose
         self._valid_poses: BitField = valid_poses
@@ -873,10 +866,10 @@ class Neopet:
         species: Species,
         color: Color,
         pose: PetPose,
-        item_ids: Optional[Sequence[ID]] = None,
-        item_names: Optional[Sequence[str]] = None,
-        size: Optional[LayerImageSize] = None,
-        name: Optional[str] = None,
+        item_ids: Sequence[ID] | None = None,
+        item_names: Sequence[str] | None = None,
+        size: LayerImageSize | None = None,
+        name: str | None = None,
         state: State,
     ) -> Neopet:
         """Returns the data for a species+color+pose combo, optionally with items, an image size, and a name for internal usage."""
@@ -888,7 +881,7 @@ class Neopet:
 
         size = size or LayerImageSize.SIZE_600
 
-        data = await state.http.fetch_assets_for(
+        data: FetchAssetsPayload = await state.http.fetch_assets_for(
             species=species,
             color=color,
             pose=pose,
@@ -897,13 +890,13 @@ class Neopet:
             size=size,
         )
 
-        items = [
+        items: list[Item] = [
             Item(data=item, state=state) for item in data["items"] if item is not None
         ]
 
         appearance = PetAppearance(data=data["petAppearance"], size=size, state=state)
 
-        bit = await state._get_bit(species_id=species.id, color_id=color.id)  # type: ignore
+        bit: BitField = await state._get_bit(species_id=species.id, color_id=color.id)  # type: ignore
 
         return Neopet(
             species=species,
@@ -924,7 +917,7 @@ class Neopet:
         pet_appearance: PetAppearance,
         /,
         *,
-        item: Optional[Item] = None,
+        item: Item | None = None,
     ) -> Neopet:
         ...
 
@@ -935,7 +928,7 @@ class Neopet:
         pet_appearance: PetAppearance,
         /,
         *,
-        items: Optional[Sequence[Item]] = None,
+        items: Sequence[Item] | None = None,
     ) -> Neopet:
         ...
 
@@ -945,16 +938,16 @@ class Neopet:
         pet_appearance: PetAppearance,
         /,
         *,
-        item: Optional[Item] = None,
-        items: Optional[Sequence[Item]] = None,
+        item: Item | None = None,
+        items: Sequence[Item] | None = None,
     ) -> Neopet:
         """Makes a single-use Neopet object, as opposed to Neopet.from_appearance, which is a more full object with all appearance data etc. This is for internal use only."""
 
-        species = pet_appearance.species
-        color = pet_appearance.color
-        state = pet_appearance._state
+        species: Species = pet_appearance.species
+        color: Color = pet_appearance.color
+        state: State = pet_appearance._state  # type: ignore
 
-        _items: List[Item] = []
+        _items: list[Item] = []
 
         if item:
             _items.append(item)
@@ -983,13 +976,15 @@ class Neopet:
 
         size = size or LayerImageSize.SIZE_600
 
-        pet_on_neo = await state.http.fetch_neopet_by_name(name=pet_name, size=size)
+        pet_on_neo: FetchedNeopetPayload = await state.http.fetch_neopet_by_name(
+            name=pet_name, size=size
+        )
 
         pet_appearance = PetAppearance(
             data=pet_on_neo["petAppearance"], size=size, state=state
         )
 
-        neopet = await Neopet._fetch_assets_for(
+        neopet: Neopet = await Neopet._fetch_assets_for(
             species=pet_appearance.species,
             color=pet_appearance.color,
             pose=pet_appearance.pose,
@@ -1004,7 +999,7 @@ class Neopet:
     def legacy_closet_url(self) -> str:
         """:class:`str`: Returns the legacy closet URL for a Neopet customization."""
 
-        params: Dict[str, Any] = {
+        params: dict[str, Any] = {
             "name": self.name or "",
             "species": self.species.id,
             "color": self.color.id,
@@ -1022,7 +1017,7 @@ class Neopet:
     def closet_url(self) -> str:
         """:class:`str`: Returns the closet URL for a Neopet customization."""
 
-        params: Dict[str, Any] = {
+        params: dict[str, Any] = {
             "name": self.name or "",
             "species": self.species.id,
             "color": self.color.id,
@@ -1041,7 +1036,7 @@ class Neopet:
     def clear_closet(self) -> None:
         """Removes items from the closet that would not be rendered to the pet appearance."""
         _, closet = _render_items(self.items)
-        new_items = [item for item in self.items if item not in closet]
+        new_items: list[Item] = [item for item in self.items if item not in closet]
         self.items = new_items
 
     @property
@@ -1068,10 +1063,10 @@ class Neopet:
 
     async def render(
         self,
-        fp: Union[str, bytes, os.PathLike[Any], io.BufferedIOBase],
+        fp: str | bytes | os.PathLike[Any] | io.BufferedIOBase,
         /,
         *,
-        pose: Optional[PetPose] = None,
+        pose: PetPose | None = None,
         seek_begin: bool = True,
     ) -> None:
         """|coro|
@@ -1105,13 +1100,13 @@ class Neopet:
 
         if pose is not None and pose != self.pose:
             # override pose here
-            is_valid = self.check(pose)
+            is_valid: bool = self.check(pose)
             if not is_valid:
                 raise MissingPetAppearance(
                     f'Pet Appearance <"{self.species.id}-{self.color.id}-{pose.name}"> does not exist.'
                 )
 
-            data = await self._state.http.fetch_appearance(
+            data: PetAppearancePayload = await self._state.http.fetch_appearance(
                 species=self.species, color=self.color, pose=pose, size=self.size
             )
             pet_appearance = PetAppearance(data=data, size=self.size, state=self._state)
@@ -1120,7 +1115,7 @@ class Neopet:
 
     @staticmethod
     async def from_outfit(
-        outfit: Outfit, /, *, size: Optional[LayerImageSize] = None
+        outfit: Outfit, /, *, size: LayerImageSize | None = None
     ) -> Neopet:
         """|coro|
 
@@ -1145,7 +1140,7 @@ class Neopet:
 
     @staticmethod
     async def from_appearance(
-        appearance: PetAppearance, /, *, size: Optional[LayerImageSize] = None
+        appearance: PetAppearance, /, *, size: LayerImageSize | None = None
     ) -> Neopet:
         """|coro|
 
@@ -1213,7 +1208,7 @@ class Outfit(Object):
         The outfit's last updated time in UTC.
     """
 
-    __slots__ = (
+    __slots__: tuple[str, ...] = (
         "_state",
         "id",
         "name",
@@ -1229,20 +1224,18 @@ class Outfit(Object):
     def __init__(self, *, state: State, size: LayerImageSize, data: OutfitPayload):
         self._state = state
         self.id = int(data["id"])
-        self.name: Optional[str] = data["name"]
+        self.name: str | None = data["name"]
         self.size = size
         self.pet_appearance: PetAppearance = PetAppearance(
             data=data["petAppearance"], size=size, state=state
         )
-        self.worn_items: List[Item] = [
+        self.worn_items: list[Item] = [
             Item(data=item_data, state=state) for item_data in data["wornItems"]
         ]
-        self.closeted_items: List[Item] = [
+        self.closeted_items: list[Item] = [
             Item(data=item_data, state=state) for item_data in data["closetedItems"]
         ]
-        self.creator: Optional[User] = (
-            User(**data["creator"]) if data["creator"] else None
-        )
+        self.creator: User | None = User(**data["creator"]) if data["creator"] else None
 
         # in an effort to cut down on dependencies, at a small performance cost,
         # we will simply truncate the trailing "Z" from the timestamps
@@ -1264,7 +1257,7 @@ class Outfit(Object):
         """:class:`str`: Returns the outfit URL for the ID provided."""
         return f"https://impress-2020.openneo.net/outfits/{self.id}"
 
-    def image_url(self, *, size: Optional[LayerImageSize] = None) -> str:
+    def image_url(self, *, size: LayerImageSize | None = None) -> str:
         """
         Parameters
         -----------
@@ -1281,7 +1274,7 @@ class Outfit(Object):
         size_str = str(size or self.size)[-3:]
         return f"https://outfits.openneo-assets.net/outfits/{self.id}/v/{updated_at}/{size_str}.png"
 
-    async def read(self, *, size: Optional[LayerImageSize] = None) -> bytes:
+    async def read(self, *, size: LayerImageSize | None = None) -> bytes:
         """|coro|
 
         Retrieves the content of the server-side-rendered image of this outfit as a :class:`bytes` object.
@@ -1300,11 +1293,11 @@ class Outfit(Object):
 
     async def render(
         self,
-        fp: Union[str, bytes, os.PathLike[Any], io.BufferedIOBase],
+        fp: str | bytes | os.PathLike[Any] | io.BufferedIOBase,
         /,
         *,
-        pose: Optional[PetPose] = None,
-        size: Optional[LayerImageSize] = None,
+        pose: PetPose | None = None,
+        size: LayerImageSize | None = None,
         seek_begin: bool = True,
     ) -> None:
         """|coro|
@@ -1346,13 +1339,13 @@ class Outfit(Object):
             rebuild = True
 
         if rebuild:
-            neopet = await Neopet.from_outfit(self, size=size or self.size)
+            neopet: Neopet = await Neopet.from_outfit(self, size=size or self.size)
             await neopet.render(fp, pose=pose, seek_begin=seek_begin)
         else:
             # render from outfit ID
-            data = await self.read(size=size or self.size)
+            data: bytes = await self.read(size=size or self.size)
 
-            def write():
+            def write() -> None:
                 if isinstance(fp, io.BufferedIOBase):
                     fp.write(data)
                     if seek_begin:
@@ -1363,8 +1356,8 @@ class Outfit(Object):
 
             await asyncio.get_running_loop().run_in_executor(None, write)
 
-    def __repr__(self):
-        attrs = [
+    def __repr__(self) -> str:
+        attrs: list[tuple[str, Any]] = [
             ("id", self.id),
             ("appearance", self.pet_appearance),
             ("created_at", self.created_at),
@@ -1377,13 +1370,13 @@ class Outfit(Object):
 #  utility functions below
 
 
-def _render_items(items: Sequence[Item]) -> Tuple[List[Item], List[Item]]:
+def _render_items(items: Sequence[Item]) -> tuple[list[Item], list[Item]]:
     # Separates all items into what's wearable and what's in the closet.
     # Mimics DTI's method of getting rid of item conflicts in a FIFO manner.
     # Any conflicts go to the closet list.
 
-    temp_items: List[Item] = []
-    temp_closet: List[Item] = []
+    temp_items: list[Item] = []
+    temp_closet: list[Item] = []
     for item in items:
         for temp in items:
             if item == temp:
@@ -1395,10 +1388,10 @@ def _render_items(items: Sequence[Item]) -> Tuple[List[Item], List[Item]]:
             if item.appearance is None or temp.appearance is None:
                 continue
 
-            intersect_1 = set(item.appearance.occupies).intersection(
+            intersect_1: set[Zone] = set(item.appearance.occupies).intersection(
                 temp.appearance.occupies + temp.appearance.restricted_zones
             )
-            intersect_2 = set(temp.appearance.occupies).intersection(
+            intersect_2: set[Zone] = set(temp.appearance.occupies).intersection(
                 item.appearance.occupies + item.appearance.restricted_zones
             )
 

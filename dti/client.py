@@ -1,6 +1,18 @@
+from __future__ import annotations
+
 import copy
 from collections import defaultdict
-from typing import DefaultDict, List, Optional, Union
+from typing import DefaultDict
+
+from dti.types import (
+    CanonicalAppearancePayload,
+    FetchAllAppearancesPayload,
+    ItemAllAppearancesPayload,
+    ItemAppearancePayload,
+    OutfitPayload,
+    PetAppearancePayload,
+    ZonePayload,
+)
 
 from .enums import ItemKind, LayerImageSize, PetPose
 from .errors import (
@@ -19,7 +31,7 @@ from .iterators import (
 from .models import Color, Item, Neopet, Outfit, PetAppearance, Species, Zone
 from .state import BitField, State
 
-__all__ = (
+__all__: tuple[str, ...] = (
     "Client",
 )
 
@@ -37,11 +49,11 @@ class Client:
         Proxy URL. If you have credentials, pass them in like so: "http://username:password@localhost:8030"
     """
 
-    __slots__ = ("_state",)
+    __slots__: tuple[str, ...] = ("_state",)
 
     def __init__(
-        self, cache_timeout: Optional[int] = None, proxy: Optional[str] = None
-    ):
+        self, cache_timeout: int | None = None, proxy: str | None = None
+    ) -> None:
         self._state = State(cache_timeout=cache_timeout, proxy=proxy)
 
     async def invalidate(self) -> None:
@@ -50,21 +62,21 @@ class Client:
         A way to force the internal cache to update."""
         await self._state._update(force=True)  # type: ignore
 
-    async def all_species(self) -> List[Species]:
+    async def all_species(self) -> list[Species]:
         """|coro|
 
         List[:class:`Species`]: Returns a list of all species."""
         await self._state._lock_and_update()  # type: ignore
         return list(self._state._species.values())  # type: ignore
 
-    async def all_colors(self) -> List[Color]:
+    async def all_colors(self) -> list[Color]:
         """|coro|
 
         List[:class:`Color`]: Returns a list of all colors."""
         await self._state._lock_and_update()  # type: ignore
         return list(self._state._colors.values())  # type: ignore
 
-    async def get_species(self, name_or_id: Union[int, str], /) -> Species:
+    async def get_species(self, name_or_id: int | str, /) -> Species:
         """|coro|
 
         Parameters
@@ -82,12 +94,12 @@ class Client:
         :class:`Species`: Returns a species by name or ID.
         """
         await self._state._lock_and_update()  # type: ignore
-        species: Optional[Species] = self._state._species[name_or_id]  # type: ignore
+        species: Species | None = self._state._species[name_or_id]  # type: ignore
         if species is None:
             raise InvalidSpecies()
         return species
 
-    async def get_color(self, name_or_id: Union[int, str], /) -> Color:
+    async def get_color(self, name_or_id: int | str, /) -> Color:
         """|coro|
 
         Parameters
@@ -105,7 +117,7 @@ class Client:
         :class:`Color`: Returns a color by name or ID.
         """
         await self._state._lock_and_update()  # type: ignore
-        color: Optional[Color] = self._state._colors[name_or_id]  # type: ignore
+        color: Color | None = self._state._colors[name_or_id]  # type: ignore
         if color is None:
             raise InvalidColor()
         return color
@@ -113,8 +125,8 @@ class Client:
     async def get_bit(
         self,
         *,
-        species: Union[int, str, Species],
-        color: Union[int, str, Color],
+        species: int | str | Species,
+        color: int | str | Color,
     ) -> BitField:
         """|coro|
 
@@ -153,9 +165,9 @@ class Client:
     async def check(
         self,
         *,
-        species: Union[int, str, Species],
-        color: Union[int, str, Color],
-        pose: Optional[PetPose] = None,
+        species: int | str | Species,
+        color: int | str | Color,
+        pose: PetPose | None = None,
     ) -> bool:
         """|coro|
 
@@ -195,12 +207,12 @@ class Client:
     async def fetch_neopet(
         self,
         *,
-        species: Union[int, str, Species],
-        color: Union[int, str, Color],
-        item_names: Optional[List[str]] = None,
-        item_ids: Optional[List[int]] = None,
-        size: Optional[LayerImageSize] = None,
-        pose: Optional[PetPose] = None,
+        species: int | str | Species,
+        color: int | str | Color,
+        item_names: list[str] | None = None,
+        item_ids: list[int] | None = None,
+        size: LayerImageSize | None = None,
+        pose: PetPose | None = None,
     ) -> Neopet:
         """|coro|
 
@@ -259,7 +271,7 @@ class Client:
         )
 
     async def fetch_neopet_by_name(
-        self, pet_name: str, /, size: Optional[LayerImageSize] = None
+        self, pet_name: str, /, size: LayerImageSize | None = None
     ) -> Neopet:
         """|coro|
 
@@ -290,7 +302,7 @@ class Client:
         )
 
     async def fetch_outfit(
-        self, outfit_id: int, /, size: Optional[LayerImageSize] = None
+        self, outfit_id: int, /, size: LayerImageSize | None = None
     ) -> Outfit:
         """|coro|
 
@@ -318,22 +330,24 @@ class Client:
 
         size = size or LayerImageSize.SIZE_600
 
-        data = await self._state.http.fetch_outfit(id=outfit_id, size=size)
+        data: OutfitPayload = await self._state.http.fetch_outfit(
+            id=outfit_id, size=size
+        )
 
         return Outfit(data=data, size=size, state=self._state)
 
     def search(
         self,
         *,
-        query: Optional[str] = None,
-        item_name: Optional[str] = None,
-        item_names: Optional[List[str]] = None,
-        item_kind: Optional[ItemKind] = None,
-        species_id: Optional[int] = None,
-        color_id: Optional[int] = None,
-        item_ids: Optional[List[int]] = None,
-        size: Optional[LayerImageSize] = None,
-        per_page: Optional[int] = None,
+        query: str | None = None,
+        item_name: str | None = None,
+        item_names: list[str] | None = None,
+        item_kind: ItemKind | None = None,
+        species_id: int | None = None,
+        color_id: int | None = None,
+        item_ids: list[int] | None = None,
+        size: LayerImageSize | None = None,
+        per_page: int | None = None,
     ) -> DTISearch:
         """|coro|
 
@@ -370,10 +384,10 @@ class Client:
         :class:`.DTISearch`: The async Search iterator
         """
 
-        searcher: Optional[DTISearch] = None
-        _names: List[str] = []
+        searcher: DTISearch | None = None
+        _names: list[str] = []
 
-        per_page = per_page or 30
+        per_page: int = per_page or 30
 
         if item_name:
             _names.append(item_name)
@@ -408,10 +422,10 @@ class Client:
     async def fetch_appearance(
         self,
         *,
-        species: Union[int, str, Species],
-        color: Union[int, str, Color],
+        species: int | str | Species,
+        color: int | str | Color,
         pose: PetPose,
-        size: Optional[LayerImageSize] = None,
+        size: LayerImageSize | None = None,
     ) -> PetAppearance:
         """|coro|
 
@@ -451,21 +465,21 @@ class Client:
         if not isinstance(color, Color):
             color = await self.get_color(color)
 
-        valid = await self.check(species=species, color=color, pose=pose)
+        valid: bool = await self.check(species=species, color=color, pose=pose)
 
         if not valid:
             raise InvalidColorSpeciesPair("Invalid Species/Color/Pose provided")
 
         size = size or LayerImageSize.SIZE_600
 
-        data = await self._state.http.fetch_appearance(
+        data: PetAppearancePayload = await self._state.http.fetch_appearance(
             species=species, color=color, pose=pose, size=size
         )
 
         return PetAppearance(data=data, size=size, state=self._state)
 
     async def fetch_appearance_by_id(
-        self, appearance_id: int, /, size: Optional[LayerImageSize] = None
+        self, appearance_id: int, /, size: LayerImageSize | None = None
     ) -> PetAppearance:
         """|coro|
 
@@ -490,7 +504,7 @@ class Client:
         """
         size = size or LayerImageSize.SIZE_600
 
-        data = await self._state.http.fetch_appearance_by_id(
+        data: PetAppearancePayload = await self._state.http.fetch_appearance_by_id(
             id=appearance_id, size=size
         )
 
@@ -499,10 +513,10 @@ class Client:
     async def fetch_appearances(
         self,
         *,
-        species: Union[int, str, Species],
-        color: Union[int, str, Color],
-        size: Optional[LayerImageSize] = None,
-    ) -> List[PetAppearance]:
+        species: int | str | Species,
+        color: int | str | Color,
+        size: LayerImageSize | None = None,
+    ) -> list[PetAppearance]:
         """|coro|
 
         Fetches pet appearances of a provided species/color.
@@ -537,20 +551,20 @@ class Client:
         if not isinstance(color, Color):
             color = await self.get_color(color)
 
-        valid = await self.check(species=species, color=color)
+        valid: bool = await self.check(species=species, color=color)
 
         if not valid:
             raise InvalidColorSpeciesPair("Invalid Species/Color provided")
 
         size = size or LayerImageSize.SIZE_600
 
-        data = await self._state.http.fetch_appearances(
+        data: list[PetAppearancePayload] = await self._state.http.fetch_appearances(
             species=species, color=color, size=size
         )
 
         return [PetAppearance(data=d, size=size, state=self._state) for d in data]
 
-    async def fetch_all_zones(self) -> List[Zone]:
+    async def fetch_all_zones(self) -> list[Zone]:
         """|coro|
 
         Fetches all appearance zones for a customization.
@@ -560,15 +574,15 @@ class Client:
         List[:class:`Zone`]
             A list of all Zones.
         """
-        data = await self._state.http.fetch_all_zones()
+        data: list[ZonePayload] = await self._state.http.fetch_all_zones()
         return [Zone(data=d) for d in data]
 
     async def fetch_appearance_ids(
         self,
         *,
-        species: Union[int, str, Species],
-        color: Union[int, str, Color],
-    ) -> List[int]:
+        species: int | str | Species,
+        color: int | str | Color,
+    ) -> list[int]:
         """|coro|
 
         Fetches all appearance ids for a given species+color.
@@ -594,7 +608,7 @@ class Client:
         if not isinstance(color, Color):
             color = await self.get_color(color)
 
-        valid = await self.check(species=species, color=color)
+        valid: bool = await self.check(species=species, color=color)
 
         if not valid:
             raise InvalidColorSpeciesPair("Invalid Species/Color/Pose provided")
@@ -604,13 +618,13 @@ class Client:
     async def fetch_all_appearances(
         self,
         *,
-        item_id: Optional[int] = None,
-        item_ids: Optional[List[int]] = None,
-        color: Optional[Union[int, str, Color]] = None,
-        size: Optional[LayerImageSize] = None,
-    ) -> List[Neopet]:
+        item_id: int | None = None,
+        item_ids: list[int] | None = None,
+        color: int | str | Color | None = None,
+        size: LayerImageSize | None = None,
+    ) -> list[Neopet]:
 
-        _item_ids: List[int] = []
+        _item_ids: list[int] = []
 
         if item_id:
             _item_ids.append(item_id)
@@ -627,20 +641,24 @@ class Client:
 
         size = size or LayerImageSize.SIZE_600
 
-        data = await self._state.http.fetch_all_appearances_for_color(
-            color, item_ids=_item_ids, size=size
+        data: FetchAllAppearancesPayload = (
+            await self._state.http.fetch_all_appearances_for_color(
+                color, item_ids=_item_ids, size=size
+            )
         )
-        all_pet_appearances = data["color"].get("appliedToAllCompatibleSpecies")
+        all_pet_appearances: list[CanonicalAppearancePayload] = data["color"].get(
+            "appliedToAllCompatibleSpecies"
+        )
 
-        all_items = data.get("items", [])
-        item_map: DefaultDict[int, List[Item]] = defaultdict(list)  # bodyId, [Item]
-        return_neopets: List[Neopet] = []
+        all_items: list[ItemAllAppearancesPayload] = data.get("items", [])
+        item_map: DefaultDict[int, list[Item]] = defaultdict(list)  # bodyId, [Item]
+        return_neopets: list[Neopet] = []
 
         for item in all_items:
-            item_appearances = item.get("allAppearances")
+            item_appearances: list[ItemAppearancePayload] = item.get("allAppearances")
             # won't be needing that in there anymore
             # the rest of this object is now just an Item
-            real_item = Item(data=item, state=self._state)
+            real_item = Item(data=item, state=self._state)  # type: ignore
 
             for item_appearance in item_appearances:
                 # please forgive me
@@ -654,7 +672,7 @@ class Client:
                 state=self._state, size=size, data=pet_appearance["canonicalAppearance"]
             )
 
-            neopet = await Neopet._from_appearance(  # type: ignore
+            neopet: Neopet = await Neopet._from_appearance(  # type: ignore
                 appearance, items=item_map[appearance.body_id]
             )
 

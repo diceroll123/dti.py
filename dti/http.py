@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Any, Sequence
 
 import httpx
 
@@ -44,13 +44,13 @@ log = logging.getLogger(__name__)
 
 
 class HTTPClient:
-    __slots__ = ("_proxy", "_retries")
+    __slots__: tuple[str, ...] = ("_proxy", "_retries")
     API_BASE = "https://impress-2020.openneo.net/api"
 
     def __init__(
         self,
         *,
-        proxy: Optional[Union[str, Dict[str, str]]] = None,
+        proxy: str | dict[str, str] | None = None,
         retries: int = 3,
     ):
         self._proxy = proxy
@@ -59,9 +59,9 @@ class HTTPClient:
     async def _query(
         self,
         query: str,
-        variables: Optional[Dict[str, Any]] = None,
-        **kwargs: Dict[str, Any],
-    ) -> Dict[Any, Any]:
+        variables: dict[str, Any] | None = None,
+        **kwargs: dict[str, Any],
+    ) -> dict[Any, Any]:
         # for graphql queries
         kwargs["headers"] = {
             "Content-Type": "application/json",
@@ -69,7 +69,7 @@ class HTTPClient:
             "Accept-Encoding": "gzip, deflate, br",
         }
 
-        payload: Dict[str, Any] = {"query": query}
+        payload: dict[str, Any] = {"query": query}
         if variables:
             payload["variables"] = variables
 
@@ -129,7 +129,7 @@ class HTTPClient:
 
     async def fetch_appearances(
         self, *, species: Species, color: Color, size: LayerImageSize
-    ) -> List[PetAppearancePayload]:
+    ) -> list[PetAppearancePayload]:
         data = await self._query(
             GRAB_PET_APPEARANCES_BY_IDS,
             variables={"speciesId": species.id, "colorId": color.id, "size": str(size)},
@@ -147,7 +147,7 @@ class HTTPClient:
 
         return outfit_data
 
-    async def fetch_all_zones(self) -> List[ZonePayload]:
+    async def fetch_all_zones(self) -> list[ZonePayload]:
         zone_data = await self._query(GRAB_ZONES)
         return zone_data["data"]["allZones"]
 
@@ -198,13 +198,13 @@ class HTTPClient:
         species: Species,
         color: Color,
         pose: PetPose,
-        item_ids: Optional[Sequence[ID]] = None,
-        item_names: Optional[Sequence[str]] = None,
-        size: Optional[LayerImageSize] = None,
+        item_ids: Sequence[ID] | None = None,
+        item_names: Sequence[str] | None = None,
+        size: LayerImageSize | None = None,
     ) -> FetchAssetsPayload:
         # basically the fullest single-purpose dataset we can grab from DTI
 
-        variables: Dict[str, Any] = {
+        variables: dict[str, Any] = {
             "speciesId": species.id,
             "colorId": color.id,
             "size": str(size),
@@ -251,7 +251,7 @@ class HTTPClient:
 
     async def fetch_appearance_ids(
         self, *, species: Species, color: Color
-    ) -> List[int]:
+    ) -> list[int]:
         data = await self._query(
             GRAB_PET_APPEARANCE_IDS,
             variables=dict(speciesId=species.id, colorId=color.id),
@@ -260,7 +260,7 @@ class HTTPClient:
         return [int(appearance["id"]) for appearance in data["data"]["petAppearances"]]
 
     async def fetch_all_appearances_for_color(
-        self, color: Color, /, *, item_ids: List[int], size: LayerImageSize
+        self, color: Color, /, *, item_ids: list[int], size: LayerImageSize
     ) -> FetchAllAppearancesPayload:
         data = await self._query(
             GRAB_ALL_APPEARANCES_FOR_COLOR,

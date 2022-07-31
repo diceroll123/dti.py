@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import random
 from enum import Enum, auto
 from typing import Any, Type, TypeVar
 
 from typing_extensions import Self
 
-__all__ = (
+__all__: tuple[str, ...] = (
     "LayerImageSize",
     "PetPose",
     "ItemKind",
