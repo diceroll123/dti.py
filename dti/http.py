@@ -93,6 +93,7 @@ class HTTPClient:
             proxies=self._proxy,  # type: ignore
             transport=httpx.AsyncHTTPTransport(retries=self._retries),
             limits=httpx.Limits(max_connections=None, max_keepalive_connections=None),  # type: ignore
+            follow_redirects=True,
         ) as client:
             response = await client.get(url)
             return response.read()
