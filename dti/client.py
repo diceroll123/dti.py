@@ -387,7 +387,7 @@ class Client:
         searcher: DTISearch | None = None
         _names: list[str] = []
 
-        per_page: int = per_page or 30
+        per_page = per_page or 30
 
         if item_name:
             _names.append(item_name)
