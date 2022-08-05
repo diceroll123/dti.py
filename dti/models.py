@@ -748,14 +748,13 @@ class Item(Object):
 
     @appearance.setter
     def appearance(self, val: ItemAppearancePayload | ItemAppearance | None) -> None:
-        if val is not None:
-            if isinstance(val, ItemAppearance):
-                self._appearance = val
-            else:
-                # assume it's a ItemAppearancePayload
-                self._appearance = ItemAppearance(val, self)
-        else:
+        if val is None:
             self._appearance = None
+        elif isinstance(val, ItemAppearance):
+            self._appearance = val
+        else:
+            # assume it's a ItemAppearancePayload
+            self._appearance = ItemAppearance(val, self)
 
     @property
     def legacy_url(self) -> str:
@@ -1010,8 +1009,7 @@ class Neopet:
             objects, closet = _render_items(self.items)
             params["objects[]"] = [item.id for item in objects]
             params["closet[]"] = [item.id for item in closet]
-
-        return "https://impress.openneo.net/wardrobe#" + urlencode(params, doseq=True)
+        return f"https://impress.openneo.net/wardrobe#{urlencode(params, doseq=True)}"
 
     @property
     def closet_url(self) -> str:
@@ -1028,10 +1026,7 @@ class Neopet:
             objects, closet = _render_items(self.items)
             params["objects[]"] = [item.id for item in objects]
             params["closet[]"] = [item.id for item in closet]
-
-        return "https://impress-2020.openneo.net/outfits/new?" + urlencode(
-            params, doseq=True
-        )
+        return f"https://impress-2020.openneo.net/outfits/new?{urlencode(params, doseq=True)}"
 
     def clear_closet(self) -> None:
         """Removes items from the closet that would not be rendered to the pet appearance."""
