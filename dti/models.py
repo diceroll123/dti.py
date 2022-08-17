@@ -710,6 +710,8 @@ class Item(Object):
         The kind of item this is. Can be `NC` for Neocash, `NP` for Neopoint items, or `PB` for paintbrush items.
     rarity: :class:`int`
         The item's rarity on Neopets.
+    nc_value_text: Optional[:class:`str`]
+        The item's NC trade value. Can be None if the item is not NC, or if it has not been valued yet. Values courtesy of neopets.com/~owls
     """
 
     __slots__: tuple[str, ...] = (
@@ -721,6 +723,7 @@ class Item(Object):
         "description",
         "thumbnail_url",
         "rarity",
+        "nc_value_text",
     )
 
     def __init__(self, *, data: ItemPayload, state: State) -> None:
@@ -731,6 +734,7 @@ class Item(Object):
         self.thumbnail_url: str = utils.url_sanitizer(data["thumbnailUrl"])
         self._appearance: ItemAppearance | None = None
         self.appearance = data.get("appearanceOn")
+        self.nc_value_text: str | None = data["ncTradeValueText"]
 
         _kind = None
         if data.get("isNc"):

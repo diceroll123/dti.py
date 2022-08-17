@@ -38,6 +38,7 @@
                 "rarityIndex": 500,
                 "isNc": true,
                 "isPb": false,
+                "ncTradeValueText": null,
                 "appearanceOn": {
                     "id": "item-72257-body-155",
                     "restrictedZones": [],
@@ -65,6 +66,7 @@
                 "rarityIndex": 500,
                 "isNc": true,
                 "isPb": false,
+                "ncTradeValueText": null,
                 "appearanceOn": {
                     "id": "item-64054-body-155",
                     "restrictedZones": [],

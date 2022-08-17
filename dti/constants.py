@@ -16,6 +16,7 @@ fragment ItemProperties on Item {
   rarityIndex
   isNc
   isPb
+  ncTradeValueText
 }"""
 
 FRAGMENT_USER_PROPERTIES = """

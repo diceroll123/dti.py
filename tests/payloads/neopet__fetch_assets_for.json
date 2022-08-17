@@ -110,6 +110,7 @@
                 "rarityIndex": 500,
                 "isNc": true,
                 "isPb": false,
+                "ncTradeValueText": null,
                 "appearanceOn": {
                     "id": "item-71171-body-150",
                     "restrictedZones": [],
@@ -137,6 +138,7 @@
                 "rarityIndex": 500,
                 "isNc": true,
                 "isPb": false,
+                "ncTradeValueText": null,
                 "appearanceOn": {
                     "id": "item-70745-body-150",
                     "restrictedZones": [
@@ -170,6 +172,7 @@
                 "rarityIndex": 82,
                 "isNc": false,
                 "isPb": false,
+                "ncTradeValueText": null,
                 "appearanceOn": {
                     "id": "item-52393-body-150",
                     "restrictedZones": [
@@ -208,6 +211,7 @@
                 "rarityIndex": 89,
                 "isNc": false,
                 "isPb": false,
+                "ncTradeValueText": null,
                 "appearanceOn": {
                     "id": "item-36123-body-150",
                     "restrictedZones": [
@@ -251,6 +255,7 @@
                 "rarityIndex": 86,
                 "isNc": false,
                 "isPb": false,
+                "ncTradeValueText": null,
                 "appearanceOn": {
                     "id": "item-66321-body-150",
                     "restrictedZones": [],
@@ -278,6 +283,7 @@
                 "rarityIndex": 500,
                 "isNc": true,
                 "isPb": false,
+                "ncTradeValueText": null,
                 "appearanceOn": {
                     "id": "item-47999-body-150",
                     "restrictedZones": [

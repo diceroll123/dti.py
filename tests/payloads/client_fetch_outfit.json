@@ -17,7 +17,8 @@
                     "thumbnailUrl": "https://images.neopets.com/items/mall_acc_largedolleyes.gif",
                     "rarityIndex": 500,
                     "isNc": true,
-                    "isPb": false
+                    "isPb": false,
+                    "ncTradeValueText": null
                 },
                 {
                     "id": "70745",
@@ -26,7 +27,8 @@
                     "thumbnailUrl": "https://images.neopets.com/items/mall_shirt_darkrainbow.gif",
                     "rarityIndex": 500,
                     "isNc": true,
-                    "isPb": false
+                    "isPb": false,
+                    "ncTradeValueText": null
                 },
                 {
                     "id": "52393",
@@ -35,7 +37,8 @@
                     "thumbnailUrl": "//images.neopets.com/items/mcc_eleggearboots.gif",
                     "rarityIndex": 82,
                     "isNc": false,
-                    "isPb": false
+                    "isPb": false,
+                    "ncTradeValueText": null
                 },
                 {
                     "id": "36123",
@@ -44,7 +47,8 @@
                     "thumbnailUrl": "//images.neopets.com/items/clo_derby_hat.gif",
                     "rarityIndex": 89,
                     "isNc": false,
-                    "isPb": false
+                    "isPb": false,
+                    "ncTradeValueText": null
                 },
                 {
                     "id": "66321",
@@ -53,7 +57,8 @@
                     "thumbnailUrl": "https://images.neopets.com/items/clo_krawk_foreman_cane.gif",
                     "rarityIndex": 86,
                     "isNc": false,
-                    "isPb": false
+                    "isPb": false,
+                    "ncTradeValueText": null
                 },
                 {
                     "id": "47999",
@@ -62,7 +67,8 @@
                     "thumbnailUrl": "//images.neopets.com/items/mall_winterprince_pants.gif",
                     "rarityIndex": 500,
                     "isNc": true,
-                    "isPb": false
+                    "isPb": false,
+                    "ncTradeValueText": null
                 }
             ],
             "closetedItems": [],
