@@ -736,12 +736,12 @@ class Item(Object):
         self.appearance = data.get("appearanceOn")
         self.nc_value_text: str | None = data["ncTradeValueText"]
 
-        _kind = None
         if data.get("isNc"):
-            _kind = ItemKind.NC
-        if data.get("isPb"):
-            _kind = ItemKind.PB
-        self.kind: ItemKind = _kind or ItemKind.NP
+            self.kind = ItemKind.NC
+        elif data.get("isPb"):
+            self.kind = ItemKind.PB
+        else:
+            self.kind = ItemKind.NP
 
         self.rarity: int = int(data["rarityIndex"])
 
