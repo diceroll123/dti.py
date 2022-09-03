@@ -24,10 +24,10 @@ class _DTIEnum(Enum):
     def _missing_(cls, value: Any) -> Self:
         return cls[value]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __int__(self):
+    def __int__(self) -> int:
         return int(self.value)
 
 

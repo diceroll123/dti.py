@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from asyncio.queues import Queue
 from typing import TYPE_CHECKING, Any, AsyncIterator, List, Optional, Sequence, Union
+from typing_extensions import Self
 
 from .constants import (
     SEARCH_ITEM_IDS,
@@ -21,7 +22,7 @@ if TYPE_CHECKING:
 
 class DTISearch(AsyncIterator[Item]):
     # this is a base class
-    def __init__(self, *, state: State, per_page: Optional[int] = None):
+    def __init__(self, *, state: State, per_page: Optional[int] = None) -> None:
         self._state = state
         self._items: Queue[Item] = Queue(maxsize=per_page or 0)
         self._exhausted = False
@@ -29,7 +30,7 @@ class DTISearch(AsyncIterator[Item]):
     async def fetch_items(self) -> List[ItemPayload]:
         raise NotImplementedError
 
-    def post_fetch(self, items: Sequence[ItemPayload]):
+    def post_fetch(self, items: Sequence[ItemPayload]) -> None:
         # override these where needed to do things like adding to offset
         # this here, by default, will exhaust the searcher, with single-offset searchers in mind
         self._exhausted = True
@@ -43,7 +44,7 @@ class DTISearch(AsyncIterator[Item]):
 
         self.post_fetch(items)
 
-    def __aiter__(self):
+    def __aiter__(self) -> Self:
         return self
 
     async def flatten(self) -> List[Item]:
@@ -64,7 +65,7 @@ class DTISearch(AsyncIterator[Item]):
         except asyncio.QueueEmpty as e:
             raise StopAsyncIteration from e
 
-    async def __anext__(self):
+    async def __anext__(self) -> Item:
         return await self.next()
 
 
@@ -86,7 +87,7 @@ class ItemIDSearch(DTISearch):
 
 
 class PaginatedDTISearch(DTISearch):
-    def __init__(self, *args: Any, **kwargs: Any):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.offset = 0
         self.per_page = 0
@@ -94,7 +95,7 @@ class PaginatedDTISearch(DTISearch):
     async def fetch_items(self) -> List[ItemPayload]:
         raise NotImplementedError
 
-    def post_fetch(self, items: Sequence[ItemPayload]):
+    def post_fetch(self, items: Sequence[ItemPayload]) -> None:
         self.offset += self.per_page
 
         # when we find the last page, don't try another next time
@@ -113,7 +114,7 @@ class ItemSearchToFit(PaginatedDTISearch):
         item_kind: Optional[ItemKind] = None,
         size: Optional[LayerImageSize] = None,
         state: State,
-    ):
+    ) -> None:
         super().__init__(state=state, per_page=per_page)
         self.query = query
         self.species_id = species_id
@@ -121,7 +122,7 @@ class ItemSearchToFit(PaginatedDTISearch):
         self.item_kind = item_kind
         self.offset = 0
         self.per_page = per_page
-        self.size = size or LayerImageSize.SIZE_600
+        self.size: LayerImageSize = size or LayerImageSize.SIZE_600
 
     async def fetch_items(self) -> List[ItemPayload]:
         data = await self._state.http._query(  # type: ignore

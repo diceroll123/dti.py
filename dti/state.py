@@ -198,7 +198,7 @@ class State:
         # this lock is so updating only happens once at a time, since it can be manually called
         self._update_lock = asyncio.Lock()
 
-        self.http = HTTPClient(proxy=proxy)
+        self.http: HTTPClient = HTTPClient(proxy=proxy)
 
     async def _lock_and_update(self) -> None:
         async with self._lock:

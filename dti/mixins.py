@@ -1,17 +1,17 @@
-from typing import Any, Union
+from typing import Any
 
 
 class Object:
     __slots__ = ()
-    id: Union[int, str]
+    id: int
 
-    def __eq__(self, other: Any):
+    def __eq__(self, other: Any) -> bool:
         return isinstance(other, self.__class__) and other.id == self.id
 
-    def __ne__(self, other: Any):
+    def __ne__(self, other: Any) -> bool:
         if isinstance(other, self.__class__):
             return other.id != self.id
         return True
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(str(self.__class__) + str(self.id))

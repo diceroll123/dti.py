@@ -420,7 +420,7 @@ class PetAppearance(Object):
         self.id: int = int(data["id"])
         self.body_id: int = int(data["bodyId"])
         self.is_glitched: bool = data["isGlitched"]
-        self.size = size
+        self.size: LayerImageSize = size
 
         # create new, somewhat temporary colors from this data since we don't have async access
         self.color: Color = Color(data=data["color"], state=state)
@@ -735,6 +735,7 @@ class Item(Object):
         self._appearance: ItemAppearance | None = None
         self.appearance = data.get("appearanceOn")
         self.nc_value_text: str | None = data["ncTradeValueText"]
+        self.kind: ItemKind
 
         if data.get("isNc"):
             self.kind = ItemKind.NC
@@ -1166,7 +1167,7 @@ class Neopet:
         """:class:`str`: Convenience property for getting a Neopet's pet appearance render url."""
         return self.appearance.image_url(items=self.items)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         attrs = [
             ("species", self.species),
             ("color", self.color),
@@ -1220,11 +1221,11 @@ class Outfit(Object):
         "size",
     )
 
-    def __init__(self, *, state: State, size: LayerImageSize, data: OutfitPayload):
+    def __init__(self, *, state: State, size: LayerImageSize, data: OutfitPayload) -> None:
         self._state = state
-        self.id = int(data["id"])
+        self.id: int = int(data["id"])
         self.name: str | None = data["name"]
-        self.size = size
+        self.size: LayerImageSize = size
         self.pet_appearance: PetAppearance = PetAppearance(
             data=data["petAppearance"], size=size, state=state
         )

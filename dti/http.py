@@ -40,7 +40,7 @@ if TYPE_CHECKING:
         ZonePayload,
     )
 
-log = logging.getLogger(__name__)
+log: logging.Logger = logging.getLogger(__name__)
 
 
 class HTTPClient:
