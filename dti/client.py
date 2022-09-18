@@ -288,6 +288,8 @@ class Client:
         -------
         ~dti.NeopetNotFound
             The Neopet is not found on Neopets.
+        ~dti.GlitchedNeopet
+            The Neopet is glitched, but exists.
 
         Returns
         --------

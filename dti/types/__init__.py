@@ -88,7 +88,7 @@ class FetchedWornItemsPayload(_BaseObject):
 
 
 class FetchedNeopetPayload(TypedDict):
-    petAppearance: PetAppearancePayload
+    petAppearance: PetAppearancePayload | None
     wornItems: list[FetchedWornItemsPayload]
 
 

@@ -18,7 +18,12 @@ from .enums import (
     PetPose,
     try_enum,
 )
-from .errors import InvalidColorSpeciesPair, MissingPetAppearance, NullAssetImage
+from .errors import (
+    GlitchedNeopet,
+    InvalidColorSpeciesPair,
+    MissingPetAppearance,
+    NullAssetImage,
+)
 from .mixins import Object
 
 if TYPE_CHECKING:
@@ -984,9 +989,13 @@ class Neopet:
             name=pet_name, size=size
         )
 
-        pet_appearance = PetAppearance(
-            data=pet_on_neo["petAppearance"], size=size, state=state
-        )
+        appearance_data = pet_on_neo["petAppearance"]
+
+        if appearance_data is None:
+            # this pet is glitched by having a color that the species doesn't actually support
+            raise GlitchedNeopet
+
+        pet_appearance = PetAppearance(data=appearance_data, size=size, state=state)
 
         neopet: Neopet = await Neopet._fetch_assets_for(
             species=pet_appearance.species,

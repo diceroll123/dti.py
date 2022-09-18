@@ -10,6 +10,14 @@ class NeopetNotFound(DTIException):
     pass
 
 
+class GlitchedNeopet(DTIException):
+    """An exception that is thrown when a glitched neopet is requested, such as an Asparagus Hissi."""
+
+    # ideally we will never have an actual Asparagus Hissi, but this is a good example of a glitched neopet
+
+    pass
+
+
 class MissingModelData(DTIException):
     """An exception that is thrown when a pet's data isn't in DTI's database yet."""
 
