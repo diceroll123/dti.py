@@ -32,7 +32,7 @@ class ZonePayload(_BaseObject):
 
 
 class AppearanceLayerPayload(_BaseObject):
-    imageUrl: str | None
+    imageUrlV2: str | None
     bodyId: str
     remoteId: str
     zone: ZonePayload

@@ -48,7 +48,7 @@ fragment PetAppearanceForOutfitPreview on PetAppearance {
     id
     bodyId
     remoteId
-    imageUrl(size: $size)
+    imageUrlV2(idealSize: $size)
     knownGlitches
     zone {
       id
@@ -70,7 +70,7 @@ fragment ItemAppearanceForOutfitPreview on ItemAppearance {
     id
     bodyId
     remoteId
-    imageUrl(size: $size)
+    imageUrlV2(idealSize: $size)
     knownGlitches
     zone {
       id

@@ -19,7 +19,7 @@
                     "id": "4477",
                     "bodyId": "155",
                     "remoteId": "5907",
-                    "imageUrl": "https://impress-asset-images.openneo.net/biology/000/000/005/5907/600x600.png?v2-1581943737000",
+                    "imageUrlV2": "https://impress-asset-images.openneo.net/biology/000/000/005/5907/600x600.png?v2-1581943737000",
                     "knownGlitches": [],
                     "zone": {
                         "id": "15",
@@ -47,7 +47,7 @@
                             "id": "346710",
                             "bodyId": "155",
                             "remoteId": "428104",
-                            "imageUrl": "https://impress-2020.openneo.net/api/assetImage?libraryUrl=https%3A%2F%2Fimages.neopets.com%2Fcp%2Fitems%2Fdata%2F000%2F000%2F428%2F428104_4c6e4bbced%2F428104HTML5.js&size=600",
+                            "imageUrlV2": "https://impress-2020.openneo.net/api/assetImage?libraryUrl=https%3A%2F%2Fimages.neopets.com%2Fcp%2Fitems%2Fdata%2F000%2F000%2F428%2F428104_4c6e4bbced%2F428104HTML5.js&size=600",
                             "knownGlitches": [],
                             "zone": {
                                 "id": "41",
@@ -75,7 +75,7 @@
                             "id": "202279",
                             "bodyId": "155",
                             "remoteId": "227031",
-                            "imageUrl": "http://images.neopets.com/cp/items/data/000/000/227/227031_a7e89ff8c2/227031.png",
+                            "imageUrlV2": "http://images.neopets.com/cp/items/data/000/000/227/227031_a7e89ff8c2/227031.png",
                             "knownGlitches": [],
                             "zone": {
                                 "id": "35",

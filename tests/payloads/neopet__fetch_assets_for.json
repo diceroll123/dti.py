@@ -19,7 +19,7 @@
                     "id": "4124",
                     "bodyId": "0",
                     "remoteId": "5285",
-                    "imageUrl": "http://images.neopets.com/cp/bio/data/000/000/005/5285_ed77ac9c8f/5285.png",
+                    "imageUrlV2": "http://images.neopets.com/cp/bio/data/000/000/005/5285_ed77ac9c8f/5285.png",
                     "knownGlitches": [],
                     "zone": {
                         "id": "33",
@@ -31,7 +31,7 @@
                     "id": "5417",
                     "bodyId": "150",
                     "remoteId": "7111",
-                    "imageUrl": "http://images.neopets.com/cp/bio/data/000/000/007/7111_c5d87373aa/7111.png",
+                    "imageUrlV2": "http://images.neopets.com/cp/bio/data/000/000/007/7111_c5d87373aa/7111.png",
                     "knownGlitches": [],
                     "zone": {
                         "id": "15",
@@ -43,7 +43,7 @@
                     "id": "5418",
                     "bodyId": "150",
                     "remoteId": "7112",
-                    "imageUrl": "http://images.neopets.com/cp/bio/data/000/000/007/7112_15fc0720ea/7112.png",
+                    "imageUrlV2": "http://images.neopets.com/cp/bio/data/000/000/007/7112_15fc0720ea/7112.png",
                     "knownGlitches": [],
                     "zone": {
                         "id": "5",
@@ -55,7 +55,7 @@
                     "id": "5421",
                     "bodyId": "150",
                     "remoteId": "7121",
-                    "imageUrl": "http://images.neopets.com/cp/bio/data/000/000/007/7121_ed55618fc0/7121.png",
+                    "imageUrlV2": "http://images.neopets.com/cp/bio/data/000/000/007/7121_ed55618fc0/7121.png",
                     "knownGlitches": [],
                     "zone": {
                         "id": "14",
@@ -67,7 +67,7 @@
                     "id": "5423",
                     "bodyId": "150",
                     "remoteId": "7123",
-                    "imageUrl": "http://images.neopets.com/cp/bio/data/000/000/007/7123_bf168a682d/7123.png",
+                    "imageUrlV2": "http://images.neopets.com/cp/bio/data/000/000/007/7123_bf168a682d/7123.png",
                     "knownGlitches": [],
                     "zone": {
                         "id": "37",
@@ -79,7 +79,7 @@
                     "id": "5428",
                     "bodyId": "150",
                     "remoteId": "7131",
-                    "imageUrl": "http://images.neopets.com/cp/bio/data/000/000/007/7131_b11c12ed8c/7131.png",
+                    "imageUrlV2": "http://images.neopets.com/cp/bio/data/000/000/007/7131_b11c12ed8c/7131.png",
                     "knownGlitches": [],
                     "zone": {
                         "id": "34",
@@ -91,7 +91,7 @@
                     "id": "17273",
                     "bodyId": "150",
                     "remoteId": "25304",
-                    "imageUrl": "http://images.neopets.com/cp/bio/data/000/000/025/25304_7835dbcd89/25304.png",
+                    "imageUrlV2": "http://images.neopets.com/cp/bio/data/000/000/025/25304_7835dbcd89/25304.png",
                     "knownGlitches": [],
                     "zone": {
                         "id": "30",
@@ -119,7 +119,7 @@
                             "id": "328268",
                             "bodyId": "150",
                             "remoteId": "395540",
-                            "imageUrl": "https://impress-asset-images.openneo.net/object/000/000/395/395540/600x600.png?v2-1414162142000",
+                            "imageUrlV2": "https://impress-asset-images.openneo.net/object/000/000/395/395540/600x600.png?v2-1414162142000",
                             "knownGlitches": [],
                             "zone": {
                                 "id": "35",
@@ -153,7 +153,7 @@
                             "id": "313724",
                             "bodyId": "150",
                             "remoteId": "373535",
-                            "imageUrl": "https://impress-asset-images.openneo.net/object/000/000/373/373535/600x600.png?v2-1405816224000",
+                            "imageUrlV2": "https://impress-asset-images.openneo.net/object/000/000/373/373535/600x600.png?v2-1405816224000",
                             "knownGlitches": [],
                             "zone": {
                                 "id": "23",
@@ -192,7 +192,7 @@
                             "id": "99530",
                             "bodyId": "150",
                             "remoteId": "97009",
-                            "imageUrl": "http://images.neopets.com/cp/items/data/000/000/097/97009_e6f743865d/97009.png",
+                            "imageUrlV2": "http://images.neopets.com/cp/items/data/000/000/097/97009_e6f743865d/97009.png",
                             "knownGlitches": [],
                             "zone": {
                                 "id": "19",
@@ -236,7 +236,7 @@
                             "id": "27613",
                             "bodyId": "150",
                             "remoteId": "3695",
-                            "imageUrl": "http://images.neopets.com/cp/items/data/000/000/003/3695_9ee3c7094b/3695.png",
+                            "imageUrlV2": "http://images.neopets.com/cp/items/data/000/000/003/3695_9ee3c7094b/3695.png",
                             "knownGlitches": [],
                             "zone": {
                                 "id": "40",
@@ -264,7 +264,7 @@
                             "id": "243512",
                             "bodyId": "150",
                             "remoteId": "264818",
-                            "imageUrl": "http://images.neopets.com/cp/items/data/000/000/264/264818_f16fd89e8b/264818.png",
+                            "imageUrlV2": "http://images.neopets.com/cp/items/data/000/000/264/264818_f16fd89e8b/264818.png",
                             "knownGlitches": [],
                             "zone": {
                                 "id": "43",
@@ -298,7 +298,7 @@
                             "id": "73876",
                             "bodyId": "150",
                             "remoteId": "57979",
-                            "imageUrl": "http://images.neopets.com/cp/items/data/000/000/057/57979_8b57d4820b/57979.png",
+                            "imageUrlV2": "http://images.neopets.com/cp/items/data/000/000/057/57979_8b57d4820b/57979.png",
                             "knownGlitches": [],
                             "zone": {
                                 "id": "21",

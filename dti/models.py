@@ -309,7 +309,7 @@ class AppearanceLayer(Object):
         self._state: State = parent._state  # type: ignore
         self.id: int = int(data["id"])
         self.parent: ItemAppearance | PetAppearance = parent
-        self._image_url: str | None = data["imageUrl"]
+        self._image_url: str | None = data["imageUrlV2"]
         self.asset_remote_id: int = int(data["remoteId"])
         self.body_id: int = int(data["bodyId"])
         self.zone: Zone = Zone(data["zone"])
