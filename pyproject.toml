@@ -1,2 +1,15 @@
 [tool.pytest.ini_options]
 asyncio_mode = "strict"
+
+[tool.pyright]
+include = [
+    "dti",
+    "dti/types",
+]
+exclude = [
+    "**/__pycache__",
+]
+reportUnnecessaryTypeIgnoreComment = "warning"
+reportUnusedImport = "error"
+pythonVersion = "3.8"
+typeCheckingMode = "basic"

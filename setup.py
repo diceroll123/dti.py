@@ -11,7 +11,7 @@ with open("dti/__init__.py") as f:
 if version is None:
     raise RuntimeError("Version number is not set")
 
-version = version.group(1)
+version = version[1]
 
 if version.endswith(("a", "b", "rc")):
     # append version identifier based on commit count
@@ -43,10 +43,11 @@ extras_require = {"test": ["pytest", "pytest-asyncio"]}
 setup(
     name="dti.py",
     author="diceroll123",
+    description="A Python wrapper for the Dress To Impress API",
     url="https://github.com/diceroll123/dti.py",
     version=version,
     license="MIT",
-    description="A Python wrapper for the Dress To Impress API",
+    license_file="LICENSE",
     python_requires=">=3.8",
     packages=["dti", "dti.types"],
     include_package_data=True,

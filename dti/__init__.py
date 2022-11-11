@@ -6,7 +6,7 @@ __version__ = "0.0.1a"
 
 import logging
 
-from . import utils
+from . import utils as utils
 from .client import *
 from .constants import *
 from .enums import *
