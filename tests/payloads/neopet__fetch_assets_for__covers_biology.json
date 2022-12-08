@@ -1,0 +1,183 @@
+{
+    "data": {
+        "petAppearance": {
+            "id": "5977",
+            "pose": "HAPPY_MASC",
+            "bodyId": "146",
+            "isGlitched": false,
+            "color": {
+                "id": "8",
+                "name": "Blue"
+            },
+            "species": {
+                "id": "5",
+                "name": "Bruce"
+            },
+            "restrictedZones": [],
+            "layers": [
+                {
+                    "id": "3887",
+                    "bodyId": "0",
+                    "remoteId": "4876",
+                    "imageUrlV2": "https://images.neopets.com/cp/bio/data/000/000/004/4876_a5499d9f84/4876.png",
+                    "knownGlitches": [],
+                    "zone": {
+                        "id": "15",
+                        "depth": 18,
+                        "label": "Body"
+                    }
+                },
+                {
+                    "id": "3890",
+                    "bodyId": "0",
+                    "remoteId": "4879",
+                    "imageUrlV2": "https://images.neopets.com/cp/bio/data/000/000/004/4879_d20b9b440a/4879.png",
+                    "knownGlitches": [],
+                    "zone": {
+                        "id": "37",
+                        "depth": 40,
+                        "label": "Hair Front"
+                    }
+                },
+                {
+                    "id": "3891",
+                    "bodyId": "0",
+                    "remoteId": "4883",
+                    "imageUrlV2": "https://images.neopets.com/cp/bio/data/000/000/004/4883_8687a3da10/4883.png",
+                    "knownGlitches": [],
+                    "zone": {
+                        "id": "33",
+                        "depth": 37,
+                        "label": "Eyes"
+                    }
+                },
+                {
+                    "id": "3897",
+                    "bodyId": "0",
+                    "remoteId": "4908",
+                    "imageUrlV2": "https://images.neopets.com/cp/bio/data/000/000/004/4908_f1539a98ef/4908.png",
+                    "knownGlitches": [],
+                    "zone": {
+                        "id": "34",
+                        "depth": 38,
+                        "label": "Mouth"
+                    }
+                }
+            ]
+        },
+        "items": [
+            {
+                "id": "84817",
+                "name": "Bruce Brucey B Glasses",
+                "description": "Be careful that the reflection doesnt give away your hand!",
+                "thumbnailUrl": "https://images.neopets.com/items/clo_bruceyb_glasses.gif",
+                "rarityIndex": 87,
+                "isNc": false,
+                "isPb": false,
+                "ncTradeValueText": "None",
+                "appearanceOn": {
+                    "id": "item-84817-body-146",
+                    "restrictedZones": [],
+                    "layers": [
+                        {
+                            "id": "579851",
+                            "bodyId": "146",
+                            "remoteId": "686583",
+                            "imageUrlV2": "https://images.neopets.com/cp/items/data/000/000/686/686583/bruce-glasses.png?v=648269ad89",
+                            "knownGlitches": [],
+                            "zone": {
+                                "id": "35",
+                                "depth": 41,
+                                "label": "Glasses"
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "id": "84818",
+                "name": "Bruce Brucey B Mouth",
+                "description": "Just keep smiling!",
+                "thumbnailUrl": "https://images.neopets.com/items/clo_bruceyb_mouth.gif",
+                "rarityIndex": 87,
+                "isNc": false,
+                "isPb": false,
+                "ncTradeValueText": "None",
+                "appearanceOn": {
+                    "id": "item-84818-body-146",
+                    "restrictedZones": [],
+                    "layers": [
+                        {
+                            "id": "579852",
+                            "bodyId": "146",
+                            "remoteId": "686582",
+                            "imageUrlV2": "https://images.neopets.com/cp/items/data/000/000/686/686582/bruce-bio_mouth.png?v=1866d5c9eb",
+                            "knownGlitches": [],
+                            "zone": {
+                                "id": "34",
+                                "depth": 38,
+                                "label": "Mouth"
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "id": "84819",
+                "name": "Bruce Brucey B Necklace",
+                "description": "What a lucky coin!",
+                "thumbnailUrl": "https://images.neopets.com/items/clo_bruceyb_necklace.gif",
+                "rarityIndex": 87,
+                "isNc": false,
+                "isPb": false,
+                "ncTradeValueText": "None",
+                "appearanceOn": {
+                    "id": "item-84819-body-146",
+                    "restrictedZones": [],
+                    "layers": [
+                        {
+                            "id": "579853",
+                            "bodyId": "146",
+                            "remoteId": "686581",
+                            "imageUrlV2": "https://images.neopets.com/cp/items/data/000/000/686/686581/bruce-necklace.png?v=9c69f5a804",
+                            "knownGlitches": [],
+                            "zone": {
+                                "id": "24",
+                                "depth": 28,
+                                "label": "Necklace"
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "id": "84820",
+                "name": "Bruce Brucey B Shirt",
+                "description": "A great shirt for looking cool while you cheat!",
+                "thumbnailUrl": "https://images.neopets.com/items/clo_bruceyb_shirt.gif",
+                "rarityIndex": 87,
+                "isNc": false,
+                "isPb": false,
+                "ncTradeValueText": "None",
+                "appearanceOn": {
+                    "id": "item-84820-body-146",
+                    "restrictedZones": [],
+                    "layers": [
+                        {
+                            "id": "579854",
+                            "bodyId": "146",
+                            "remoteId": "686580",
+                            "imageUrlV2": "https://images.neopets.com/cp/items/data/000/000/686/686580/bruce-shirt_dress.png?v=faf6de7e05",
+                            "knownGlitches": [],
+                            "zone": {
+                                "id": "23",
+                                "depth": 26,
+                                "label": "Shirt/Dress"
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

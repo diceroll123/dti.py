@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 import pytest
+
 from dti import Client
 from dti.models import Color, Species
 from dti.state import ValidField, _NameDict
@@ -59,4 +60,12 @@ def assets_data_unwearable() -> Dict[str, Any]:
     # petAppearance payload from Neopet._fetch_assets_for()
     return json.loads(
         (payloads / "neopet__fetch_assets_for__unwearable.json").read_text()
+    )
+
+
+@pytest.fixture
+def assets_data_covers_biology() -> Dict[str, Any]:
+    # petAppearance payload from Neopet._fetch_assets_for()
+    return json.loads(
+        (payloads / "neopet__fetch_assets_for__covers_biology.json").read_text()
     )

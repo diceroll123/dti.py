@@ -467,9 +467,6 @@ class PetAppearance(Object):
 
         all_layers: list[AppearanceLayer] = list(self.layers)
         item_restricted_zones: list[Zone] = []
-        pet_occupied_and_restricted_zones: set[Zone] = {
-            layer.zone for layer in all_layers
-        } | set(self.restricted_zones)
 
         if items:
             render_items, _ = _render_items(items)
@@ -508,7 +505,7 @@ class PetAppearance(Object):
                 and layer.body_id != 0
                 and (
                     self.pose == PetPose.UNCONVERTED
-                    or layer.zone in pet_occupied_and_restricted_zones
+                    or layer.zone in self.restricted_zones
                 )
             ):
                 return False
@@ -523,9 +520,13 @@ class PetAppearance(Object):
 
             return True
 
-        visible_layers = filter(_layer_filter, all_layers)
+        layer_sorter: dict[int, AppearanceLayer] = {}
+        for layer in filter(_layer_filter, all_layers):
+            # this way, we can override layers that are already in the list
+            # in the rare case of a Mouth item overriding the biology Mouth, for example.
+            layer_sorter[layer.zone.depth] = layer
 
-        return sorted(visible_layers, key=lambda layer: layer.zone.depth)
+        return [layer_sorter[layer] for layer in sorted(layer_sorter)]
 
     def image_url(self, *, items: Sequence[Item] | None = None) -> str:
         """
