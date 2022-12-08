@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import copy
+import random
 from collections import defaultdict
 from typing import DefaultDict
 
+from dti.constants import CLOSEST_POSES_IN_ORDER
 from dti.types import (
     CanonicalAppearancePayload,
     FetchAllAppearancesPayload,
@@ -255,9 +257,16 @@ class Client:
         if not isinstance(color, Color):
             color = await self.get_color(color)
 
-        valid = await self.check(species=species, color=color, pose=pose)
+        if pose is None:
+            ideal_pose = random.choice([PetPose.HAPPY_FEM, PetPose.HAPPY_MASC])
+            for possible_pose in CLOSEST_POSES_IN_ORDER[ideal_pose]:
+                valid = await self.check(species=species, color=color, pose=possible_pose)
+                if valid:
+                    pose = possible_pose
+                    break
 
-        if not valid:
+        if pose is None:
+            # if we get this far and pose is None, it *has to be* user error
             raise InvalidColorSpeciesPair("Invalid Species/Color/Pose provided")
 
         return await Neopet._fetch_assets_for(  # type: ignore
@@ -266,7 +275,7 @@ class Client:
             item_names=item_names,
             item_ids=item_ids,
             size=size,
-            pose=pose or PetPose.ideal(),
+            pose=pose,
             state=self._state,
         )
 
