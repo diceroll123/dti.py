@@ -72,10 +72,6 @@ class PetPose(int, _DTIEnum):
     ALL_SAD = SAD_FEM | SAD_MASC
     ALL_SICK = SICK_FEM | SICK_MASC
 
-    @classmethod
-    def ideal(cls) -> Self:
-        return random.choice([cls.HAPPY_FEM, cls.HAPPY_MASC])
-
 
 class AppearanceLayerKnownGlitch(Enum):
     OFFICIAL_SWF_IS_INCORRECT = "OFFICIAL_SWF_IS_INCORRECT"
