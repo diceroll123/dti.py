@@ -1,13 +1,17 @@
-from typing import Any, Dict
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Dict
 
 import pytest
 
-from dti.client import Client
 from dti.enums import LayerImageSize
 from dti.models import Item, Neopet, PetAppearance
 
+if TYPE_CHECKING:
+    from dti.client import Client
 
-async def _neopet_from_data(client: Client, data: Dict[str, Any]):
+
+async def _neopet_from_data(client: Client, data: Dict[str, Any]) -> Neopet:
     state = client._state
     size = LayerImageSize.SIZE_600
 
@@ -43,14 +47,16 @@ async def _neopet_from_data(client: Client, data: Dict[str, Any]):
 
 
 @pytest.mark.asyncio
-async def test_neopet(client: Client, assets_data: Dict[str, Any]):
+async def test_neopet(client: Client, assets_data: Dict[str, Any]) -> None:
     neopet = await _neopet_from_data(client, assets_data)
     # successfully building a Neopet object is the test
     assert neopet.species.name == "Krawk"
 
 
 @pytest.mark.asyncio
-async def test_neopet_render_layers(client: Client, assets_data: Dict[str, Any]):
+async def test_neopet_render_layers(
+    client: Client, assets_data: Dict[str, Any]
+) -> None:
     neopet = await _neopet_from_data(client, assets_data)
     layers = neopet.appearance._render_layers(neopet.items)
     assert len(layers) == 12
@@ -59,7 +65,7 @@ async def test_neopet_render_layers(client: Client, assets_data: Dict[str, Any])
 @pytest.mark.asyncio
 async def test_neopet_render_layers_unwearable(
     client: Client, assets_data_unwearable: Dict[str, Any]
-):
+) -> None:
     # this is a Baby Pteri wearing Kiss of Hearts + Baby Zomutt Contacts
     # the items should be filtered off, as they can't actually be worn by this pet,
     # leaving just the pet layer
@@ -71,7 +77,7 @@ async def test_neopet_render_layers_unwearable(
 @pytest.mark.asyncio
 async def test_neopet_render_layers_covers_biology(
     client: Client, assets_data_covers_biology: Dict[str, Any]
-):
+) -> None:
     # this is a Blue Bruce wearing Bruce Brucey B Glasses, Bruce Brucey B Mouth, Bruce Brucey B Necklace, Bruce Brucey B Shirt
     # the mouth covers the actual Bruce mouth
     neopet = await _neopet_from_data(client, assets_data_covers_biology)

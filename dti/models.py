@@ -3,11 +3,8 @@ from __future__ import annotations
 import asyncio
 import datetime
 import io
-import os
 from typing import TYPE_CHECKING, Any, Sequence, overload
 from urllib.parse import urlencode
-
-from dti.types import FetchAssetsPayload, FetchedNeopetPayload
 
 from . import utils
 from .enums import (
@@ -27,6 +24,10 @@ from .errors import (
 from .mixins import Object
 
 if TYPE_CHECKING:
+    import os
+
+    from dti.types import FetchAssetsPayload, FetchedNeopetPayload
+
     from .state import BitField, State
     from .types import (
         ID,
@@ -858,7 +859,7 @@ class Neopet:
         size: LayerImageSize | None = None,
         name: str | None = None,
         state: State,
-    ):
+    ) -> None:
         self._state: State = state
         self.species: Species = species
         self.color: Color = color
@@ -1231,7 +1232,9 @@ class Outfit(Object):
         "size",
     )
 
-    def __init__(self, *, state: State, size: LayerImageSize, data: OutfitPayload) -> None:
+    def __init__(
+        self, *, state: State, size: LayerImageSize, data: OutfitPayload
+    ) -> None:
         self._state = state
         self.id: int = int(data["id"])
         self.name: str | None = data["name"]

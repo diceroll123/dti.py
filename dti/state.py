@@ -6,15 +6,13 @@ import time
 from typing import TYPE_CHECKING, Dict, TypeVar, Union
 
 from .constants import ALL_SPECIES_AND_COLORS
-from .enums import PetPose
 from .errors import InvalidPairBytes
 from .http import HTTPClient
 
-__all__: tuple[str, ...] = (
-    "ValidField",
-)
+__all__: tuple[str, ...] = ("ValidField",)
 
 if TYPE_CHECKING:
+    from .enums import PetPose
     from .models import Color, Species
 
     T = TypeVar("T", Color, Species)
@@ -105,7 +103,7 @@ class ValidField:
     __slots__: tuple[str, ...] = ("_data",)
     _data: bytes
 
-    def __init__(self, data: bytes | None = None):
+    def __init__(self, data: bytes | None = None) -> None:
         if data is None:
             self._data = b""
             return

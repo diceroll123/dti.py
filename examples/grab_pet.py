@@ -4,7 +4,7 @@ from dti import Client
 from dti.errors import NeopetNotFound
 
 
-async def main():
+async def main() -> None:
     dti_client = Client()
 
     try:

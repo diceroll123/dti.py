@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import random
 from enum import Enum, auto
-from typing import Any, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Type, TypeVar
 
-from typing_extensions import Self
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
 __all__: tuple[str, ...] = (
     "LayerImageSize",
@@ -17,7 +17,7 @@ __all__: tuple[str, ...] = (
 
 
 class _DTIEnum(Enum):
-    def _generate_next_value_(name, start, count, last_values):  # type: ignore
+    def _generate_next_value_(name, start, count, last_values) -> Self:  # type: ignore
         return name
 
     @classmethod

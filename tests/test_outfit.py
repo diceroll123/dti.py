@@ -1,12 +1,16 @@
-import datetime
-from typing import Any, Dict
+from __future__ import annotations
 
-from dti.client import Client
+import datetime
+from typing import TYPE_CHECKING, Any, Dict
+
 from dti.enums import LayerImageSize
 from dti.models import Outfit
 
+if TYPE_CHECKING:
+    from dti.client import Client
 
-def test_outfit(client: Client, outfit_data: Dict[str, Any]):
+
+def test_outfit(client: Client, outfit_data: Dict[str, Any]) -> None:
     # If this breaks, we're probably just missing some new required attribute somewhere
     # We also let this take care of the following models instance tests:
     # dti.Item

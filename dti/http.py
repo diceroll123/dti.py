@@ -52,7 +52,7 @@ class HTTPClient:
         *,
         proxy: str | dict[str, str] | None = None,
         retries: int = 3,
-    ):
+    ) -> None:
         self._proxy = proxy
         self._retries = retries
 
@@ -255,7 +255,7 @@ class HTTPClient:
     ) -> list[int]:
         data = await self._query(
             GRAB_PET_APPEARANCE_IDS,
-            variables=dict(speciesId=species.id, colorId=color.id),
+            variables={"speciesId": species.id, "colorId": color.id},
         )
 
         return [int(appearance["id"]) for appearance in data["data"]["petAppearances"]]
@@ -265,11 +265,11 @@ class HTTPClient:
     ) -> FetchAllAppearancesPayload:
         data = await self._query(
             GRAB_ALL_APPEARANCES_FOR_COLOR,
-            variables=dict(
-                itemIds=item_ids,
-                preferredColorId=color.id,
-                size=str(size),
-            ),
+            variables={
+                "itemIds": item_ids,
+                "preferredColorId": color.id,
+                "size": str(size),
+            },
         )
 
         return data["data"]

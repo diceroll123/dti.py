@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 from asyncio.queues import Queue
 from typing import TYPE_CHECKING, Any, AsyncIterator, List, Optional, Sequence, Union
-from typing_extensions import Self
 
 from .constants import (
     SEARCH_ITEM_IDS,
@@ -14,9 +13,11 @@ from .constants import (
 from .enums import ItemKind, LayerImageSize
 from .errors import InvalidItemID
 from .models import Item
-from .state import State
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
+    from .state import State
     from .types import ItemPayload
 
 
@@ -72,7 +73,7 @@ class DTISearch(AsyncIterator[Item]):
 class ItemIDSearch(DTISearch):
     # an item-ID search
     # TODO: might need to be tweaked to be paginated in the future
-    def __init__(self, state: State, item_ids: Sequence[Union[str, int]]):
+    def __init__(self, state: State, item_ids: Sequence[Union[str, int]]) -> None:
         super().__init__(state=state)
         self.item_ids = item_ids
 
@@ -149,7 +150,7 @@ class ItemSearchNames(DTISearch):
         *,
         state: State,
         names: Sequence[str],
-    ):
+    ) -> None:
         super().__init__(state=state)
         self.names = names
 
@@ -171,7 +172,7 @@ class ItemSearch(DTISearch):
     # a regular search query
     def __init__(
         self, *, state: State, query: str, item_kind: Optional[ItemKind] = None
-    ):
+    ) -> None:
         super().__init__(state=state)
         self.query = query
         self.item_kind = item_kind

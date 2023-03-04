@@ -3,18 +3,9 @@ from __future__ import annotations
 import copy
 import random
 from collections import defaultdict
-from typing import DefaultDict
+from typing import TYPE_CHECKING, DefaultDict
 
 from dti.constants import CLOSEST_POSES_IN_ORDER
-from dti.types import (
-    CanonicalAppearancePayload,
-    FetchAllAppearancesPayload,
-    ItemAllAppearancesPayload,
-    ItemAppearancePayload,
-    OutfitPayload,
-    PetAppearancePayload,
-    ZonePayload,
-)
 
 from .enums import ItemKind, LayerImageSize, PetPose
 from .errors import (
@@ -33,9 +24,19 @@ from .iterators import (
 from .models import Color, Item, Neopet, Outfit, PetAppearance, Species, Zone
 from .state import BitField, State
 
-__all__: tuple[str, ...] = (
-    "Client",
-)
+if TYPE_CHECKING:
+    from dti.types import (
+        CanonicalAppearancePayload,
+        FetchAllAppearancesPayload,
+        ItemAllAppearancesPayload,
+        ItemAppearancePayload,
+        OutfitPayload,
+        PetAppearancePayload,
+        ZonePayload,
+    )
+
+
+__all__: tuple[str, ...] = ("Client",)
 
 
 class Client:
@@ -260,7 +261,9 @@ class Client:
         if pose is None:
             ideal_pose = random.choice([PetPose.HAPPY_FEM, PetPose.HAPPY_MASC])
             for possible_pose in CLOSEST_POSES_IN_ORDER[ideal_pose]:
-                valid = await self.check(species=species, color=color, pose=possible_pose)
+                valid = await self.check(
+                    species=species, color=color, pose=possible_pose
+                )
                 if valid:
                     pose = possible_pose
                     break
@@ -634,7 +637,6 @@ class Client:
         color: int | str | Color | None = None,
         size: LayerImageSize | None = None,
     ) -> list[Neopet]:
-
         _item_ids: list[int] = []
 
         if item_id:
