@@ -50,7 +50,7 @@ setup(
     version=version,
     license="MIT",
     license_file="LICENSE",
-    python_requires=">=3.8",
+    python_requires=">=3.10",
     packages=["dti", "dti.types"],
     include_package_data=True,
     install_requires=requirements,

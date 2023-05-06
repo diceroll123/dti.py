@@ -1,11 +1,15 @@
-from typing import NamedTuple
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, NamedTuple
 
 import pytest
 
-from dti import Client
 from dti.enums import PetPose
 from dti.errors import InvalidColor, InvalidSpecies
 from dti.models import Color, Species
+
+if TYPE_CHECKING:
+    from dti import Client
 
 
 class Combo(NamedTuple):

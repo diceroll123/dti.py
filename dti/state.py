@@ -26,13 +26,13 @@ class _NameDict(dict[str | int, T]):
     # this is only to be used by DTIState
     # for the sole purpose of easily searching colors/species by name
     # that said, we're throwing away any error prevention outside of these rules
-    def __getitem__(self, key: str | int) -> T | None:  # type: ignore
+    def __getitem__(self, key: str | int) -> T | None:
         # lowercase to make it less annoying to search
         search_key = str(key).lower()
         # will never raise a KeyError, but will return None instead
         with contextlib.suppress(KeyError):
             # this is the normal __getitem__ behavior
-            return dict.__getitem__(self, search_key)  # type: ignore
+            return dict.__getitem__(self, search_key)
 
         return next((v for v in self.values() if search_key == v.name.lower()), None)
 
