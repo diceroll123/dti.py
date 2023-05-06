@@ -77,13 +77,15 @@ class HTTPClient:
             proxies=self._proxy,  # type: ignore
             transport=httpx.AsyncHTTPTransport(retries=self._retries),
         ) as client:
-            response = await client.post(  # type: ignore
-                f"{self.API_BASE}/graphql", json=payload, **kwargs
-            )
             try:
+                response = await client.post(
+                    f"{self.API_BASE}/graphql", json=payload, **kwargs
+                )
                 return response.json()
             except json.decoder.JSONDecodeError as e:
-                raise HTTPException(response, e) from e
+                raise HTTPException(response, e) from e  # type: ignore
+            except httpx.HTTPError as e:
+                raise HTTPException(e) from e
 
     async def _fetch_valid_pet_poses(self) -> bytes:
         return await self._fetch_binary_data(f"{self.API_BASE}/validPetPoses")
