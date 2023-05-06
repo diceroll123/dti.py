@@ -11,7 +11,9 @@ __all__: tuple[str, ...] = (
 
 
 def build_layers_url(
-    layers: list[str], /, *, size: LayerImageSize | None = None
+    layers: list[str],
+    /,
+    size: LayerImageSize | None = None,
 ) -> str:
     """Convenience method to make the server-side-rendering URL of the provided layer URLs.
 

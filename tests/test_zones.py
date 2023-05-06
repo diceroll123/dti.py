@@ -1,9 +1,11 @@
-from typing import Any, Dict
+from __future__ import annotations
+
+from typing import Any
 
 from dti.models import Zone
 
 
-def test_zones(zone_data: Dict[str, Any]) -> None:
+def test_zones(zone_data: dict[str, Any]) -> None:
     zones = [Zone(data=d) for d in zone_data["data"]["allZones"]]
 
     # shouldn't ever change

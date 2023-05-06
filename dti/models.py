@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import datetime
 import io
-from typing import TYPE_CHECKING, Any, Sequence, overload
+from typing import TYPE_CHECKING, Any, overload
 from urllib.parse import urlencode
 
 from . import utils
@@ -25,6 +25,7 @@ from .mixins import Object
 
 if TYPE_CHECKING:
     import os
+    from collections.abc import Sequence
 
     from dti.types import FetchAssetsPayload, FetchedNeopetPayload
 
@@ -104,7 +105,8 @@ class Species(Object):
         found: list[Color] = []
         for color_id, color in self._state._colors.items():  # type: ignore
             is_valid = self._state._valid_pairs._check(  # type: ignore
-                species_id=self.id, color_id=int(color_id)
+                species_id=self.id,
+                color_id=int(color_id),
             )
             if is_valid == valid:
                 found.append(color)
@@ -180,7 +182,8 @@ class Color(Object):
         found: list[Species] = []
         for species_id, species in self._state._species.items():  # type: ignore
             is_valid = self._state._valid_pairs._check(  # type: ignore
-                species_id=int(species_id), color_id=self.id
+                species_id=int(species_id),
+                color_id=self.id,
             )
             if is_valid == valid:
                 found.append(species)
@@ -420,7 +423,11 @@ class PetAppearance(Object):
     )
 
     def __init__(
-        self, *, state: State, size: LayerImageSize, data: PetAppearancePayload
+        self,
+        *,
+        state: State,
+        size: LayerImageSize,
+        data: PetAppearancePayload,
     ) -> None:
         self._state = state
         self.id: int = int(data["id"])
@@ -462,7 +469,8 @@ class PetAppearance(Object):
         return f"<PetAppearance {joined}>"
 
     def _render_layers(
-        self, items: Sequence[Item] | None = None
+        self,
+        items: Sequence[Item] | None = None,
     ) -> list[AppearanceLayer]:
         # Returns the image layers' images in order from bottom to top.
 
@@ -561,7 +569,7 @@ class PetAppearance(Object):
                 layer for layer in layers if layer.image_url is None
             ]
             raise NullAssetImage(
-                f"Null image URLs found in this render: {missing}"
+                f"Null image URLs found in this render: {missing}",
             ) from e
         return utils.build_layers_url(layer_urls, size=self.size)
 
@@ -887,7 +895,7 @@ class Neopet:
 
         if not await state._check(species_id=species.id, color_id=color.id):  # type: ignore
             raise InvalidColorSpeciesPair(
-                f"According to DTI, the {species} species does not have the color {color}. If it's newly released, it must be modeled first!"
+                f"According to DTI, the {species} species does not have the color {color}. If it's newly released, it must be modeled first!",
             )
 
         size = size or LayerImageSize.SIZE_600
@@ -981,14 +989,19 @@ class Neopet:
 
     @classmethod
     async def _fetch_by_name(
-        cls, *, state: State, pet_name: str, size: LayerImageSize
+        cls,
+        *,
+        state: State,
+        pet_name: str,
+        size: LayerImageSize,
     ) -> Neopet:
         """Returns the data for a specific neopet, by name."""
 
         size = size or LayerImageSize.SIZE_600
 
         pet_on_neo: FetchedNeopetPayload = await state.http.fetch_neopet_by_name(
-            name=pet_name, size=size
+            name=pet_name,
+            size=size,
         )
 
         appearance_data = pet_on_neo["petAppearance"]
@@ -1114,11 +1127,14 @@ class Neopet:
             is_valid: bool = self.check(pose)
             if not is_valid:
                 raise MissingPetAppearance(
-                    f'Pet Appearance <"{self.species.id}-{self.color.id}-{pose.name}"> does not exist.'
+                    f'Pet Appearance <"{self.species.id}-{self.color.id}-{pose.name}"> does not exist.',
                 )
 
             data: PetAppearancePayload = await self._state.http.fetch_appearance(
-                species=self.species, color=self.color, pose=pose, size=self.size
+                species=self.species,
+                color=self.color,
+                pose=pose,
+                size=self.size,
             )
             pet_appearance = PetAppearance(data=data, size=self.size, state=self._state)
 
@@ -1126,7 +1142,9 @@ class Neopet:
 
     @staticmethod
     async def from_outfit(
-        outfit: Outfit, /, *, size: LayerImageSize | None = None
+        outfit: Outfit,
+        /,
+        size: LayerImageSize | None = None,
     ) -> Neopet:
         """|coro|
 
@@ -1151,7 +1169,9 @@ class Neopet:
 
     @staticmethod
     async def from_appearance(
-        appearance: PetAppearance, /, *, size: LayerImageSize | None = None
+        appearance: PetAppearance,
+        /,
+        size: LayerImageSize | None = None,
     ) -> Neopet:
         """|coro|
 
@@ -1233,14 +1253,20 @@ class Outfit(Object):
     )
 
     def __init__(
-        self, *, state: State, size: LayerImageSize, data: OutfitPayload
+        self,
+        *,
+        state: State,
+        size: LayerImageSize,
+        data: OutfitPayload,
     ) -> None:
         self._state = state
         self.id: int = int(data["id"])
         self.name: str | None = data["name"]
         self.size: LayerImageSize = size
         self.pet_appearance: PetAppearance = PetAppearance(
-            data=data["petAppearance"], size=size, state=state
+            data=data["petAppearance"],
+            size=size,
+            state=state,
         )
         self.worn_items: list[Item] = [
             Item(data=item_data, state=state) for item_data in data["wornItems"]
@@ -1254,10 +1280,10 @@ class Outfit(Object):
         # we will simply truncate the trailing "Z" from the timestamps
         # for more info see https://discuss.python.org/t/parse-z-timezone-suffix-in-datetime/2220
         self.created_at: datetime.datetime = datetime.datetime.fromisoformat(
-            data["createdAt"][:-1]
+            data["createdAt"][:-1],
         ).replace(tzinfo=datetime.timezone.utc)
         self.updated_at: datetime.datetime = datetime.datetime.fromisoformat(
-            data["updatedAt"][:-1]
+            data["updatedAt"][:-1],
         ).replace(tzinfo=datetime.timezone.utc)
 
     @property
@@ -1402,10 +1428,10 @@ def _render_items(items: Sequence[Item]) -> tuple[list[Item], list[Item]]:
                 continue
 
             intersect_1: set[Zone] = set(item.appearance.occupies).intersection(
-                temp.appearance.occupies + temp.appearance.restricted_zones
+                temp.appearance.occupies + temp.appearance.restricted_zones,
             )
             intersect_2: set[Zone] = set(temp.appearance.occupies).intersection(
-                item.appearance.occupies + item.appearance.restricted_zones
+                item.appearance.occupies + item.appearance.restricted_zones,
             )
 
             if intersect_1 or intersect_2:

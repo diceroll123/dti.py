@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import json
 import time
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
@@ -25,47 +27,47 @@ dti_c._state._last_update = time.monotonic()
 # data from State._fetch_species_and_color
 data = json.loads((payloads / "state__fetch_species_and_color.json").read_text())
 dti_c._state._colors = _NameDict(
-    {c["id"]: Color(data=c, state=dti_c._state) for c in data["data"]["allColors"]}
+    {c["id"]: Color(data=c, state=dti_c._state) for c in data["data"]["allColors"]},
 )
 dti_c._state._species = _NameDict(
-    {s["id"]: Species(data=s, state=dti_c._state) for s in data["data"]["allSpecies"]}
+    {s["id"]: Species(data=s, state=dti_c._state) for s in data["data"]["allSpecies"]},
 )
 
 
-@pytest.fixture
+@pytest.fixture()
 def client() -> Client:
     return dti_c
 
 
-@pytest.fixture
-def zone_data() -> Dict[str, Any]:
+@pytest.fixture()
+def zone_data() -> dict[str, Any]:
     # zone payload from Client.fetch_all_zones()
     return json.loads((payloads / "client_fetch_all_zones.json").read_text())
 
 
-@pytest.fixture
-def outfit_data() -> Dict[str, Any]:
+@pytest.fixture()
+def outfit_data() -> dict[str, Any]:
     # outfit payload from Client.fetch_outfit()
     return json.loads((payloads / "client_fetch_outfit.json").read_text())
 
 
-@pytest.fixture
-def assets_data() -> Dict[str, Any]:
+@pytest.fixture()
+def assets_data() -> dict[str, Any]:
     # petAppearance payload from Neopet._fetch_assets_for()
     return json.loads((payloads / "neopet__fetch_assets_for.json").read_text())
 
 
-@pytest.fixture
-def assets_data_unwearable() -> Dict[str, Any]:
+@pytest.fixture()
+def assets_data_unwearable() -> dict[str, Any]:
     # petAppearance payload from Neopet._fetch_assets_for()
     return json.loads(
-        (payloads / "neopet__fetch_assets_for__unwearable.json").read_text()
+        (payloads / "neopet__fetch_assets_for__unwearable.json").read_text(),
     )
 
 
-@pytest.fixture
-def assets_data_covers_biology() -> Dict[str, Any]:
+@pytest.fixture()
+def assets_data_covers_biology() -> dict[str, Any]:
     # petAppearance payload from Neopet._fetch_assets_for()
     return json.loads(
-        (payloads / "neopet__fetch_assets_for__covers_biology.json").read_text()
+        (payloads / "neopet__fetch_assets_for__covers_biology.json").read_text(),
     )

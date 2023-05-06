@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import TYPE_CHECKING, Any, Sequence
+from typing import TYPE_CHECKING, Any
 
 import httpx
 
@@ -28,6 +28,8 @@ from .errors import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from .enums import LayerImageSize, PetPose
     from .models import Color, Species
     from .types import (
@@ -79,7 +81,9 @@ class HTTPClient:
         ) as client:
             try:
                 response = await client.post(
-                    f"{self.API_BASE}/graphql", json=payload, **kwargs
+                    f"{self.API_BASE}/graphql",
+                    json=payload,
+                    **kwargs,
                 )
                 return response.json()
             except json.decoder.JSONDecodeError as e:
@@ -94,14 +98,17 @@ class HTTPClient:
         async with httpx.AsyncClient(
             proxies=self._proxy,  # type: ignore
             transport=httpx.AsyncHTTPTransport(retries=self._retries),
-            limits=httpx.Limits(max_connections=None, max_keepalive_connections=None),  # type: ignore
+            limits=httpx.Limits(max_connections=None, max_keepalive_connections=None),
             follow_redirects=True,
         ) as client:
             response = await client.get(url)
             return response.read()
 
     async def fetch_appearance_by_id(
-        self, *, id: int, size: LayerImageSize
+        self,
+        *,
+        id: int,
+        size: LayerImageSize,
     ) -> PetAppearancePayload:
         data = await self._query(
             GRAB_PET_APPEARANCE_BY_ID,
@@ -116,7 +123,12 @@ class HTTPClient:
         return appearance_data
 
     async def fetch_appearance(
-        self, *, species: Species, color: Color, pose: PetPose, size: LayerImageSize
+        self,
+        *,
+        species: Species,
+        color: Color,
+        pose: PetPose,
+        size: LayerImageSize,
     ) -> PetAppearancePayload:
         data = await self._query(
             GRAB_PET_APPEARANCE_BY_SPECIES_COLOR_POSE,
@@ -131,7 +143,11 @@ class HTTPClient:
         return data["data"]["petAppearance"]
 
     async def fetch_appearances(
-        self, *, species: Species, color: Color, size: LayerImageSize
+        self,
+        *,
+        species: Species,
+        color: Color,
+        size: LayerImageSize,
     ) -> list[PetAppearancePayload]:
         data = await self._query(
             GRAB_PET_APPEARANCES_BY_IDS,
@@ -155,7 +171,9 @@ class HTTPClient:
         return zone_data["data"]["allZones"]
 
     async def fetch_neopet_by_name(
-        self, name: str, size: LayerImageSize
+        self,
+        name: str,
+        size: LayerImageSize,
     ) -> FetchedNeopetPayload:
         data = await self._query(
             query=PET_ON_NEOPETS,
@@ -168,7 +186,7 @@ class HTTPClient:
             # an error we were not prepared for has occurred, let's find it!
             log.critical(f"Unknown pet appearance data returned: {str(data)}")
             raise NeopetNotFound(
-                "An error occurred while trying to gather this pet's data."
+                "An error occurred while trying to gather this pet's data.",
             )
 
         if errors := data.get("errors"):
@@ -181,12 +199,12 @@ class HTTPClient:
                     in e["message"]
                 ):
                     raise MissingModelData(
-                        "This pet's modeling data isn't loaded into DTI yet! Go model it on Classic DTI!"
+                        "This pet's modeling data isn't loaded into DTI yet! Go model it on Classic DTI!",
                     )
 
             log.critical(f"Unhandled error occurred in data: {str(data)}")
             raise NeopetNotFound(
-                "An error occurred while trying to gather this pet's data."
+                "An error occurred while trying to gather this pet's data.",
             )
 
         pet_on_neo = data["data"]["petOnNeopetsDotCom"]
@@ -226,34 +244,37 @@ class HTTPClient:
         if data is None:
             # an error we were not prepared for has occurred, let's find it!
             log.critical(
-                f"Somehow, the API returned null for a query. Params: {variables!r}"
+                f"Somehow, the API returned null for a query. Params: {variables!r}",
             )
             raise NeopetNotFound(
-                "An error occurred while trying to gather this pet's data."
+                "An error occurred while trying to gather this pet's data.",
             )
 
         if error := data.get("error", None):
             if "it is undefined" in error["message"]:
                 raise InvalidColorSpeciesPair(
-                    f"According to DTI, the {species} species does not have the color {color}. If it's newly released, it must be modeled first!"
+                    f"According to DTI, the {species} species does not have the color {color}. If it's newly released, it must be modeled first!",
                 )
 
             log.critical(f"Unhandled error occurred in data: {str(data)}")
             raise NeopetNotFound(
-                "An error occurred while trying to gather this pet's data."
+                "An error occurred while trying to gather this pet's data.",
             )
 
         if "data" not in data:
             # an error we were not prepared for has occurred, let's find it!
             log.critical(f"Unknown pet appearance data returned: {str(data)}")
             raise NeopetNotFound(
-                "An error occurred while trying to gather this pet's data."
+                "An error occurred while trying to gather this pet's data.",
             )
 
         return data["data"]
 
     async def fetch_appearance_ids(
-        self, *, species: Species, color: Color
+        self,
+        *,
+        species: Species,
+        color: Color,
     ) -> list[int]:
         data = await self._query(
             GRAB_PET_APPEARANCE_IDS,
@@ -263,7 +284,11 @@ class HTTPClient:
         return [int(appearance["id"]) for appearance in data["data"]["petAppearances"]]
 
     async def fetch_all_appearances_for_color(
-        self, color: Color, /, *, item_ids: list[int], size: LayerImageSize
+        self,
+        color: Color,
+        /,
+        item_ids: list[int],
+        size: LayerImageSize,
     ) -> FetchAllAppearancesPayload:
         data = await self._query(
             GRAB_ALL_APPEARANCES_FOR_COLOR,

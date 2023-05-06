@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum, auto
-from typing import TYPE_CHECKING, Any, Type, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -85,7 +85,7 @@ class AppearanceLayerKnownGlitch(Enum):
 T = TypeVar("T")
 
 
-def try_enum(cls: Type[T], val: Any) -> T:
+def try_enum(cls: type[T], val: Any) -> T:
     try:
         return cls(val)
     except TypeError:

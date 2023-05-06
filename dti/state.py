@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import time
-from typing import TYPE_CHECKING, Dict, TypeVar, Union
+from typing import TYPE_CHECKING, TypeVar
 
 from .constants import ALL_SPECIES_AND_COLORS
 from .errors import InvalidPairBytes
@@ -22,7 +22,7 @@ else:
 S = TypeVar("S", bound="State")
 
 
-class _NameDict(Dict[Union[str, int], T]):
+class _NameDict(dict[str | int, T]):
     # this is only to be used by DTIState
     # for the sole purpose of easily searching colors/species by name
     # that said, we're throwing away any error prevention outside of these rules
@@ -173,7 +173,9 @@ class State:
     )
 
     def __init__(
-        self, cache_timeout: int | None = None, proxy: str | None = None
+        self,
+        cache_timeout: int | None = None,
+        proxy: str | None = None,
     ) -> None:
         # colors and species below are accessed by the string version of their ID AND/OR lower-cased names
         # alternatively you can list them out by doing self._colors.values()
@@ -209,7 +211,7 @@ class State:
 
         # colors
         self._colors = _NameDict(
-            {color["id"]: Color(data=color, state=self) for color in data["allColors"]}
+            {color["id"]: Color(data=color, state=self) for color in data["allColors"]},
         )
 
         # species
@@ -217,7 +219,7 @@ class State:
             {
                 species["id"]: Species(data=species, state=self)
                 for species in data["allSpecies"]
-            }
+            },
         )
 
     @property
@@ -250,12 +252,18 @@ class State:
             return self._valid_pairs._get_bit(species_id=species_id, color_id=color_id)  # type: ignore
 
     async def _check(
-        self, *, species_id: int, color_id: int, pose: PetPose | None = None
+        self,
+        *,
+        species_id: int,
+        color_id: int,
+        pose: PetPose | None = None,
     ) -> bool:
         await self._update()
         async with self._lock:
             return self._valid_pairs._check(  # type: ignore
-                species_id=species_id, color_id=color_id, pose=pose
+                species_id=species_id,
+                color_id=color_id,
+                pose=pose,
             )
 
     async def _update(self: S, force: bool = False) -> S:

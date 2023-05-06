@@ -55,7 +55,9 @@ class Client:
     __slots__: tuple[str, ...] = ("_state",)
 
     def __init__(
-        self, cache_timeout: int | None = None, proxy: str | None = None
+        self,
+        cache_timeout: int | None = None,
+        proxy: str | None = None,
     ) -> None:
         self._state = State(cache_timeout=cache_timeout, proxy=proxy)
 
@@ -99,7 +101,7 @@ class Client:
         await self._state._lock_and_update()  # type: ignore
         species: Species | None = self._state._species[name_or_id]  # type: ignore
         if species is None:
-            raise InvalidSpecies()
+            raise InvalidSpecies
         return species
 
     async def get_color(self, name_or_id: int | str, /) -> Color:
@@ -122,7 +124,7 @@ class Client:
         await self._state._lock_and_update()  # type: ignore
         color: Color | None = self._state._colors[name_or_id]  # type: ignore
         if color is None:
-            raise InvalidColor()
+            raise InvalidColor
         return color
 
     async def get_bit(
@@ -204,7 +206,9 @@ class Client:
             color = await self.get_color(color)
 
         return await self._state._check(  # type: ignore
-            species_id=species.id, color_id=color.id, pose=pose
+            species_id=species.id,
+            color_id=color.id,
+            pose=pose,
         )
 
     async def fetch_neopet(
@@ -262,7 +266,9 @@ class Client:
             ideal_pose = random.choice([PetPose.HAPPY_FEM, PetPose.HAPPY_MASC])
             for possible_pose in CLOSEST_POSES_IN_ORDER[ideal_pose]:
                 valid = await self.check(
-                    species=species, color=color, pose=possible_pose
+                    species=species,
+                    color=color,
+                    pose=possible_pose,
                 )
                 if valid:
                     pose = possible_pose
@@ -283,7 +289,10 @@ class Client:
         )
 
     async def fetch_neopet_by_name(
-        self, pet_name: str, /, size: LayerImageSize | None = None
+        self,
+        pet_name: str,
+        /,
+        size: LayerImageSize | None = None,
     ) -> Neopet:
         """|coro|
 
@@ -312,11 +321,16 @@ class Client:
         size = size or LayerImageSize.SIZE_600
 
         return await Neopet._fetch_by_name(  # type: ignore
-            pet_name=pet_name, size=size, state=self._state
+            pet_name=pet_name,
+            size=size,
+            state=self._state,
         )
 
     async def fetch_outfit(
-        self, outfit_id: int, /, size: LayerImageSize | None = None
+        self,
+        outfit_id: int,
+        /,
+        size: LayerImageSize | None = None,
     ) -> Outfit:
         """|coro|
 
@@ -345,7 +359,8 @@ class Client:
         size = size or LayerImageSize.SIZE_600
 
         data: OutfitPayload = await self._state.http.fetch_outfit(
-            id=outfit_id, size=size
+            id=outfit_id,
+            size=size,
         )
 
         return Outfit(data=data, size=size, state=self._state)
@@ -428,7 +443,7 @@ class Client:
 
         if searcher is None:
             raise NoIteratorsFound(
-                "None of the values provided matched a search iterator"
+                "None of the values provided matched a search iterator",
             )
 
         return searcher
@@ -487,13 +502,19 @@ class Client:
         size = size or LayerImageSize.SIZE_600
 
         data: PetAppearancePayload = await self._state.http.fetch_appearance(
-            species=species, color=color, pose=pose, size=size
+            species=species,
+            color=color,
+            pose=pose,
+            size=size,
         )
 
         return PetAppearance(data=data, size=size, state=self._state)
 
     async def fetch_appearance_by_id(
-        self, appearance_id: int, /, size: LayerImageSize | None = None
+        self,
+        appearance_id: int,
+        /,
+        size: LayerImageSize | None = None,
     ) -> PetAppearance:
         """|coro|
 
@@ -519,7 +540,8 @@ class Client:
         size = size or LayerImageSize.SIZE_600
 
         data: PetAppearancePayload = await self._state.http.fetch_appearance_by_id(
-            id=appearance_id, size=size
+            id=appearance_id,
+            size=size,
         )
 
         return PetAppearance(data=data, size=size, state=self._state)
@@ -573,7 +595,9 @@ class Client:
         size = size or LayerImageSize.SIZE_600
 
         data: list[PetAppearancePayload] = await self._state.http.fetch_appearances(
-            species=species, color=color, size=size
+            species=species,
+            color=color,
+            size=size,
         )
 
         return [PetAppearance(data=d, size=size, state=self._state) for d in data]
@@ -656,11 +680,13 @@ class Client:
 
         data: FetchAllAppearancesPayload = (
             await self._state.http.fetch_all_appearances_for_color(
-                color, item_ids=_item_ids, size=size
+                color,
+                item_ids=_item_ids,
+                size=size,
             )
         )
         all_pet_appearances: list[CanonicalAppearancePayload] = data["color"].get(
-            "appliedToAllCompatibleSpecies"
+            "appliedToAllCompatibleSpecies",
         )
 
         all_items: list[ItemAllAppearancesPayload] = data.get("items", [])
@@ -682,11 +708,14 @@ class Client:
 
         for pet_appearance in all_pet_appearances:
             appearance = PetAppearance(
-                state=self._state, size=size, data=pet_appearance["canonicalAppearance"]
+                state=self._state,
+                size=size,
+                data=pet_appearance["canonicalAppearance"],
             )
 
             neopet: Neopet = await Neopet._from_appearance(  # type: ignore
-                appearance, items=item_map[appearance.body_id]
+                appearance,
+                items=item_map[appearance.body_id],
             )
 
             return_neopets.append(neopet)

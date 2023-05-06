@@ -8,7 +8,7 @@ async def main() -> None:
     sorted_species = sorted(await dti_client.all_species(), key=lambda s: s.name)
     for species in sorted_species:
         print(
-            f"{species.name} can have this many colors: {len(await species.colors())}"
+            f"{species.name} can have this many colors: {len(await species.colors())}",
         )
 
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal, TypedDict, TypeVar, Union
+from typing import Literal, TypedDict, TypeVar
 
 PetPoseType = Literal[
     "HAPPY_MASC",
@@ -116,4 +116,4 @@ class FetchAllAppearancesPayload(TypedDict):
     color: ColorAppliedToAllCompatibleSpeciesPayload
 
 
-ID = TypeVar("ID", bound=Union[str, int])
+ID = TypeVar("ID", bound=str | int)

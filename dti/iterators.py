@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import asyncio
 from asyncio.queues import Queue
-from typing import TYPE_CHECKING, Any, AsyncIterator, List, Optional, Sequence, Union
+from typing import TYPE_CHECKING, Any
+from collections.abc import AsyncIterator, Sequence
 
 from .constants import (
     SEARCH_ITEM_IDS,
@@ -23,12 +24,12 @@ if TYPE_CHECKING:
 
 class DTISearch(AsyncIterator[Item]):
     # this is a base class
-    def __init__(self, *, state: State, per_page: Optional[int] = None) -> None:
+    def __init__(self, *, state: State, per_page: int | None = None) -> None:
         self._state = state
         self._items: Queue[Item] = Queue(maxsize=per_page or 0)
         self._exhausted = False
 
-    async def fetch_items(self) -> List[ItemPayload]:
+    async def fetch_items(self) -> list[ItemPayload]:
         raise NotImplementedError
 
     def post_fetch(self, items: Sequence[ItemPayload]) -> None:
@@ -48,8 +49,8 @@ class DTISearch(AsyncIterator[Item]):
     def __aiter__(self) -> Self:
         return self
 
-    async def flatten(self) -> List[Item]:
-        ret: List[Item] = []
+    async def flatten(self) -> list[Item]:
+        ret: list[Item] = []
         while True:
             try:
                 item = await self.next()
@@ -73,11 +74,11 @@ class DTISearch(AsyncIterator[Item]):
 class ItemIDSearch(DTISearch):
     # an item-ID search
     # TODO: might need to be tweaked to be paginated in the future
-    def __init__(self, state: State, item_ids: Sequence[Union[str, int]]) -> None:
+    def __init__(self, state: State, item_ids: Sequence[str | int]) -> None:
         super().__init__(state=state)
         self.item_ids = item_ids
 
-    async def fetch_items(self) -> List[ItemPayload]:
+    async def fetch_items(self) -> list[ItemPayload]:
         data = await self._state.http._query(  # type: ignore
             query=SEARCH_ITEM_IDS,
             variables={"itemIds": self.item_ids},
@@ -93,7 +94,7 @@ class PaginatedDTISearch(DTISearch):
         self.offset = 0
         self.per_page = 0
 
-    async def fetch_items(self) -> List[ItemPayload]:
+    async def fetch_items(self) -> list[ItemPayload]:
         raise NotImplementedError
 
     def post_fetch(self, items: Sequence[ItemPayload]) -> None:
@@ -112,8 +113,8 @@ class ItemSearchToFit(PaginatedDTISearch):
         species_id: int,
         color_id: int,
         per_page: int = 30,
-        item_kind: Optional[ItemKind] = None,
-        size: Optional[LayerImageSize] = None,
+        item_kind: ItemKind | None = None,
+        size: LayerImageSize | None = None,
         state: State,
     ) -> None:
         super().__init__(state=state, per_page=per_page)
@@ -125,7 +126,7 @@ class ItemSearchToFit(PaginatedDTISearch):
         self.per_page = per_page
         self.size: LayerImageSize = size or LayerImageSize.SIZE_600
 
-    async def fetch_items(self) -> List[ItemPayload]:
+    async def fetch_items(self) -> list[ItemPayload]:
         data = await self._state.http._query(  # type: ignore
             query=SEARCH_TO_FIT,
             variables={
@@ -154,12 +155,13 @@ class ItemSearchNames(DTISearch):
         super().__init__(state=state)
         self.names = names
 
-    async def fetch_items(self) -> List[ItemPayload]:
+    async def fetch_items(self) -> list[ItemPayload]:
         data = await self._state.http._query(  # type: ignore
-            query=SEARCH_QUERY_EXACT_MULTIPLE, variables={"names": self.names}
+            query=SEARCH_QUERY_EXACT_MULTIPLE,
+            variables={"names": self.names},
         )
 
-        items: Union[ItemPayload, List[ItemPayload]] = data["data"]["itemsByName"]
+        items: ItemPayload | list[ItemPayload] = data["data"]["itemsByName"]
 
         # ensure we're working with iterable lists of items
         # when we search for a single item, it returns just the item, so we pur it in a list
@@ -171,13 +173,17 @@ class ItemSearchNames(DTISearch):
 class ItemSearch(DTISearch):
     # a regular search query
     def __init__(
-        self, *, state: State, query: str, item_kind: Optional[ItemKind] = None
+        self,
+        *,
+        state: State,
+        query: str,
+        item_kind: ItemKind | None = None,
     ) -> None:
         super().__init__(state=state)
         self.query = query
         self.item_kind = item_kind
 
-    async def fetch_items(self) -> List[ItemPayload]:
+    async def fetch_items(self) -> list[ItemPayload]:
         data = await self._state.http._query(  # type: ignore
             query=SEARCH_QUERY,
             variables={

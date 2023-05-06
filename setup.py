@@ -5,7 +5,9 @@ from setuptools import setup
 
 with open("dti/__init__.py") as f:
     version = re.search(
-        r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE
+        r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]',
+        f.read(),
+        re.MULTILINE,
     )
 
 if version is None:
