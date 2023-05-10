@@ -140,7 +140,12 @@ class HTTPClient:
             },
         )
 
-        return data["data"]["petAppearance"]
+        appearance = data["data"]["petAppearance"]
+        if appearance is None:
+            raise MissingPetAppearance(
+                f'Pet Appearance <"{species.id}-{color.id}-{pose.name}"> does not exist.',
+            )
+        return appearance
 
     async def fetch_appearances(
         self,

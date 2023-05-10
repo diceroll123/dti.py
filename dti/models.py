@@ -1118,6 +1118,8 @@ class Neopet:
         -------
         ~dti.BrokenAssetImage
             A layer's asset image is broken somehow on DTI's side.
+        ~dti.MissingPetAppearance
+            The Pet Appearance is not found on DTI.
         """
 
         pet_appearance = self.appearance
