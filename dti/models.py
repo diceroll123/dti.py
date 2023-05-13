@@ -1200,6 +1200,11 @@ class Neopet:
         """:class:`str`: Convenience property for getting a Neopet's pet appearance render url."""
         return self.appearance.image_url(items=self.items)
 
+    @property
+    def layers(self) -> list[AppearanceLayer]:
+        """List[:class:`AppearanceLayer`]: Returns the layers of the pet appearance. Uses render logic to remove conflicting layers."""
+        return self.appearance._render_layers(self.items)
+
     def __repr__(self) -> str:
         attrs = [
             ("species", self.species),
