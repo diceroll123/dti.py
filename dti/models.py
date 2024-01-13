@@ -1056,6 +1056,18 @@ class Neopet:
             params["objects[]"] = [item.id for item in objects]
             params["closet[]"] = [item.id for item in closet]
         return f"https://impress-2020.openneo.net/outfits/new?{urlencode(params, doseq=True)}"
+    
+    @property
+    def worn_items(self) -> list[Item]:
+        """List[:class:`Item`]: Returns the items that are worn on the pet."""
+        worn, _ = _render_items(self.items)
+        return worn
+
+    @property
+    def closet_items(self) -> list[Item]:
+        """List[:class:`Item`]: Returns the items that are in the closet but not worn on the pet."""
+        _, closet = _render_items(self.items)
+        return closet
 
     def clear_closet(self) -> None:
         """Removes items from the closet that would not be rendered to the pet appearance."""
