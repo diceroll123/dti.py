@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import asyncio
 from asyncio.queues import Queue
-from typing import TYPE_CHECKING, Any
 from collections.abc import AsyncIterator, Sequence
+from typing import TYPE_CHECKING, Any
 
 from .constants import (
     SEARCH_ITEM_IDS,

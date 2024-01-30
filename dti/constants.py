@@ -111,7 +111,7 @@ query($query: String!, $fitsPet: FitsPetSearchFilter!, $speciesId: ID!, $colorId
       ...ItemProperties
       appearanceOn(speciesId: $speciesId, colorId: $colorId) {
         ...ItemAppearanceForOutfitPreview
-      } 
+      }
     }
   }
 }"""
@@ -196,7 +196,7 @@ GRAB_PET_APPEARANCE_BY_ID = (
 query ($appearanceId: ID!, $size: LayerImageSize!) {
   petAppearanceById(id: $appearanceId) {
     ...PetAppearanceForOutfitPreview
-  }    
+  }
 }
 """
     + FRAGMENT_PET_APPEARANCE
@@ -208,7 +208,7 @@ GRAB_PET_APPEARANCES_BY_IDS = (
 query ($speciesId: ID!, $colorId: ID!, $size: LayerImageSize!) {
   petAppearances(speciesId: $speciesId, colorId: $colorId) {
     ...PetAppearanceForOutfitPreview
-  } 
+  }
 }
 """
     + FRAGMENT_PET_APPEARANCE

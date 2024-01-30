@@ -3,7 +3,7 @@ from __future__ import annotations
 import copy
 import random
 from collections import defaultdict
-from typing import TYPE_CHECKING, DefaultDict
+from typing import TYPE_CHECKING
 
 from dti.constants import CLOSEST_POSES_IN_ORDER
 
@@ -44,12 +44,13 @@ class Client:
     This class is used to interact with the DTI GraphQL API.
 
     Parameters
-    -----------
+    ----------
     cache_timeout: Optional[:class:`int`]
         The amount of time, in seconds, to reload the internal cache. It's updated as-needed after this amount of time.
         Default = 3600 (1 hour).
     proxy: Optional[:class:`str`]
         Proxy URL. If you have credentials, pass them in like so: "http://username:password@localhost:8030"
+
     """
 
     __slots__: tuple[str, ...] = ("_state",)
@@ -64,20 +65,23 @@ class Client:
     async def invalidate(self) -> None:
         """|coro|
 
-        A way to force the internal cache to update."""
+        A way to force the internal cache to update.
+        """
         await self._state._update(force=True)  # type: ignore
 
     async def all_species(self) -> list[Species]:
         """|coro|
 
-        List[:class:`Species`]: Returns a list of all species."""
+        List[:class:`Species`]: Returns a list of all species.
+        """
         await self._state._lock_and_update()  # type: ignore
         return list(self._state._species.values())  # type: ignore
 
     async def all_colors(self) -> list[Color]:
         """|coro|
 
-        List[:class:`Color`]: Returns a list of all colors."""
+        List[:class:`Color`]: Returns a list of all colors.
+        """
         await self._state._lock_and_update()  # type: ignore
         return list(self._state._colors.values())  # type: ignore
 
@@ -85,18 +89,19 @@ class Client:
         """|coro|
 
         Parameters
-        -----------
+        ----------
         name_or_id: Union[:class:`int`, :class:`str`]
             The name, or ID of the desired Species. Case-insensitive.
 
         Raises
-        -------
+        ------
         ~dti.InvalidSpecies
             The species does not exist.
 
         Returns
-        --------
+        -------
         :class:`Species`: Returns a species by name or ID.
+
         """
         await self._state._lock_and_update()  # type: ignore
         species: Species | None = self._state._species[name_or_id]  # type: ignore
@@ -108,18 +113,19 @@ class Client:
         """|coro|
 
         Parameters
-        -----------
+        ----------
         name_or_id: Union[:class:`int`, :class:`str`]
             The name, or ID of the desired Color. Case-insensitive.
 
         Raises
-        -------
+        ------
         ~dti.InvalidColor
             The color does not exist.
 
         Returns
-        --------
+        -------
         :class:`Color`: Returns a color by name or ID.
+
         """
         await self._state._lock_and_update()  # type: ignore
         color: Color | None = self._state._colors[name_or_id]  # type: ignore
@@ -141,24 +147,24 @@ class Client:
         You should query this value by simply using the `check` function.
 
         Parameters
-        -----------
+        ----------
         species: Union[:class:`int`, :class:`str`, :class:`Species`]
             The name, or ID, or Species object of the desired Species. Case-insensitive.
         color: Union[:class:`int`, :class:`str`, :class:`Color`]
             The name, or ID, or Color object of the desired Color. Case-insensitive.
 
         Raises
-        -------
+        ------
         ~dti.InvalidColor
             The color does not exist.
         ~dti.InvalidSpecies
             The species does not exist.
 
         Returns
-        --------
+        -------
         :class:`BitField`: Returns the bit array field for a given pet species/color.
-        """
 
+        """
         if not isinstance(species, Species):
             species = await self.get_species(species)
 
@@ -179,7 +185,7 @@ class Client:
         A convenience function to get a boolean of a species/color/pose combo existing.
 
         Parameters
-        -----------
+        ----------
         species: Union[:class:`int`, :class:`str`, :class:`Species`]
             The name, or ID, or Species object of the desired Species. Case-insensitive.
         color: Union[:class:`int`, :class:`str`, :class:`Color`]
@@ -188,17 +194,17 @@ class Client:
             The desired pet pose. If this value is `None`, this function just checks if the species/color combo exists.
 
         Raises
-        -------
+        ------
         ~dti.InvalidColor
             The color does not exist.
         ~dti.InvalidSpecies
             The species does not exist.
 
         Returns
-        --------
+        -------
         :class:`bool`: Whether or not this species/color/pose combo exists.
-        """
 
+        """
         if not isinstance(species, Species):
             species = await self.get_species(species)
 
@@ -227,7 +233,7 @@ class Client:
         exactly what you want on the pet and how you want it rendered.
 
         Parameters
-        -----------
+        ----------
         species: Union[:class:`int`, :class:`str`, :class:`Species`]
             The name, or ID, or Species object of the desired Species. Case-insensitive.
         color: Union[:class:`int`, :class:`str`, :class:`Color`]
@@ -242,7 +248,7 @@ class Client:
             The desired pet pose for the render. If one is not supplied, it may be chosen at random.
 
         Raises
-        -------
+        ------
         ~dti.InvalidColor
             The color does not exist.
         ~dti.InvalidSpecies
@@ -251,11 +257,11 @@ class Client:
             This species/color/pose combo does not exist, according to DTI.
 
         Returns
-        --------
+        -------
         :class:`Neopet`
             The Neopet with the options applied to it.
-        """
 
+        """
         if not isinstance(species, Species):
             species = await self.get_species(species)
 
@@ -299,25 +305,25 @@ class Client:
         Creates a :class:`Neopet` using the name of a real Neopet.
 
         Parameters
-        -----------
+        ----------
         pet_name: :class:`str`
             The name of the pet you'd like to find.
         size: Optional[:class:`LayerImageSize`]
             The desired size for the render. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
 
         Raises
-        -------
+        ------
         ~dti.NeopetNotFound
             The Neopet is not found on Neopets.
         ~dti.GlitchedNeopet
             The Neopet is glitched, but exists.
 
         Returns
-        --------
+        -------
         :class:`Neopet`
             The corresponding Neopet that matches the name provided.
-        """
 
+        """
         size = size or LayerImageSize.SIZE_600
 
         return await Neopet._fetch_by_name(  # type: ignore
@@ -337,23 +343,23 @@ class Client:
         This function grabs an outfit from DTI by ID.
 
         Parameters
-        -----------
+        ----------
         outfit_id: :class:`int`
             The outfit ID of the outfit on DTI.
         size: Optional[:class:`LayerImageSize`]
             The desired size for the render. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
 
         Raises
-        -------
+        ------
         ~dti.OutfitNotFound
             The Outfit is not found on DTI.
 
         Returns
-        --------
+        -------
         :class:`Outfit`
             The corresponding outfit that matches the ID.
-        """
 
+        """
         await self._state._lock_and_update()  # type: ignore
 
         size = size or LayerImageSize.SIZE_600
@@ -383,7 +389,7 @@ class Client:
         This is a one-size-fits-most search function. Most of the parameters cannot be mixed and matched.
 
         Parameters
-        -----------
+        ----------
         query: Optional[:class:`str`]
             A search query just as you'd type into the search bar on DTI.
         species_id: Optional[:class:`int`]
@@ -404,15 +410,15 @@ class Client:
             A list of item IDs to search for + add to the items of the Neopet. ***All*** item IDs ***must*** be valid, or :class:`InvalidItemID` will be raised.
 
         Raises
-        -------
+        ------
         ~dti.InvalidItemID
             An invalid item ID was passed to `item_ids`.
 
         Returns
-        --------
+        -------
         :class:`.DTISearch`: The async Search iterator
-        """
 
+        """
         searcher: DTISearch | None = None
         _names: list[str] = []
 
@@ -461,7 +467,7 @@ class Client:
         Fetches the pet appearance of a provided species/color/pose.
 
         Parameters
-        -----------
+        ----------
         species: Union[:class:`int`, :class:`str`, :class:`Species`]
             The name, or ID, or Species object of the desired Species. Case-insensitive.
         color: Union[:class:`int`, :class:`str`, :class:`Color`]
@@ -472,7 +478,7 @@ class Client:
             The desired size for the pet appearance image layers. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
 
         Raises
-        -------
+        ------
         ~dti.InvalidColor
             The color does not exist.
         ~dti.InvalidSpecies
@@ -483,11 +489,11 @@ class Client:
             The Pet Appearance is not found on DTI.
 
         Returns
-        --------
+        -------
         :class:`PetAppearance`
             The corresponding pet appearance.
-        """
 
+        """
         if not isinstance(species, Species):
             species = await self.get_species(species)
 
@@ -521,21 +527,22 @@ class Client:
         Fetches the pet appearance from DTI by ID, if it exists.
 
         Parameters
-        -----------
+        ----------
         appearance_id: :class:`int`
             The appearance ID you'd like.
         size: Optional[:class:`LayerImageSize`]
             The desired size for the pet appearance image layers. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
 
         Raises
-        -------
+        ------
         ~dti.MissingPetAppearance
             The Pet Appearance is not found on DTI.
 
         Returns
-        --------
+        -------
         :class:`PetAppearance`
             The corresponding pet appearance.
+
         """
         size = size or LayerImageSize.SIZE_600
 
@@ -558,7 +565,7 @@ class Client:
         Fetches pet appearances of a provided species/color.
 
         Parameters
-        -----------
+        ----------
         species: Union[:class:`int`, :class:`str`, :class:`Species`]
             The name, or ID, or Species object of the desired Species. Case-insensitive.
         color: Union[:class:`int`, :class:`str`, :class:`Color`]
@@ -567,7 +574,7 @@ class Client:
             The desired size for the pet appearance layers. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
 
         Raises
-        -------
+        ------
         ~dti.InvalidColor
             The color does not exist.
         ~dti.InvalidSpecies
@@ -576,11 +583,11 @@ class Client:
             This species/color combo does not exist, according to DTI.
 
         Returns
-        --------
+        -------
         List[:class:`PetAppearance`]
             The list of this pet's appearances.
-        """
 
+        """
         if not isinstance(species, Species):
             species = await self.get_species(species)
 
@@ -608,9 +615,10 @@ class Client:
         Fetches all appearance zones for a customization.
 
         Returns
-        --------
+        -------
         List[:class:`Zone`]
             A list of all Zones.
+
         """
         data: list[ZonePayload] = await self._state.http.fetch_all_zones()
         return [Zone(data=d) for d in data]
@@ -626,7 +634,7 @@ class Client:
         Fetches all appearance ids for a given species+color.
 
         Raises
-        -------
+        ------
         ~dti.InvalidColor
             The color does not exist.
         ~dti.InvalidSpecies
@@ -635,11 +643,11 @@ class Client:
             This species/color combo does not exist, according to DTI.
 
         Returns
-        --------
+        -------
         List[:class:`int`]
             A list of the pet appearance IDs.
-        """
 
+        """
         if not isinstance(species, Species):
             species = await self.get_species(species)
 
@@ -690,7 +698,7 @@ class Client:
         )
 
         all_items: list[ItemAllAppearancesPayload] = data.get("items", [])
-        item_map: DefaultDict[int, list[Item]] = defaultdict(list)  # bodyId, [Item]
+        item_map: defaultdict[int, list[Item]] = defaultdict(list)  # bodyId, [Item]
         return_neopets: list[Neopet] = []
 
         for item in all_items:

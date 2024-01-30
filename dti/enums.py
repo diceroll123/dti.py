@@ -7,17 +7,17 @@ if TYPE_CHECKING:
     from typing_extensions import Self
 
 __all__: tuple[str, ...] = (
+    "AppearanceLayerKnownGlitch",
+    "AppearanceLayerType",
+    "ItemKind",
     "LayerImageSize",
     "PetPose",
-    "ItemKind",
-    "AppearanceLayerType",
-    "AppearanceLayerKnownGlitch",
     "try_enum",
 )
 
 
 class _DTIEnum(Enum):
-    def _generate_next_value_(name, start, count, last_values) -> Self:  # type: ignore
+    def _generate_next_value_(name, start, count, last_values) -> Self:
         return name
 
     @classmethod

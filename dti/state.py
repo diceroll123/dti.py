@@ -161,15 +161,15 @@ class ValidField:
 
 class State:
     __slots__: tuple[str, ...] = (
-        "http",
+        "_cache_timeout",
+        "_cached",
+        "_colors",
+        "_last_update",
         "_lock",
+        "_species",
         "_update_lock",
         "_valid_pairs",
-        "_colors",
-        "_species",
-        "_cached",
-        "_last_update",
-        "_cache_timeout",
+        "http",
     )
 
     def __init__(

@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import datetime
 import io
+from itertools import starmap
 from typing import TYPE_CHECKING, Any, overload
 from urllib.parse import urlencode
 
@@ -43,16 +44,16 @@ if TYPE_CHECKING:
     )
 
 __all__: tuple[str, ...] = (
-    "Species",
-    "Color",
-    "Zone",
     "AppearanceLayer",
-    "PetAppearance",
-    "ItemAppearance",
+    "Color",
     "Item",
-    "User",
+    "ItemAppearance",
     "Neopet",
     "Outfit",
+    "PetAppearance",
+    "Species",
+    "User",
+    "Zone",
 )
 
 
@@ -78,11 +79,12 @@ class Species(Object):
             Returns the species' name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The species name.
     id: :class:`int`
         The species ID.
+
     """
 
     __slots__: tuple[str, ...] = (
@@ -158,11 +160,12 @@ class Color(Object):
             Returns the color's name.
 
     Attributes
-    -----------
+    ----------
     name: :class:`str`
         The color name.
     id: :class:`int`
         The color ID.
+
     """
 
     __slots__: tuple[str, ...] = (
@@ -231,18 +234,19 @@ class Zone(Object):
             Returns the zone's hash.
 
     Attributes
-    -----------
+    ----------
     label: :class:`str`
         The zone label.
     id: :class:`int`
         The zone ID.
     depth: :class:`int`
         The zone depth.
+
     """
 
     __slots__: tuple[str, ...] = (
-        "id",
         "depth",
+        "id",
         "label",
     )
 
@@ -273,7 +277,7 @@ class AppearanceLayer(Object):
             Returns the appearance layer's hash.
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The appearance layer's DTI ID. Guaranteed unique across all layers of all types.
     parent: Union[:class:`ItemAppearance`, :class:`PetAppearance`]
@@ -290,18 +294,19 @@ class AppearanceLayer(Object):
         The appearance layer's zone.
     known_glitches: Optional[List[:class:`AppearanceLayerKnownGlitch`]]
         Known glitches for this appearance layer. Returns None if the list is empty.
+
     """
 
     __slots__: tuple[str, ...] = (
+        "_image_url",
         "_state",
+        "asset_remote_id",
+        "asset_type",
+        "body_id",
         "id",
+        "known_glitches",
         "parent",
         "zone",
-        "_image_url",
-        "asset_type",
-        "asset_remote_id",
-        "known_glitches",
-        "body_id",
     )
 
     def __init__(
@@ -333,7 +338,6 @@ class AppearanceLayer(Object):
         """Optional[:class:`str`]: The appearance layer's PNG image url. If this is None, the item has a complex movie-based image.
         Rendering these will raise an error.
         """
-
         if self._image_url is None:
             return None
 
@@ -353,6 +357,7 @@ class AppearanceLayer(Object):
         -------
         :class:`bytes`
             The content of the asset.
+
         """
         if self.image_url is None:
             raise NullAssetImage(f"Layer image missing: {self!r}")
@@ -367,7 +372,7 @@ class AppearanceLayer(Object):
             ("parent", self.parent),
             ("asset_type", self.asset_type),
         ]
-        joined = " ".join("%s=%r" % t for t in attrs)
+        joined = " ".join(starmap("{}={!r}".format, attrs))
         return f"<AppearanceLayer {joined}>"
 
 
@@ -389,7 +394,7 @@ class PetAppearance(Object):
             Returns the pet appearance's hash.
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The pet appearance's ID.
     body_id: :class:`int`
@@ -407,19 +412,20 @@ class PetAppearance(Object):
     is_glitched: :class:`bool`
         Whether or not this appearance is marked as glitched. Not to be confused with the layers having their own
         glitches, for that, check out :attr:`PetAppearance.has_glitches`.
+
     """
 
     __slots__: tuple[str, ...] = (
         "_state",
-        "id",
         "body_id",
-        "species",
         "color",
-        "pose",
-        "layers",
-        "restricted_zones",
+        "id",
         "is_glitched",
+        "layers",
+        "pose",
+        "restricted_zones",
         "size",
+        "species",
     )
 
     def __init__(
@@ -465,7 +471,7 @@ class PetAppearance(Object):
             ("pose", self.pose),
             ("is_glitched", self.is_glitched),
         ]
-        joined = " ".join("%s=%r" % t for t in attrs)
+        joined = " ".join(starmap("{}={!r}".format, attrs))
         return f"<PetAppearance {joined}>"
 
     def _render_layers(
@@ -545,16 +551,16 @@ class PetAppearance(Object):
             An optional list of items to render on this appearance.
 
         Raises
-        -------
+        ------
         ~dti.NullAssetImage
             The species does not exist.
 
         Returns
-        --------
+        -------
         :class:`str`
             The DTI server-side-rendering image url of a Neopet appearance.
-        """
 
+        """
         layers: list[AppearanceLayer] = self._render_layers(items)
         layer_urls: list[str] = []
 
@@ -579,7 +585,7 @@ class PetAppearance(Object):
         Retrieves the content of the server-side-rendered image of this pet appearance as a :class:`bytes` object.
 
         Parameters
-        -----------
+        ----------
         items: Optional[Sequence[:class:`Item`]]
             An optional list of items to render on this appearance.
 
@@ -587,6 +593,7 @@ class PetAppearance(Object):
         -------
         :class:`bytes`
             The content of the rendered image.
+
         """
         return await self._state.http._fetch_binary_data(self.image_url(items=items))  # type: ignore
 
@@ -611,15 +618,15 @@ class PetAppearance(Object):
             Only supports PNG output.
 
         Parameters
-        -----------
+        ----------
         fp: Union[:class:`str`, :class:`bytes`, :class:`io.BufferedIOBase`, :class:`os.PathLike`]
             A path string, or a file-like object opened in binary mode and write mode (`wb`).
         items: Optional[Sequence[:class:`Item`]]
             An optional list of items to render on this appearance.
         seek_begin: :class:`bool`
             Whether to seek to the beginning of the file after saving is successfully done.
-        """
 
+        """
         data: bytes = await self.read(items=items)
 
         def write() -> None:
@@ -663,6 +670,7 @@ class ItemAppearance(Object):
         The restricted zones of the item appearance. Outfits can't have conflicting restricted zones.
     occupies: List[:class:`Zone`]
         The zones that this item appearance occupies.
+
     """
 
     __slots__: tuple[str, ...] = (
@@ -670,8 +678,8 @@ class ItemAppearance(Object):
         "id",
         "item",
         "layers",
-        "restricted_zones",
         "occupies",
+        "restricted_zones",
     )
 
     def __init__(self, data: ItemAppearancePayload, item: Item) -> None:
@@ -712,7 +720,7 @@ class Item(Object):
             Returns the item's name.
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The item's Neopets ID.
     name: :class:`str`
@@ -727,18 +735,19 @@ class Item(Object):
         The item's rarity on Neopets.
     nc_value_text: Optional[:class:`str`]
         The item's NC trade value. Can be None if the item is not NC, or if it has not been valued yet. Values courtesy of neopets.com/~owls
+
     """
 
     __slots__: tuple[str, ...] = (
-        "_state",
         "_appearance",
-        "id",
-        "name",
-        "kind",
+        "_state",
         "description",
-        "thumbnail_url",
-        "rarity",
+        "id",
+        "kind",
+        "name",
         "nc_value_text",
+        "rarity",
+        "thumbnail_url",
     )
 
     def __init__(self, *, data: ItemPayload, state: State) -> None:
@@ -799,11 +808,12 @@ class User(Object):
     """Represents a Dress To Impress user.
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The user's ID.
     username: :class:`str`
         The user's username.
+
     """
 
     __slots__: tuple[str, ...] = (
@@ -826,7 +836,7 @@ class Neopet:
     """Represents a customizable Neopet.
 
     Attributes
-    -----------
+    ----------
     species: :class:`Species`
         The Neopets' species.
     color: :class:`Color`
@@ -841,18 +851,19 @@ class Neopet:
         A list of the items that will be applied to the pet. Can be empty.
     name: Optional[:class:`str`]
         The name of the Neopet, if one is supplied.
+
     """
 
     __slots__: tuple[str, ...] = (
-        "_valid_poses",
         "_state",
-        "species",
-        "color",
+        "_valid_poses",
         "appearance",
+        "color",
         "items",
         "name",
         "pose",
         "size",
+        "species",
     )
 
     def __init__(
@@ -961,7 +972,6 @@ class Neopet:
         items: Sequence[Item] | None = None,
     ) -> Neopet:
         """Makes a single-use Neopet object, as opposed to Neopet.from_appearance, which is a more full object with all appearance data etc. This is for internal use only."""
-
         species: Species = pet_appearance.species
         color: Color = pet_appearance.color
         state: State = pet_appearance._state  # type: ignore
@@ -996,7 +1006,6 @@ class Neopet:
         size: LayerImageSize,
     ) -> Neopet:
         """Returns the data for a specific neopet, by name."""
-
         size = size or LayerImageSize.SIZE_600
 
         pet_on_neo: FetchedNeopetPayload = await state.http.fetch_neopet_by_name(
@@ -1026,7 +1035,6 @@ class Neopet:
     @property
     def legacy_closet_url(self) -> str:
         """:class:`str`: Returns the legacy closet URL for a Neopet customization."""
-
         params: dict[str, Any] = {
             "name": self.name or "",
             "species": self.species.id,
@@ -1043,7 +1051,6 @@ class Neopet:
     @property
     def closet_url(self) -> str:
         """:class:`str`: Returns the closet URL for a Neopet customization."""
-
         params: dict[str, Any] = {
             "name": self.name or "",
             "species": self.species.id,
@@ -1056,7 +1063,7 @@ class Neopet:
             params["objects[]"] = [item.id for item in objects]
             params["closet[]"] = [item.id for item in closet]
         return f"https://impress-2020.openneo.net/outfits/new?{urlencode(params, doseq=True)}"
-    
+
     @property
     def worn_items(self) -> list[Item]:
         """List[:class:`Item`]: Returns the items that are worn on the pet."""
@@ -1118,7 +1125,7 @@ class Neopet:
             Only supports PNG output.
 
         Parameters
-        -----------
+        ----------
         fp: Union[:class:`str`, :class:`bytes`, :class:`io.BufferedIOBase`, :class:`os.PathLike`]
             A path string, or a file-like object opened in binary mode and write mode (`wb`).
         pose: Optional[:class:`PetPose`]
@@ -1127,13 +1134,13 @@ class Neopet:
             Whether to seek to the beginning of the file after saving is successfully done.
 
         Raises
-        -------
+        ------
         ~dti.BrokenAssetImage
             A layer's asset image is broken somehow on DTI's side.
         ~dti.MissingPetAppearance
             The Pet Appearance is not found on DTI.
-        """
 
+        """
         pet_appearance = self.appearance
 
         if pose is not None and pose != self.pose:
@@ -1165,13 +1172,13 @@ class Neopet:
         Converts an Outfit object into a Neopet object, which is a little more flexible.
 
         Parameters
-        -----------
+        ----------
         outfit: :class:`Outfit`
             The Outfit you'd like to convert to a Neopet object.
         size: Optional[:class:`LayerImageSize`]
             The desired size for the image. If one is not supplied, it defaults to the outfit's size.
-        """
 
+        """
         return await Neopet._fetch_assets_for(
             species=outfit.pet_appearance.species,
             color=outfit.pet_appearance.color,
@@ -1192,13 +1199,13 @@ class Neopet:
         Converts a PetAppearance object into a Neopet object, which is a little more flexible.
 
         Parameters
-        -----------
+        ----------
         appearance: :class:`PetAppearance`
             The PetAppearance you'd like to convert to a Neopet object.
         size: Optional[:class:`LayerImageSize`]
             The desired size for the image. If one is not supplied, it defaults to the outfit's size.
-        """
 
+        """
         return await Neopet._fetch_assets_for(
             species=appearance.species,
             color=appearance.color,
@@ -1229,7 +1236,7 @@ class Neopet:
         if self.name:
             # let's put the name in front if there is one.
             attrs.insert(0, ("name", self.name))  # type: ignore
-        joined = " ".join("%s=%r" % t for t in attrs)
+        joined = " ".join(starmap("{}={!r}".format, attrs))
         return f"<Neopet {joined}>"
 
 
@@ -1237,7 +1244,7 @@ class Outfit(Object):
     """Represents a DTI Outfit.
 
     Attributes
-    -----------
+    ----------
     id: :class:`int`
         The outfit's DTI ID.
     name: Optional[:class:`str`]
@@ -1256,19 +1263,20 @@ class Outfit(Object):
         The outfit's creation time in UTC.
     updated_at: :class:`datetime.datetime`
         The outfit's last updated time in UTC.
+
     """
 
     __slots__: tuple[str, ...] = (
         "_state",
-        "id",
-        "name",
-        "creator",
-        "pet_appearance",
-        "worn_items",
         "closeted_items",
         "created_at",
-        "updated_at",
+        "creator",
+        "id",
+        "name",
+        "pet_appearance",
         "size",
+        "updated_at",
+        "worn_items",
     )
 
     def __init__(
@@ -1323,11 +1331,11 @@ class Outfit(Object):
             The desired size for the image. If one is not supplied, it defaults to the outfit's size.
 
         Returns
-        --------
+        -------
         :class:`str`
             The image url of an outfit.
-        """
 
+        """
         updated_at = int(self.updated_at.timestamp())
         size_str = str(size or self.size)[-3:]
         return f"https://outfits.openneo-assets.net/outfits/{self.id}/v/{updated_at}/{size_str}.png"
@@ -1338,7 +1346,7 @@ class Outfit(Object):
         Retrieves the content of the server-side-rendered image of this outfit as a :class:`bytes` object.
 
         Parameters
-        -----------
+        ----------
         size: Optional[LayerImageSize]
             The desired size for the image. If one is not supplied, it defaults to the outfit's size.
 
@@ -1346,6 +1354,7 @@ class Outfit(Object):
         -------
         :class:`bytes`
             The content of the rendered image.
+
         """
         return await self._state.http._fetch_binary_data(self.image_url(size=size))  # type: ignore
 
@@ -1371,7 +1380,7 @@ class Outfit(Object):
             Only supports PNG output.
 
         Parameters
-        -----------
+        ----------
         fp: Union[:class:`str`, :class:`bytes`, :class:`io.BufferedIOBase`, :class:`os.PathLike`]
             A path string, or a file-like object opened in binary mode and write mode (`wb`).
         pose: Optional[:class:`PetPose`]
@@ -1382,11 +1391,11 @@ class Outfit(Object):
             Whether to seek to the beginning of the file after saving is successfully done.
 
         Raises
-        -------
+        ------
         ~dti.BrokenAssetImage
             A layer's asset image is broken somehow on DTI's side.
-        """
 
+        """
         # if there's a pose or size change, we have to rebuild as a Neopet render
         rebuild = False
 
@@ -1421,7 +1430,7 @@ class Outfit(Object):
             ("created_at", self.created_at),
             ("updated_at", self.updated_at),
         ]
-        joined = " ".join("%s=%r" % t for t in attrs)
+        joined = " ".join(starmap("{}={!r}".format, attrs))
         return f"<Outfit {joined}>"
 
 
