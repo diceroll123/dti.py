@@ -26,5 +26,5 @@ $ python -m pip install -U .
 *Since there is no obvious "first thing to do" with this library, simply refer to the examples folder for all examples.*
 
 ## Links
-- [Dress To Impress (2020)](https://impress-2020.openneo.net/)
-- [DTI's Github Repo](https://github.com/matchu/impress-2020/)
+- [Dress To Impress](https://impress.openneo.net/)
+- [DTI's Github Repo](https://github.com/openneo/impress/)

@@ -461,7 +461,7 @@ class PetAppearance(Object):
     @property
     def url(self) -> str:
         """:class:`str`: The URL of this pet appearance as an editable outfit."""
-        return f"https://impress-2020.openneo.net/outfits/new?species={self.species.id}&color={self.color.id}&pose={self.pose.name}&state={self.id}"
+        return f"https://impress.openneo.net/outfits/new?species={self.species.id}&color={self.color.id}&pose={self.pose.name}&state={self.id}"
 
     def __repr__(self) -> str:
         attrs: list[tuple[str, Any]] = [
@@ -795,7 +795,7 @@ class Item(Object):
     @property
     def url(self) -> str:
         """:class:`str`: Returns the DTI URL for the item."""
-        return f"https://impress-2020.openneo.net/items/{self.id}"
+        return f"https://impress.openneo.net/items/{self.id}"
 
     def __str__(self) -> str:
         return self.name
@@ -1062,7 +1062,7 @@ class Neopet:
             objects, closet = _render_items(self.items)
             params["objects[]"] = [item.id for item in objects]
             params["closet[]"] = [item.id for item in closet]
-        return f"https://impress-2020.openneo.net/outfits/new?{urlencode(params, doseq=True)}"
+        return f"https://impress.openneo.net/outfits/new?{urlencode(params, doseq=True)}"
 
     @property
     def worn_items(self) -> list[Item]:
@@ -1320,8 +1320,11 @@ class Outfit(Object):
 
     @property
     def url(self) -> str:
-        """:class:`str`: Returns the outfit URL for the ID provided."""
-        return f"https://impress-2020.openneo.net/outfits/{self.id}"
+        """:class:`str`: Returns the outfit URL for the ID provided.
+        
+        Since the 2020 site is soon to be deprecated, this will redirect to the legacy URL.
+        """
+        return self.legacy_url
 
     def image_url(self, *, size: LayerImageSize | None = None) -> str:
         """
