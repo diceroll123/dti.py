@@ -223,6 +223,7 @@ class HTTPClient:
         *,
         species: Species,
         color: Color,
+        alt_style_id: int | None = None,
         pose: PetPose,
         item_ids: Sequence[ID] | None = None,
         item_names: Sequence[str] | None = None,
@@ -235,6 +236,7 @@ class HTTPClient:
             "colorId": color.id,
             "size": str(size),
             "pose": str(pose),
+            "altStyleId": alt_style_id,
         }
 
         if item_names:

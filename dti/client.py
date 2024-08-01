@@ -222,6 +222,7 @@ class Client:
         *,
         species: int | str | Species,
         color: int | str | Color,
+        alt_style_id: int | None = None,
         item_names: list[str] | None = None,
         item_ids: list[int] | None = None,
         size: LayerImageSize | None = None,
@@ -238,6 +239,8 @@ class Client:
             The name, or ID, or Species object of the desired Species. Case-insensitive.
         color: Union[:class:`int`, :class:`str`, :class:`Color`]
             The name, or ID, or Color object of the desired Color. Case-insensitive.
+        alt_style_id: Optional[:class:`int`]
+            The ID of the alternative/nostalgic style you'd like to use. If one is not supplied, it defaults to `None`.
         item_names: Optional[List[:class:`str`]]
             A list of item names to search for + add to the items of the Neopet.
         item_ids: Optional[List[:class:`int`]]
@@ -287,6 +290,7 @@ class Client:
         return await Neopet._fetch_assets_for(  # type: ignore
             species=species,
             color=color,
+            alt_style_id=alt_style_id,
             item_names=item_names,
             item_ids=item_ids,
             size=size,

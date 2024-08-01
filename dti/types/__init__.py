@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Literal, TypedDict, TypeVar
+from typing import Any, Literal, TypedDict, TypeVar
 
 PetPoseType = Literal[
     "HAPPY_MASC",
@@ -114,6 +114,25 @@ class ColorAppliedToAllCompatibleSpeciesPayload(TypedDict):
 class FetchAllAppearancesPayload(TypedDict):
     items: list[ItemAllAppearancesPayload]
     color: ColorAppliedToAllCompatibleSpeciesPayload
+
+
+class SWFAsset(TypedDict):
+    body_id: int
+    id: int
+    urls: list[dict[str, Any]]
+    zone: ZonePayload
+    known_glitches: list[Any]
+
+
+class AltStylePayload(TypedDict):
+    id: int
+    species_id: int
+    color_id: int
+    body_id: int
+    series_name: str
+    thumbnail_url: str
+    adjective_name: str
+    swf_assets: list[SWFAsset]
 
 
 ID = TypeVar("ID", bound=str | int)

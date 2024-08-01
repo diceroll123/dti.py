@@ -7,6 +7,7 @@ from itertools import starmap
 from typing import TYPE_CHECKING, Any, overload
 from urllib.parse import urlencode
 
+
 from . import utils
 from .enums import (
     AppearanceLayerKnownGlitch,
@@ -28,8 +29,6 @@ if TYPE_CHECKING:
     import os
     from collections.abc import Sequence
 
-    from dti.types import FetchAssetsPayload, FetchedNeopetPayload
-
     from .state import BitField, State
     from .types import (
         ID,
@@ -41,6 +40,10 @@ if TYPE_CHECKING:
         PetAppearancePayload,
         SpeciesPayload,
         ZonePayload,
+        FetchAssetsPayload,
+        FetchedNeopetPayload,
+        BodyPayload,
+        AltStylePayload,
     )
 
 __all__: tuple[str, ...] = (
@@ -426,6 +429,7 @@ class PetAppearance(Object):
         "restricted_zones",
         "size",
         "species",
+        "alt_style_id",
     )
 
     def __init__(
@@ -434,21 +438,35 @@ class PetAppearance(Object):
         state: State,
         size: LayerImageSize,
         data: PetAppearancePayload,
+        alt_style_id: int | None = None,
     ) -> None:
         self._state = state
         self.id: int = int(data["id"])
         self.body_id: int = int(data["bodyId"])
         self.is_glitched: bool = data["isGlitched"]
         self.size: LayerImageSize = size
+        self.alt_style_id: int | None = alt_style_id
 
         # create new, somewhat temporary colors from this data since we don't have async access
         self.color: Color = Color(data=data["color"], state=state)
         self.species: Species = Species(data=data["species"], state=state)
 
         self.pose: PetPose = PetPose(data["pose"])
-        self.layers: list[AppearanceLayer] = [
-            AppearanceLayer(parent=self, data=layer) for layer in data["layers"]
-        ]
+
+        alt_style = None
+        if self.alt_style_id is not None:
+            alt_style = state.get_alt_style_by_id(self.alt_style_id)
+
+        if alt_style is None:
+            self.layers: list[AppearanceLayer] = [
+                AppearanceLayer(parent=self, data=layer) for layer in data["layers"]
+            ]
+        else:
+            self.layers: list[AppearanceLayer] = [
+                AppearanceLayer(parent=self, data=layer)
+                for layer in alt_style.layers_list
+            ]
+
         self.restricted_zones: list[Zone] = [
             Zone(restricted) for restricted in data["restrictedZones"]
         ]
@@ -461,7 +479,12 @@ class PetAppearance(Object):
     @property
     def url(self) -> str:
         """:class:`str`: The URL of this pet appearance as an editable outfit."""
-        return f"https://impress.openneo.net/outfits/new?species={self.species.id}&color={self.color.id}&pose={self.pose.name}&state={self.id}"
+        url = f"https://impress.openneo.net/outfits/new?species={self.species.id}&color={self.color.id}&pose={self.pose.name}&state={self.id}"
+
+        if self.alt_style_id:
+            url += f"&style={self.alt_style_id}"
+
+        return url
 
     def __repr__(self) -> str:
         attrs: list[tuple[str, Any]] = [
@@ -851,6 +874,8 @@ class Neopet:
         A list of the items that will be applied to the pet. Can be empty.
     name: Optional[:class:`str`]
         The name of the Neopet, if one is supplied.
+    alt_style_id: Optional[:class:`int`]
+        The ID of the alternative style of the pet, if one is supplied.
 
     """
 
@@ -864,6 +889,7 @@ class Neopet:
         "pose",
         "size",
         "species",
+        "alt_style_id",
     )
 
     def __init__(
@@ -877,6 +903,7 @@ class Neopet:
         items: Sequence[Item] | None = None,
         size: LayerImageSize | None = None,
         name: str | None = None,
+        alt_style_id: int | None = None,
         state: State,
     ) -> None:
         self._state: State = state
@@ -888,6 +915,7 @@ class Neopet:
         self.size: LayerImageSize = size or LayerImageSize.SIZE_600
         self.pose: PetPose = pose
         self._valid_poses: BitField = valid_poses
+        self.alt_style_id: int | None = alt_style_id
 
     @classmethod
     async def _fetch_assets_for(
@@ -895,6 +923,7 @@ class Neopet:
         *,
         species: Species,
         color: Color,
+        alt_style_id: int | None = None,
         pose: PetPose,
         item_ids: Sequence[ID] | None = None,
         item_names: Sequence[str] | None = None,
@@ -911,9 +940,19 @@ class Neopet:
 
         size = size or LayerImageSize.SIZE_600
 
+        if alt_style_id is None:
+            alt_style = state.get_alt_style_by_species_color_pose(
+                species_id=species.id,
+                color_id=color.id,
+                pose=pose,
+            )
+            if alt_style:
+                alt_style_id = alt_style.id
+
         data: FetchAssetsPayload = await state.http.fetch_assets_for(
             species=species,
             color=color,
+            alt_style_id=alt_style_id,
             pose=pose,
             item_ids=item_ids,
             item_names=item_names,
@@ -924,7 +963,12 @@ class Neopet:
             Item(data=item, state=state) for item in data["items"] if item is not None
         ]
 
-        appearance = PetAppearance(data=data["petAppearance"], size=size, state=state)
+        appearance = PetAppearance(
+            data=data["petAppearance"],
+            size=size,
+            state=state,
+            alt_style_id=alt_style_id,
+        )
 
         bit: BitField = await state._get_bit(species_id=species.id, color_id=color.id)  # type: ignore
 
@@ -937,6 +981,7 @@ class Neopet:
             appearance=appearance,
             name=name,
             size=size,
+            alt_style_id=alt_style_id,
             state=state,
         )
 
@@ -948,8 +993,7 @@ class Neopet:
         /,
         *,
         item: Item | None = None,
-    ) -> Neopet:
-        ...
+    ) -> Neopet: ...
 
     @overload
     @classmethod
@@ -959,8 +1003,7 @@ class Neopet:
         /,
         *,
         items: Sequence[Item] | None = None,
-    ) -> Neopet:
-        ...
+    ) -> Neopet: ...
 
     @classmethod
     async def _from_appearance(
@@ -1062,7 +1105,9 @@ class Neopet:
             objects, closet = _render_items(self.items)
             params["objects[]"] = [item.id for item in objects]
             params["closet[]"] = [item.id for item in closet]
-        return f"https://impress.openneo.net/outfits/new?{urlencode(params, doseq=True)}"
+        return (
+            f"https://impress.openneo.net/outfits/new?{urlencode(params, doseq=True)}"
+        )
 
     @property
     def worn_items(self) -> list[Item]:
@@ -1157,7 +1202,12 @@ class Neopet:
                 pose=pose,
                 size=self.size,
             )
-            pet_appearance = PetAppearance(data=data, size=self.size, state=self._state)
+            pet_appearance = PetAppearance(
+                data=data,
+                size=self.size,
+                state=self._state,
+                alt_style_id=self.alt_style_id,
+            )
 
         await pet_appearance.render(fp, items=self.items, seek_begin=seek_begin)
 
@@ -1321,7 +1371,7 @@ class Outfit(Object):
     @property
     def url(self) -> str:
         """:class:`str`: Returns the outfit URL for the ID provided.
-        
+
         Since the 2020 site is soon to be deprecated, this will redirect to the legacy URL.
         """
         return self.legacy_url
@@ -1437,7 +1487,82 @@ class Outfit(Object):
         return f"<Outfit {joined}>"
 
 
-#  utility functions below
+class AltStyle(Object):
+    """Represents an Alternative Style for a Neopet.
+
+
+    Attributes
+    ----------
+    id: :class:`int`
+        The alternative style's ID.
+    species_id: :class:`int`
+        The alternative style's species ID.
+    body_id: :class:`int`
+        The alternative style's body ID.
+    color_id: :class:`int`
+        The alternative style's color ID.
+    series_name: :class:`str`
+        The alternative style's series name. `Nostalgic` for example.
+    thumbnail_url: :class:`str`
+        The alternative style's thumbnail URL.
+    adjective_name: :class:`str`
+        The alternative style's adjective name. `Nostalgic Robot` for example.
+    swf_assets: List[:class:`dict`]
+        The alternative style's SWF assets.
+    """
+
+    __slots__ = (
+        "id",
+        "body_id",
+        "species_id",
+        "color_id",
+        "series_name",
+        "thumbnail_url",
+        "adjective_name",
+        "swf_assets",
+    )
+
+    def __init__(self, data: AltStylePayload):
+        self.id = data["id"]
+        self.species_id = data["species_id"]
+        self.body_id = data["body_id"]
+        self.color_id = data["color_id"]
+        self.series_name = data["series_name"]
+        self.thumbnail_url = data["thumbnail_url"]
+        self.adjective_name = data["adjective_name"]
+        self.swf_assets = data["swf_assets"]
+
+    @property
+    def layers_list(self) -> list[AppearanceLayerPayload]:
+        layers = []
+        for asset in self.swf_assets:
+            layers.append(
+                {
+                    "id": self.id,
+                    "zone": asset["zone"],
+                    "remoteId": asset["id"],
+                    "bodyId": asset["body_id"],
+                    "imageUrlV2": asset["urls"]["png"],  # type: ignore
+                    "knownGlitches": asset["known_glitches"],
+                }
+            )
+        return layers
+
+    def __repr__(self) -> str:
+        attrs: list[tuple[str, Any]] = [
+            ("id", self.id),
+            ("species_id", self.species_id),
+            ("body_id", self.body_id),
+            ("color_id", self.color_id),
+            ("series_name", self.series_name),
+            ("adjective_name", self.adjective_name),
+            ("thumbnail_url", self.thumbnail_url),
+        ]
+        joined = " ".join(starmap("{}={!r}".format, attrs))
+        return f"<AltStyle {joined}>"
+
+
+# MARK: Utility Functions
 
 
 def _render_items(items: Sequence[Item]) -> tuple[list[Item], list[Item]]:

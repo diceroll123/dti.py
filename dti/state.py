@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+import json
 import time
 from typing import TYPE_CHECKING, TypeVar
+
 
 from .constants import ALL_SPECIES_AND_COLORS
 from .errors import InvalidPairBytes
@@ -13,7 +15,7 @@ __all__: tuple[str, ...] = ("ValidField",)
 
 if TYPE_CHECKING:
     from .enums import PetPose
-    from .models import Color, Species
+    from .models import Color, Species, AltStyle
 
     T = TypeVar("T", Color, Species)
 else:
@@ -169,6 +171,7 @@ class State:
         "_species",
         "_update_lock",
         "_valid_pairs",
+        "_alt_styles",
         "http",
     )
 
@@ -181,6 +184,7 @@ class State:
         # alternatively you can list them out by doing self._colors.values()
         self._colors: dict[str | int, Color] = _NameDict()
         self._species: dict[str | int, Species] = _NameDict()
+        self._alt_styles: dict[int, AltStyle] = {}
         self._cached: bool = False
         self._last_update: float = 0.0
 
@@ -221,6 +225,40 @@ class State:
                 for species in data["allSpecies"]
             },
         )
+
+    async def _fetch_alt_styles(self) -> None:
+        data = await self.http._fetch_binary_data(
+            "https://impress.openneo.net/alt-styles.json"
+        )
+        from .models import AltStyle
+
+        json_data = json.loads(data)
+
+        self._alt_styles = {alt["id"]: AltStyle(data=alt) for alt in json_data}
+
+    def get_alt_style_by_id(self, alt_style_id: int) -> AltStyle | None:
+        return self._alt_styles.get(alt_style_id)
+
+    def get_alt_style_by_species_color_pose(
+        self,
+        species_id: int,
+        color_id: int,
+        pose: PetPose,
+    ) -> AltStyle | None:
+        from .enums import PetPose
+
+        mapping = {
+            # this is a mapping of the series name to the pose
+            # for example, unconverted seems to be strictly "Nostalgic"
+            # who knows what more series there will be!
+            PetPose.UNCONVERTED: "Nostalgic",
+        }
+
+        for alt in self._alt_styles.values():
+            if alt.species_id == species_id and alt.color_id == color_id:
+                if mapping.get(pose) == alt.series_name:
+                    return alt
+        return None
 
     @property
     def is_cached(self) -> bool:
@@ -277,6 +315,9 @@ class State:
             self._colors.clear()
             self._species.clear()
             await self._fetch_species_and_color()
+
+            self._alt_styles.clear()
+            await self._fetch_alt_styles()
 
             self._cached = True
             self._last_update = time.monotonic()

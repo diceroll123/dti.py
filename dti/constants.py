@@ -105,11 +105,11 @@ query($itemIds: [ID!]!) {
 
 SEARCH_TO_FIT = (
     """
-query($query: String!, $fitsPet: FitsPetSearchFilter!, $speciesId: ID!, $colorId: ID!, $itemKind: ItemKindSearchFilter, $offset: Int, $limit: Int, $size: LayerImageSize!) {
+query($query: String!, $fitsPet: FitsPetSearchFilter!, $speciesId: ID!, $colorId: ID!, $altStyleId: ID, $itemKind: ItemKindSearchFilter, $offset: Int, $limit: Int, $size: LayerImageSize!) {
   itemSearch(query: $query, fitsPet: $fitsPet, itemKind: $itemKind, offset: $offset, limit: $limit) {
     items {
       ...ItemProperties
-      appearanceOn(speciesId: $speciesId, colorId: $colorId) {
+      appearanceOn(speciesId: $speciesId, colorId: $colorId, altStyleId: $altStyleId) {
         ...ItemAppearanceForOutfitPreview
       }
     }
@@ -144,13 +144,13 @@ query($names: [String!]!) {
 # grab pet appearances
 GRAB_PET_APPEARANCE_WITH_ITEMS_BY_IDS = (
     """
-query ($allItemIds: [ID!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSize!, $pose: Pose!) {
+query ($allItemIds: [ID!]!, $speciesId: ID!, $colorId: ID!, $altStyleId: ID, $size: LayerImageSize!, $pose: Pose!) {
   petAppearance(speciesId: $speciesId, colorId: $colorId, pose: $pose) {
     ...PetAppearanceForOutfitPreview
   }
   items(ids: $allItemIds) {
     ...ItemProperties
-    appearanceOn(speciesId: $speciesId, colorId: $colorId) {
+    appearanceOn(speciesId: $speciesId, colorId: $colorId, altStyleId: $altStyleId) {
       ...ItemAppearanceForOutfitPreview
     }
   }
@@ -162,13 +162,13 @@ query ($allItemIds: [ID!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSiz
 
 GRAB_PET_APPEARANCE_WITH_ITEMS_BY_NAMES = (
     """
-query ($names: [String!]!, $speciesId: ID!, $colorId: ID!, $size: LayerImageSize!, $pose: Pose!) {
+query ($names: [String!]!, $speciesId: ID!, $colorId: ID!, $altStyleId: ID, $size: LayerImageSize!, $pose: Pose!) {
   petAppearance(speciesId: $speciesId, colorId: $colorId, pose: $pose) {
     ...PetAppearanceForOutfitPreview
   }
   items: itemsByName(names: $names) {
     ...ItemProperties
-    appearanceOn(speciesId: $speciesId, colorId: $colorId) {
+    appearanceOn(speciesId: $speciesId, colorId: $colorId, altStyleId: $altStyleId) {
       ...ItemAppearanceForOutfitPreview
     }
   }
