@@ -527,13 +527,10 @@ class PetAppearance(Object):
 
             # A pet appearance can also restrict its own zones. The Wraith Uni is an
             # interesting example: it has a horn, but its zone restrictions hide it!
-            if (
+            return not (
                 layer.asset_type == AppearanceLayerType.BIOLOGY
                 and layer.zone in self.restricted_zones
-            ):
-                return False
-
-            return True
+            )
 
         layer_sorter: dict[int, AppearanceLayer] = {}
         for layer in filter(_layer_filter, all_layers):
@@ -948,8 +945,7 @@ class Neopet:
         /,
         *,
         item: Item | None = None,
-    ) -> Neopet:
-        ...
+    ) -> Neopet: ...
 
     @overload
     @classmethod
@@ -959,8 +955,7 @@ class Neopet:
         /,
         *,
         items: Sequence[Item] | None = None,
-    ) -> Neopet:
-        ...
+    ) -> Neopet: ...
 
     @classmethod
     async def _from_appearance(
@@ -1062,7 +1057,9 @@ class Neopet:
             objects, closet = _render_items(self.items)
             params["objects[]"] = [item.id for item in objects]
             params["closet[]"] = [item.id for item in closet]
-        return f"https://impress.openneo.net/outfits/new?{urlencode(params, doseq=True)}"
+        return (
+            f"https://impress.openneo.net/outfits/new?{urlencode(params, doseq=True)}"
+        )
 
     @property
     def worn_items(self) -> list[Item]:
@@ -1321,7 +1318,7 @@ class Outfit(Object):
     @property
     def url(self) -> str:
         """:class:`str`: Returns the outfit URL for the ID provided.
-        
+
         Since the 2020 site is soon to be deprecated, this will redirect to the legacy URL.
         """
         return self.legacy_url

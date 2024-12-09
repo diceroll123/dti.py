@@ -11,25 +11,33 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [ '3.10', '3.x' ]
+        python-version: [ '3.10', '3.11', '3.12', '3.13' ]
 
     name: pytest ${{ matrix.python-version }}
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
 
-      - name: Set up CPython ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip setuptools wheel pytest pytest-asyncio
-          pip install -U -r requirements.txt
 
       - name: Run tests
         shell: bash
         run: |
-          PYTHONPATH="$(pwd)" pytest
+          uv run --frozen pytest
+
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install deps
+        shell: bash
+        run: |
+          uv sync --frozen --only-dev
+
+      - uses: pre-commit/action@v3.0.1

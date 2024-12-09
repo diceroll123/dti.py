@@ -4,7 +4,7 @@ from enum import Enum, auto
 from typing import TYPE_CHECKING, Any, TypeVar
 
 if TYPE_CHECKING:
-    from typing_extensions import Self
+    from typing import Self
 
 __all__: tuple[str, ...] = (
     "AppearanceLayerKnownGlitch",

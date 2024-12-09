@@ -1,5 +1,3 @@
-
-
 class Object:
     __slots__ = ()
     id: int
