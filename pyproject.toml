@@ -1,3 +1,39 @@
+[project]
+name = "dti-py"
+version = "0.0.1"
+description = "A Python wrapper for the Dress To Impress API"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx[brotli,http2,zstd]==0.27.2",
+    "typing-extensions>=4.12.2",
+]
+license = { file = "LICENSE" }
+
+[tool.ruff]
+show-fixes = true
+target-version = "py311"
+
+[tool.ruff.lint]
+extend-select = [
+    "C4",
+    "SIM",
+    "TC",
+    "UP",
+    "ANN201",
+    "ANN202",
+    "ANN204",
+    "ANN205",
+    "ANN206",
+]
+ignore = ["E501", "F403"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
 [tool.pytest.ini_options]
 asyncio_mode = "strict"
 
@@ -13,3 +49,10 @@ reportUnnecessaryTypeIgnoreComment = "warning"
 reportUnusedImport = "error"
 pythonVersion = "3.10"
 typeCheckingMode = "basic"
+
+[dependency-groups]
+dev = [
+    "pillow>=11.0.0",
+    "pytest>=8.3.4",
+    "pytest-asyncio>=0.24.0",
+]
