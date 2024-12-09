@@ -189,7 +189,6 @@ version = "0.0.1"
 source = { virtual = "." }
 dependencies = [
     { name = "httpx", extra = ["brotli", "http2", "zstd"] },
-    { name = "typing-extensions" },
 ]
 
 [package.dev-dependencies]
@@ -200,10 +199,7 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "httpx", extras = ["brotli", "http2", "zstd"], specifier = "==0.27.2" },
-    { name = "typing-extensions", specifier = ">=4.12.2" },
-]
+requires-dist = [{ name = "httpx", extras = ["brotli", "http2", "zstd"], specifier = "==0.27.2" }]
 
 [package.metadata.requires-dev]
 dev = [

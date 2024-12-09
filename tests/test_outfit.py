@@ -33,5 +33,5 @@ def test_outfit(client: Client, outfit_data: dict[str, Any]) -> None:
         2,
         37,
         32,
-        tzinfo=datetime.timezone.utc,
+        tzinfo=datetime.UTC,
     )
