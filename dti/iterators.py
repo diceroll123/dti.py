@@ -16,7 +16,7 @@ from .errors import InvalidItemID
 from .models import Item
 
 if TYPE_CHECKING:
-    from typing import Self
+    from typing_extensions import Self
 
     from .state import State
     from .types import ItemPayload

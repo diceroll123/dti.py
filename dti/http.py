@@ -76,7 +76,7 @@ class HTTPClient:
             payload["variables"] = variables
 
         async with httpx.AsyncClient(
-            proxies=self._proxy,  # type: ignore
+            proxy=self._proxy,  # type: ignore
             transport=httpx.AsyncHTTPTransport(retries=self._retries),
         ) as client:
             try:
@@ -96,7 +96,7 @@ class HTTPClient:
 
     async def _fetch_binary_data(self, url: str) -> bytes:
         async with httpx.AsyncClient(
-            proxies=self._proxy,  # type: ignore
+            proxy=self._proxy,  # type: ignore
             transport=httpx.AsyncHTTPTransport(retries=self._retries),
             limits=httpx.Limits(max_connections=None, max_keepalive_connections=None),
             follow_redirects=True,

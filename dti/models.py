@@ -786,7 +786,7 @@ class Item(Object):
     def legacy_url(self) -> str:
         """:class:`str`: Returns the legacy DTI URL for the item."""
         return (
-            f'http://impress.openneo.net/items/{self.id}-{self.name.replace(" ", "-")}'
+            f"http://impress.openneo.net/items/{self.id}-{self.name.replace(' ', '-')}"
         )
 
     @property

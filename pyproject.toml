@@ -5,7 +5,8 @@ description = "A Python wrapper for the Dress To Impress API"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "httpx[brotli,http2,zstd]==0.27.2",
+    "httpx[brotli,http2,zstd]==0.28.1",
+    "typing-extensions>=4.13.1",
 ]
 license = { file = "LICENSE" }
 
@@ -51,7 +52,7 @@ typeCheckingMode = "basic"
 
 [dependency-groups]
 dev = [
-    "pillow>=11.0.0",
-    "pytest>=8.3.4",
-    "pytest-asyncio>=0.24.0",
+    "pillow>=11.1.0",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=0.26.0",
 ]
