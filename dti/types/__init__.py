@@ -61,7 +61,6 @@ class BaseItemPayload(_BaseObject):
     isNc: bool
     isPb: bool
     rarityIndex: str
-    ncTradeValueText: str | None
     numUsersOfferingThis: int
     numUsersSeekingThis: int
 

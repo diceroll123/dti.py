@@ -110,7 +110,6 @@
                 "rarityIndex": 500,
                 "isNc": true,
                 "isPb": false,
-                "ncTradeValueText": null,
                 "numUsersOfferingThis": 1,
                 "numUsersSeekingThis": 2,
                 "appearanceOn": {
@@ -140,7 +139,6 @@
                 "rarityIndex": 500,
                 "isNc": true,
                 "isPb": false,
-                "ncTradeValueText": null,
                 "numUsersOfferingThis": 3,
                 "numUsersSeekingThis": 4,
                 "appearanceOn": {
@@ -176,7 +174,6 @@
                 "rarityIndex": 82,
                 "isNc": false,
                 "isPb": false,
-                "ncTradeValueText": null,
                 "numUsersOfferingThis": 5,
                 "numUsersSeekingThis": 6,
                 "appearanceOn": {
@@ -217,7 +214,6 @@
                 "rarityIndex": 89,
                 "isNc": false,
                 "isPb": false,
-                "ncTradeValueText": null,
                 "numUsersOfferingThis": 7,
                 "numUsersSeekingThis": 8,
                 "appearanceOn": {
@@ -263,7 +259,6 @@
                 "rarityIndex": 86,
                 "isNc": false,
                 "isPb": false,
-                "ncTradeValueText": null,
                 "numUsersOfferingThis": 9,
                 "numUsersSeekingThis": 10,
                 "appearanceOn": {
@@ -293,7 +288,6 @@
                 "rarityIndex": 500,
                 "isNc": true,
                 "isPb": false,
-                "ncTradeValueText": null,
                 "numUsersOfferingThis": 11,
                 "numUsersSeekingThis": 12,
                 "appearanceOn": {
