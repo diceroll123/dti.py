@@ -749,8 +749,8 @@ class Item(Object):
         "nc_value_text",
         "rarity",
         "thumbnail_url",
-        "users_seeking",
         "users_offering",
+        "users_seeking",
     )
 
     if TYPE_CHECKING:
@@ -817,7 +817,17 @@ class Item(Object):
         return self.name
 
     def __repr__(self) -> str:
-        return f"<Item id={self.id} name={self.name!r} kind={self.kind} rarity={self.rarity}>"
+        attrs = (
+            ("id", self.id),
+            ("name", self.name),
+            ("kind", self.kind),
+            ("rarity", self.rarity),
+            ("users_seeking", self.users_seeking),
+            ("users_offering", self.users_offering),
+        )
+
+        inner = " ".join("{}={!r}".format(*t) for t in attrs)
+        return f"<{self.__class__.__name__} {inner}>"
 
 
 class User(Object):
