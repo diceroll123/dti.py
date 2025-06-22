@@ -732,10 +732,10 @@ class Item(Object):
         The item's rarity on Neopets.
     nc_value_text: Optional[:class:`str`]
         The item's NC trade value. Can be None if the item is not NC, or if it has not been valued yet. Values courtesy of neopets.com/~owls
-    users_seeking: :class:`int`
-        The number of users seeking this item.
     users_offering: :class:`int`
-        The number of users offering this item.
+        The number of users offering this item in trade lists.
+    users_seeking: :class:`int`
+        The number of users seeking this item in trade lists.
 
     """
 
