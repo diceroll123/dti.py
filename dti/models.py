@@ -730,8 +730,6 @@ class Item(Object):
         The kind of item this is. Can be `NC` for Neocash, `NP` for Neopoint items, or `PB` for paintbrush items.
     rarity: :class:`int`
         The item's rarity on Neopets.
-    nc_value_text: Optional[:class:`str`]
-        The item's NC trade value. Can be None if the item is not NC, or if it has not been valued yet. Values courtesy of neopets.com/~owls
     users_offering: :class:`int`
         The number of users offering this item in trade lists.
     users_seeking: :class:`int`
@@ -746,7 +744,6 @@ class Item(Object):
         "id",
         "kind",
         "name",
-        "nc_value_text",
         "rarity",
         "thumbnail_url",
         "users_offering",
@@ -760,7 +757,6 @@ class Item(Object):
         thumbnail_url: str
         kind: ItemKind
         rarity: int
-        nc_value_text: str | None
         users_seeking: int
         users_offering: int
 
@@ -772,7 +768,6 @@ class Item(Object):
         self.thumbnail_url: str = utils.url_sanitizer(data["thumbnailUrl"])
         self._appearance: ItemAppearance | None = None
         self.appearance = data.get("appearanceOn")
-        self.nc_value_text: str | None = data["ncTradeValueText"]
         self.kind: ItemKind
         self.users_seeking = data["numUsersSeekingThis"]
         self.users_offering = data["numUsersOfferingThis"]

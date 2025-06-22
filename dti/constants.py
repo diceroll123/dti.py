@@ -14,7 +14,6 @@ fragment ItemProperties on Item {
   rarityIndex
   isNc
   isPb
-  ncTradeValueText
   numUsersOfferingThis
   numUsersSeekingThis
 }"""
