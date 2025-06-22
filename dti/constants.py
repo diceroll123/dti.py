@@ -15,6 +15,8 @@ fragment ItemProperties on Item {
   isNc
   isPb
   ncTradeValueText
+  numUsersOfferingThis
+  numUsersSeekingThis
 }"""
 
 FRAGMENT_USER_PROPERTIES = """

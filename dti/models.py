@@ -732,6 +732,10 @@ class Item(Object):
         The item's rarity on Neopets.
     nc_value_text: Optional[:class:`str`]
         The item's NC trade value. Can be None if the item is not NC, or if it has not been valued yet. Values courtesy of neopets.com/~owls
+    users_offering: :class:`int`
+        The number of users offering this item in trade lists.
+    users_seeking: :class:`int`
+        The number of users seeking this item in trade lists.
 
     """
 
@@ -745,7 +749,20 @@ class Item(Object):
         "nc_value_text",
         "rarity",
         "thumbnail_url",
+        "users_offering",
+        "users_seeking",
     )
+
+    if TYPE_CHECKING:
+        id: int
+        name: str
+        description: str
+        thumbnail_url: str
+        kind: ItemKind
+        rarity: int
+        nc_value_text: str | None
+        users_seeking: int
+        users_offering: int
 
     def __init__(self, *, data: ItemPayload, state: State) -> None:
         self._state = state
@@ -757,6 +774,8 @@ class Item(Object):
         self.appearance = data.get("appearanceOn")
         self.nc_value_text: str | None = data["ncTradeValueText"]
         self.kind: ItemKind
+        self.users_seeking = data["numUsersSeekingThis"]
+        self.users_offering = data["numUsersOfferingThis"]
 
         if data.get("isNc"):
             self.kind = ItemKind.NC
@@ -798,7 +817,17 @@ class Item(Object):
         return self.name
 
     def __repr__(self) -> str:
-        return f"<Item id={self.id} name={self.name!r} kind={self.kind} rarity={self.rarity}>"
+        attrs = (
+            ("id", self.id),
+            ("name", self.name),
+            ("kind", self.kind),
+            ("rarity", self.rarity),
+            ("users_seeking", self.users_seeking),
+            ("users_offering", self.users_offering),
+        )
+
+        inner = " ".join("{}={!r}".format(*t) for t in attrs)
+        return f"<{self.__class__.__name__} {inner}>"
 
 
 class User(Object):
