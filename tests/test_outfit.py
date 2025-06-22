@@ -35,3 +35,10 @@ def test_outfit(client: Client, outfit_data: dict[str, Any]) -> None:
         32,
         tzinfo=datetime.timezone.utc,
     )
+    assert len(outfit.worn_items) == 6
+
+    # check seeking/offering counts
+    big_doll_eyes = outfit.worn_items[0]
+    assert big_doll_eyes.name == "Big Doll Eyes Contacts"
+    assert big_doll_eyes.users_offering == 1
+    assert big_doll_eyes.users_seeking == 2

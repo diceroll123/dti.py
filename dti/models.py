@@ -732,6 +732,10 @@ class Item(Object):
         The item's rarity on Neopets.
     nc_value_text: Optional[:class:`str`]
         The item's NC trade value. Can be None if the item is not NC, or if it has not been valued yet. Values courtesy of neopets.com/~owls
+    users_seeking: :class:`int`
+        The number of users seeking this item.
+    users_offering: :class:`int`
+        The number of users offering this item.
 
     """
 
@@ -745,7 +749,20 @@ class Item(Object):
         "nc_value_text",
         "rarity",
         "thumbnail_url",
+        "users_seeking",
+        "users_offering",
     )
+
+    if TYPE_CHECKING:
+        id: int
+        name: str
+        description: str
+        thumbnail_url: str
+        kind: ItemKind
+        rarity: int
+        nc_value_text: str | None
+        users_seeking: int
+        users_offering: int
 
     def __init__(self, *, data: ItemPayload, state: State) -> None:
         self._state = state
@@ -757,6 +774,8 @@ class Item(Object):
         self.appearance = data.get("appearanceOn")
         self.nc_value_text: str | None = data["ncTradeValueText"]
         self.kind: ItemKind
+        self.users_seeking = data["numUsersSeekingThis"]
+        self.users_offering = data["numUsersOfferingThis"]
 
         if data.get("isNc"):
             self.kind = ItemKind.NC

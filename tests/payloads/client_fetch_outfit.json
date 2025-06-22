@@ -18,7 +18,9 @@
                     "rarityIndex": 500,
                     "isNc": true,
                     "isPb": false,
-                    "ncTradeValueText": null
+                    "ncTradeValueText": null,
+                    "numUsersOfferingThis": 1,
+                    "numUsersSeekingThis": 2
                 },
                 {
                     "id": "70745",
@@ -28,7 +30,9 @@
                     "rarityIndex": 500,
                     "isNc": true,
                     "isPb": false,
-                    "ncTradeValueText": null
+                    "ncTradeValueText": null,
+                    "numUsersOfferingThis": 3,
+                    "numUsersSeekingThis": 4
                 },
                 {
                     "id": "52393",
@@ -38,7 +42,9 @@
                     "rarityIndex": 82,
                     "isNc": false,
                     "isPb": false,
-                    "ncTradeValueText": null
+                    "ncTradeValueText": null,
+                    "numUsersOfferingThis": 5,
+                    "numUsersSeekingThis": 6
                 },
                 {
                     "id": "36123",
@@ -48,7 +54,9 @@
                     "rarityIndex": 89,
                     "isNc": false,
                     "isPb": false,
-                    "ncTradeValueText": null
+                    "ncTradeValueText": null,
+                    "numUsersOfferingThis": 7,
+                    "numUsersSeekingThis": 8
                 },
                 {
                     "id": "66321",
@@ -58,7 +66,9 @@
                     "rarityIndex": 86,
                     "isNc": false,
                     "isPb": false,
-                    "ncTradeValueText": null
+                    "ncTradeValueText": null,
+                    "numUsersOfferingThis": 9,
+                    "numUsersSeekingThis": 10
                 },
                 {
                     "id": "47999",
@@ -68,7 +78,9 @@
                     "rarityIndex": 500,
                     "isNc": true,
                     "isPb": false,
-                    "ncTradeValueText": null
+                    "ncTradeValueText": null,
+                    "numUsersOfferingThis": 11,
+                    "numUsersSeekingThis": 12
                 }
             ],
             "closetedItems": [],
