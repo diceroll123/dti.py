@@ -38,6 +38,6 @@ jobs:
       - name: Install deps
         shell: bash
         run: |
-          uv sync --frozen --only-dev
+          uv sync --frozen
 
       - uses: pre-commit/action@v3.0.1

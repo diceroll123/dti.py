@@ -87,7 +87,7 @@ class HTTPClient:
                 )
                 return response.json()
             except json.decoder.JSONDecodeError as e:
-                raise HTTPException(response, e) from e  # type: ignore
+                raise HTTPException(response, e) from e
             except httpx.HTTPError as e:
                 raise HTTPException(e) from e
 
