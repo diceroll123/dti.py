@@ -315,7 +315,7 @@ class AppearanceLayer(Object):
         parent: ItemAppearance | PetAppearance,
         data: AppearanceLayerPayload,
     ) -> None:
-        self._state: State = parent._state  # type: ignore
+        self._state: State = parent._state
         self.id: int = int(data["id"])
         self.parent: ItemAppearance | PetAppearance = parent
         self._image_url: str | None = data["imageUrlV2"]
@@ -361,7 +361,7 @@ class AppearanceLayer(Object):
         """
         if self.image_url is None:
             raise NullAssetImage(f"Layer image missing: {self!r}")
-        return await self._state.http._fetch_binary_data(self.image_url)  # type: ignore
+        return await self._state.http._fetch_binary_data(self.image_url)
 
     def __repr__(self) -> str:
         attrs: list[tuple[str, Any]] = [
