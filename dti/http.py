@@ -18,6 +18,7 @@ from .constants import (
     OUTFIT,
     PET_ON_NEOPETS,
 )
+from .enums import LayerImageSize
 from .errors import (
     HTTPException,
     InvalidColorSpeciesPair,
@@ -108,7 +109,7 @@ class HTTPClient:
         self,
         *,
         id: int,
-        size: LayerImageSize,
+        size: LayerImageSize = LayerImageSize.SIZE_600,
     ) -> PetAppearancePayload:
         data = await self._query(
             GRAB_PET_APPEARANCE_BY_ID,
@@ -128,7 +129,7 @@ class HTTPClient:
         species: Species,
         color: Color,
         pose: PetPose,
-        size: LayerImageSize,
+        size: LayerImageSize = LayerImageSize.SIZE_600,
     ) -> PetAppearancePayload:
         data = await self._query(
             GRAB_PET_APPEARANCE_BY_SPECIES_COLOR_POSE,
@@ -152,7 +153,7 @@ class HTTPClient:
         *,
         species: Species,
         color: Color,
-        size: LayerImageSize,
+        size: LayerImageSize = LayerImageSize.SIZE_600,
     ) -> list[PetAppearancePayload]:
         data = await self._query(
             GRAB_PET_APPEARANCES_BY_IDS,
@@ -178,7 +179,7 @@ class HTTPClient:
     async def fetch_neopet_by_name(
         self,
         name: str,
-        size: LayerImageSize,
+        size: LayerImageSize = LayerImageSize.SIZE_600,
     ) -> FetchedNeopetPayload:
         data = await self._query(
             query=PET_ON_NEOPETS,
@@ -226,7 +227,7 @@ class HTTPClient:
         pose: PetPose,
         item_ids: Sequence[ID] | None = None,
         item_names: Sequence[str] | None = None,
-        size: LayerImageSize | None = None,
+        size: LayerImageSize = LayerImageSize.SIZE_600,
     ) -> FetchAssetsPayload:
         # basically the fullest single-purpose dataset we can grab from DTI
 
@@ -293,7 +294,7 @@ class HTTPClient:
         color: Color,
         /,
         item_ids: list[int],
-        size: LayerImageSize,
+        size: LayerImageSize = LayerImageSize.SIZE_600,
     ) -> FetchAllAppearancesPayload:
         data = await self._query(
             GRAB_ALL_APPEARANCES_FOR_COLOR,

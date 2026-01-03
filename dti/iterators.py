@@ -114,7 +114,7 @@ class ItemSearchToFit(PaginatedDTISearch):
         color_id: int,
         per_page: int = 30,
         item_kind: ItemKind | None = None,
-        size: LayerImageSize | None = None,
+        size: LayerImageSize = LayerImageSize.SIZE_600,
         state: State,
     ) -> None:
         super().__init__(state=state, per_page=per_page)
@@ -124,7 +124,7 @@ class ItemSearchToFit(PaginatedDTISearch):
         self.item_kind = item_kind
         self.offset = 0
         self.per_page = per_page
-        self.size: LayerImageSize = size or LayerImageSize.SIZE_600
+        self.size: LayerImageSize = size
 
     async def fetch_items(self) -> list[ItemPayload]:
         data = await self._state.http._query(  # type: ignore
