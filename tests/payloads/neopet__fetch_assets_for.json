@@ -110,6 +110,8 @@
                 "rarityIndex": 500,
                 "isNc": true,
                 "isPb": false,
+                "numUsersOfferingThis": 1,
+                "numUsersSeekingThis": 2,
                 "appearanceOn": {
                     "id": "item-71171-body-150",
                     "restrictedZones": [],
@@ -137,6 +139,8 @@
                 "rarityIndex": 500,
                 "isNc": true,
                 "isPb": false,
+                "numUsersOfferingThis": 3,
+                "numUsersSeekingThis": 4,
                 "appearanceOn": {
                     "id": "item-70745-body-150",
                     "restrictedZones": [
@@ -170,6 +174,8 @@
                 "rarityIndex": 82,
                 "isNc": false,
                 "isPb": false,
+                "numUsersOfferingThis": 5,
+                "numUsersSeekingThis": 6,
                 "appearanceOn": {
                     "id": "item-52393-body-150",
                     "restrictedZones": [
@@ -208,6 +214,8 @@
                 "rarityIndex": 89,
                 "isNc": false,
                 "isPb": false,
+                "numUsersOfferingThis": 7,
+                "numUsersSeekingThis": 8,
                 "appearanceOn": {
                     "id": "item-36123-body-150",
                     "restrictedZones": [
@@ -251,6 +259,8 @@
                 "rarityIndex": 86,
                 "isNc": false,
                 "isPb": false,
+                "numUsersOfferingThis": 9,
+                "numUsersSeekingThis": 10,
                 "appearanceOn": {
                     "id": "item-66321-body-150",
                     "restrictedZones": [],
@@ -278,6 +288,8 @@
                 "rarityIndex": 500,
                 "isNc": true,
                 "isPb": false,
+                "numUsersOfferingThis": 11,
+                "numUsersSeekingThis": 12,
                 "appearanceOn": {
                     "id": "item-47999-body-150",
                     "restrictedZones": [

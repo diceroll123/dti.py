@@ -74,6 +74,8 @@
                 "rarityIndex": 87,
                 "isNc": false,
                 "isPb": false,
+                "numUsersOfferingThis": 1,
+                "numUsersSeekingThis": 2,
                 "appearanceOn": {
                     "id": "item-84817-body-146",
                     "restrictedZones": [],
@@ -101,6 +103,8 @@
                 "rarityIndex": 87,
                 "isNc": false,
                 "isPb": false,
+                "numUsersOfferingThis": 3,
+                "numUsersSeekingThis": 4,
                 "appearanceOn": {
                     "id": "item-84818-body-146",
                     "restrictedZones": [],
@@ -128,6 +132,8 @@
                 "rarityIndex": 87,
                 "isNc": false,
                 "isPb": false,
+                "numUsersOfferingThis": 5,
+                "numUsersSeekingThis": 6,
                 "appearanceOn": {
                     "id": "item-84819-body-146",
                     "restrictedZones": [],
@@ -155,6 +161,8 @@
                 "rarityIndex": 87,
                 "isNc": false,
                 "isPb": false,
+                "numUsersOfferingThis": 7,
+                "numUsersSeekingThis": 8,
                 "appearanceOn": {
                     "id": "item-84820-body-146",
                     "restrictedZones": [],
