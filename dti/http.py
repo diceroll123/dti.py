@@ -31,7 +31,7 @@ from .errors import (
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
-    from .enums import LayerImageSize, PetPose
+    from .enums import PetPose
     from .models import Color, Species
     from .types import (
         ID,
