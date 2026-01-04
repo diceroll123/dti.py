@@ -547,34 +547,21 @@ class PetAppearance(Object):
         items: Optional[Sequence[:class:`Item`]]
             An optional list of items to render on this appearance.
 
-        Raises
-        ------
-        ~dti.NullAssetImage
-            The species does not exist.
-
         Returns
         -------
         :class:`str`
             The DTI server-side-rendering image url of a Neopet appearance.
 
         """
-        layers: list[AppearanceLayer] = self._render_layers(items)
-        layer_urls: list[str] = []
 
-        try:
-            for layer in layers:
-                if img := layer.image_url:
-                    layer_urls.append(img)
-                    continue
-                raise TypeError
-        except TypeError as e:
-            missing: list[AppearanceLayer] = [
-                layer for layer in layers if layer.image_url is None
-            ]
-            raise NullAssetImage(
-                f"Null image URLs found in this render: {missing}",
-            ) from e
-        return utils.build_layers_url(layer_urls, size=self.size)
+        item_ids = [item.id for item in items or []]
+
+        return utils.outfit_image_url(
+            species=self.species.id,
+            color=self.color.id,
+            pose=self.pose,
+            item_ids=item_ids,
+        )
 
     async def read(self, *, items: Sequence[Item] | None = None) -> bytes:
         """|coro|
