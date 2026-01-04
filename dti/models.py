@@ -1022,10 +1022,9 @@ class Neopet:
         *,
         state: State,
         pet_name: str,
-        size: LayerImageSize,
+        size: LayerImageSize = LayerImageSize.SIZE_600,
     ) -> Neopet:
         """Returns the data for a specific neopet, by name."""
-        size = size or LayerImageSize.SIZE_600
 
         pet_on_neo: FetchedNeopetPayload = await state.http.fetch_neopet_by_name(
             name=pet_name,
@@ -1304,8 +1303,8 @@ class Outfit(Object):
         self,
         *,
         state: State,
-        size: LayerImageSize,
         data: OutfitPayload,
+        size: LayerImageSize = LayerImageSize.SIZE_600,
     ) -> None:
         self._state = state
         self.id: int = int(data["id"])
