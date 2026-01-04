@@ -13,8 +13,7 @@ def test_outfit_image_url() -> None:
         item_ids=[74967, 37002, 71526],
     )
     assert (
-        url
-        == "https://impress.openneo.net/outfits/new.png?"
+        url == "https://impress.openneo.net/outfits/new.png?"
         "species=1&color=8&pose=HAPPY_FEM&style=90030&"
         "objects%5B%5D=74967&objects%5B%5D=37002&objects%5B%5D=71526"
     )
