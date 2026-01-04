@@ -1,15 +1,39 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
-from urllib.parse import urlencode, urljoin, urlparse
+from urllib.parse import quote, urlencode, urljoin, urlparse
+
+from dti.enums import LayerImageSize
 
 if TYPE_CHECKING:
     from .enums import PetPose
 
 __all__: tuple[str, ...] = (
+    "build_layers_url",
     "outfit_image_url",
     "url_sanitizer",
 )
+
+
+def build_layers_url(
+    layers: list[str],
+    /,
+    size: LayerImageSize = LayerImageSize.SIZE_600,
+) -> str:
+    """Convenience method to make the server-side-rendering URL of the provided layer URLs.
+
+    Parameters
+    ----------
+    layers: List[:class:`str`]
+        The image urls, in ascending order of Zone ID's
+    size: Optional[:class:`LayerImageSize`]
+        The desired size for the render. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
+
+    """
+    size_str = str(size or LayerImageSize.SIZE_600)[-3:]
+    joined = ",".join(quote(layer) for layer in layers)
+
+    return f"https://impress-2020.openneo.net/api/outfitImage?size={size_str}&layerUrls={joined}"
 
 
 def outfit_image_url(
