@@ -14,8 +14,6 @@ fragment ItemProperties on Item {
   rarityIndex
   isNc
   isPb
-  numUsersOfferingThis
-  numUsersSeekingThis
 }"""
 
 FRAGMENT_USER_PROPERTIES = """

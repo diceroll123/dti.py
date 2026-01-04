@@ -17,9 +17,7 @@
                     "thumbnailUrl": "https://images.neopets.com/items/mall_acc_largedolleyes.gif",
                     "rarityIndex": 500,
                     "isNc": true,
-                    "isPb": false,
-                    "numUsersOfferingThis": 1,
-                    "numUsersSeekingThis": 2
+                    "isPb": false
                 },
                 {
                     "id": "70745",
@@ -28,9 +26,7 @@
                     "thumbnailUrl": "https://images.neopets.com/items/mall_shirt_darkrainbow.gif",
                     "rarityIndex": 500,
                     "isNc": true,
-                    "isPb": false,
-                    "numUsersOfferingThis": 3,
-                    "numUsersSeekingThis": 4
+                    "isPb": false
                 },
                 {
                     "id": "52393",
@@ -39,9 +35,7 @@
                     "thumbnailUrl": "//images.neopets.com/items/mcc_eleggearboots.gif",
                     "rarityIndex": 82,
                     "isNc": false,
-                    "isPb": false,
-                    "numUsersOfferingThis": 5,
-                    "numUsersSeekingThis": 6
+                    "isPb": false
                 },
                 {
                     "id": "36123",
@@ -50,9 +44,7 @@
                     "thumbnailUrl": "//images.neopets.com/items/clo_derby_hat.gif",
                     "rarityIndex": 89,
                     "isNc": false,
-                    "isPb": false,
-                    "numUsersOfferingThis": 7,
-                    "numUsersSeekingThis": 8
+                    "isPb": false
                 },
                 {
                     "id": "66321",
@@ -61,9 +53,7 @@
                     "thumbnailUrl": "https://images.neopets.com/items/clo_krawk_foreman_cane.gif",
                     "rarityIndex": 86,
                     "isNc": false,
-                    "isPb": false,
-                    "numUsersOfferingThis": 9,
-                    "numUsersSeekingThis": 10
+                    "isPb": false
                 },
                 {
                     "id": "47999",
@@ -72,9 +62,7 @@
                     "thumbnailUrl": "//images.neopets.com/items/mall_winterprince_pants.gif",
                     "rarityIndex": 500,
                     "isNc": true,
-                    "isPb": false,
-                    "numUsersOfferingThis": 11,
-                    "numUsersSeekingThis": 12
+                    "isPb": false
                 }
             ],
             "closetedItems": [],
