@@ -38,7 +38,7 @@ def outfit_image_url(
         The alt style ID of the pet.
     name: :class:`str` | None
         The name of the pet.
-    item_ids: :class:`list`[ :class:`int`] | None
+    item_ids: :class:`list`[:class:`int`] | None
         A list of item ids to add to the pet.
 
     Returns
