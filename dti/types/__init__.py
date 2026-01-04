@@ -61,8 +61,6 @@ class BaseItemPayload(_BaseObject):
     isNc: bool
     isPb: bool
     rarityIndex: str
-    numUsersOfferingThis: int
-    numUsersSeekingThis: int
 
 
 class ItemPayload(BaseItemPayload):
