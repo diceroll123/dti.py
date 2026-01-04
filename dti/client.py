@@ -224,8 +224,8 @@ class Client:
         color: int | str | Color,
         item_names: list[str] | None = None,
         item_ids: list[int] | None = None,
-        size: LayerImageSize | None = None,
         pose: PetPose | None = None,
+        size: LayerImageSize = LayerImageSize.SIZE_600,
     ) -> Neopet:
         """|coro|
 
@@ -242,10 +242,10 @@ class Client:
             A list of item names to search for + add to the items of the Neopet.
         item_ids: Optional[List[:class:`int`]]
             A list of item IDs to search for + add to the items of the Neopet.
-        size: Optional[:class:`LayerImageSize`]
-            The desired size for the render. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
         pose: Optional[:class:`PetPose`]
             The desired pet pose for the render. If one is not supplied, it may be chosen at random.
+        size: :class:`LayerImageSize`
+            The desired size for the render. Defaults to `LayerImageSize.SIZE_600`.
 
         Raises
         ------
@@ -298,7 +298,7 @@ class Client:
         self,
         pet_name: str,
         /,
-        size: LayerImageSize | None = None,
+        size: LayerImageSize = LayerImageSize.SIZE_600,
     ) -> Neopet:
         """|coro|
 
@@ -308,8 +308,8 @@ class Client:
         ----------
         pet_name: :class:`str`
             The name of the pet you'd like to find.
-        size: Optional[:class:`LayerImageSize`]
-            The desired size for the render. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
+        size: :class:`LayerImageSize`
+            The desired size for the render. Defaults to `LayerImageSize.SIZE_600`.
 
         Raises
         ------
@@ -324,7 +324,6 @@ class Client:
             The corresponding Neopet that matches the name provided.
 
         """
-        size = size or LayerImageSize.SIZE_600
 
         return await Neopet._fetch_by_name(  # type: ignore
             pet_name=pet_name,
@@ -336,7 +335,7 @@ class Client:
         self,
         outfit_id: int,
         /,
-        size: LayerImageSize | None = None,
+        size: LayerImageSize = LayerImageSize.SIZE_600,
     ) -> Outfit:
         """|coro|
 
@@ -346,8 +345,8 @@ class Client:
         ----------
         outfit_id: :class:`int`
             The outfit ID of the outfit on DTI.
-        size: Optional[:class:`LayerImageSize`]
-            The desired size for the render. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
+        size: :class:`LayerImageSize`
+            The desired size for the render. Defaults to `LayerImageSize.SIZE_600`.
 
         Raises
         ------
@@ -361,8 +360,6 @@ class Client:
 
         """
         await self._state._lock_and_update()  # type: ignore
-
-        size = size or LayerImageSize.SIZE_600
 
         data: OutfitPayload = await self._state.http.fetch_outfit(
             id=outfit_id,
@@ -381,8 +378,8 @@ class Client:
         species_id: int | None = None,
         color_id: int | None = None,
         item_ids: list[int] | None = None,
-        size: LayerImageSize | None = None,
         per_page: int | None = None,
+        size: LayerImageSize = LayerImageSize.SIZE_600,
     ) -> DTISearch:
         """|coro|
 
@@ -396,8 +393,6 @@ class Client:
             The ID of the species you're trying to find items for. Only used when `query` is supplied. If so, this is mandatory.
         color_id: Optional[:class:`int`]
             The ID of the color you're trying to find items for. Only used when `query` is supplied. If so, this is mandatory.
-        size: Optional[:class:`LayerImageSize`]
-            The desired size for the render. Only used when `query` is supplied. If so, this is optional. If size is not supplied, it defaults to `LayerImageSize.SIZE_600`.
         item_kind: Optional[:class:`ItemKind`]
             The desired kind of item you're trying to find. Can significantly reduce your search query.
         per_page: Optional[:class:`int`]
@@ -408,6 +403,8 @@ class Client:
             A list of item names to search for. Case sensitive, and must be an exact search. Invalid results will be `None`.
         item_ids: Optional[List[:class:`int`]]
             A list of item IDs to search for + add to the items of the Neopet. ***All*** item IDs ***must*** be valid, or :class:`InvalidItemID` will be raised.
+        size: :class:`LayerImageSize`
+            The desired size for the render. Defaults to `LayerImageSize.SIZE_600`.
 
         Raises
         ------
@@ -460,7 +457,7 @@ class Client:
         species: int | str | Species,
         color: int | str | Color,
         pose: PetPose,
-        size: LayerImageSize | None = None,
+        size: LayerImageSize = LayerImageSize.SIZE_600,
     ) -> PetAppearance:
         """|coro|
 
@@ -474,8 +471,8 @@ class Client:
             The name, or ID, or Color object of the desired Color. Case-insensitive.
         pose: :class:`PetPose`
             The desired pet pose for the appearance.
-        size: Optional[:class:`LayerImageSize`]
-            The desired size for the pet appearance image layers. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
+        size: :class:`LayerImageSize`
+            The desired size for the pet appearance image layers. Defaults to `LayerImageSize.SIZE_600`.
 
         Raises
         ------
@@ -505,8 +502,6 @@ class Client:
         if not valid:
             raise InvalidColorSpeciesPair("Invalid Species/Color/Pose provided")
 
-        size = size or LayerImageSize.SIZE_600
-
         data: PetAppearancePayload = await self._state.http.fetch_appearance(
             species=species,
             color=color,
@@ -520,7 +515,7 @@ class Client:
         self,
         appearance_id: int,
         /,
-        size: LayerImageSize | None = None,
+        size: LayerImageSize = LayerImageSize.SIZE_600,
     ) -> PetAppearance:
         """|coro|
 
@@ -530,8 +525,8 @@ class Client:
         ----------
         appearance_id: :class:`int`
             The appearance ID you'd like.
-        size: Optional[:class:`LayerImageSize`]
-            The desired size for the pet appearance image layers. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
+        size: :class:`LayerImageSize`
+            The desired size for the pet appearance image layers. Defaults to `LayerImageSize.SIZE_600`.
 
         Raises
         ------
@@ -544,8 +539,6 @@ class Client:
             The corresponding pet appearance.
 
         """
-        size = size or LayerImageSize.SIZE_600
-
         data: PetAppearancePayload = await self._state.http.fetch_appearance_by_id(
             id=appearance_id,
             size=size,
@@ -558,7 +551,7 @@ class Client:
         *,
         species: int | str | Species,
         color: int | str | Color,
-        size: LayerImageSize | None = None,
+        size: LayerImageSize = LayerImageSize.SIZE_600,
     ) -> list[PetAppearance]:
         """|coro|
 
@@ -570,8 +563,8 @@ class Client:
             The name, or ID, or Species object of the desired Species. Case-insensitive.
         color: Union[:class:`int`, :class:`str`, :class:`Color`]
             The name, or ID, or Color object of the desired Color. Case-insensitive.
-        size: Optional[:class:`LayerImageSize`]
-            The desired size for the pet appearance layers. If one is not supplied, it defaults to `LayerImageSize.SIZE_600`.
+        size: :class:`LayerImageSize`
+            The desired size for the pet appearance layers. Defaults to `LayerImageSize.SIZE_600`.
 
         Raises
         ------
@@ -598,8 +591,6 @@ class Client:
 
         if not valid:
             raise InvalidColorSpeciesPair("Invalid Species/Color provided")
-
-        size = size or LayerImageSize.SIZE_600
 
         data: list[PetAppearancePayload] = await self._state.http.fetch_appearances(
             species=species,
