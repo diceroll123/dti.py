@@ -25,6 +25,7 @@ fragment UserProperties on User {
 FRAGMENT_PET_APPEARANCE = """
 fragment PetAppearanceForOutfitPreview on PetAppearance {
   id
+  petStateId
   pose
   bodyId
   isGlitched

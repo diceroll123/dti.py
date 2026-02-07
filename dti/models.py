@@ -396,7 +396,9 @@ class PetAppearance(Object):
     Attributes
     ----------
     id: :class:`str`
-        The pet appearance's ID.
+        The pet appearance's ID. In the case of an alt style, this won't match pet_state_id.
+    pet_state_id: :class:`int`
+        The pet appearance's pet state ID. For alt styles, this differs from id.
     body_id: :class:`int`
         The pet appearance's body ID.
     color: :class:`Color`
@@ -423,6 +425,7 @@ class PetAppearance(Object):
         "is_glitched",
         "layers",
         "pose",
+        "pet_state_id",
         "restricted_zones",
         "size",
         "species",
@@ -437,6 +440,7 @@ class PetAppearance(Object):
     ) -> None:
         self._state = state
         self.id: str = data["id"]
+        self.pet_state_id: int = int(data["petStateId"])
         self.body_id: int = int(data["bodyId"])
         self.is_glitched: bool = data["isGlitched"]
         self.size: LayerImageSize = size

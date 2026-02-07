@@ -42,6 +42,7 @@ class AppearanceLayerPayload(_BaseObject):
 class PetAppearancePayload(_BaseObject):
     bodyId: str
     isGlitched: bool
+    petStateId: str
     color: ColorPayload
     species: SpeciesPayload
     pose: PetPoseType
