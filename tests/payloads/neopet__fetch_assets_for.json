@@ -2,6 +2,7 @@
     "data": {
         "petAppearance": {
             "id": "4252",
+            "petStateId": "4252",
             "pose": "HAPPY_MASC",
             "bodyId": "150",
             "isGlitched": false,

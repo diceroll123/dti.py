@@ -3,6 +3,7 @@
         "outfit": {
             "id": "902792",
             "name": "Alex (Clockwork Orange)",
+            "petStateId": "4252",
             "createdAt": "2015-05-06T02:37:32.000Z",
             "updatedAt": "2021-12-22T11:28:23.000Z",
             "creator": {
@@ -68,6 +69,7 @@
             "closetedItems": [],
             "petAppearance": {
                 "id": "4252",
+                "petStateId": "4252",
                 "pose": "HAPPY_MASC",
                 "bodyId": "150",
                 "isGlitched": false,

@@ -2,6 +2,7 @@
     "data": {
         "petAppearance": {
             "id": "1499",
+            "petStateId": "1499",
             "pose": "UNCONVERTED",
             "bodyId": "155",
             "isGlitched": false,
