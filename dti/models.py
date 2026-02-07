@@ -395,7 +395,7 @@ class PetAppearance(Object):
 
     Attributes
     ----------
-    id: :class:`int`
+    id: :class:`str`
         The pet appearance's ID.
     body_id: :class:`int`
         The pet appearance's body ID.
@@ -436,7 +436,7 @@ class PetAppearance(Object):
         data: PetAppearancePayload,
     ) -> None:
         self._state = state
-        self.id: int = int(data["id"])
+        self.id: str = data["id"]
         self.body_id: int = int(data["bodyId"])
         self.is_glitched: bool = data["isGlitched"]
         self.size: LayerImageSize = size
