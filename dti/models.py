@@ -721,6 +721,10 @@ class Item(Object):
         The kind of item this is. Can be `NC` for Neocash, `NP` for Neopoint items, or `PB` for paintbrush items.
     rarity: :class:`int`
         The item's rarity on Neopets.
+    users_offering: :class:`int`
+        The number of users offering this item in trade lists.
+    users_seeking: :class:`int`
+        The number of users seeking this item in trade lists.
 
     """
 
@@ -733,6 +737,8 @@ class Item(Object):
         "name",
         "rarity",
         "thumbnail_url",
+        "users_offering",
+        "users_seeking",
     )
 
     if TYPE_CHECKING:
@@ -742,6 +748,8 @@ class Item(Object):
         thumbnail_url: str
         kind: ItemKind
         rarity: int
+        users_seeking: int
+        users_offering: int
 
     def __init__(self, *, data: ItemPayload, state: State) -> None:
         self._state = state
@@ -752,6 +760,8 @@ class Item(Object):
         self._appearance: ItemAppearance | None = None
         self.appearance = data.get("appearanceOn")
         self.kind: ItemKind
+        self.users_seeking = data["numUsersSeekingThis"]
+        self.users_offering = data["numUsersOfferingThis"]
 
         if data.get("isNc"):
             self.kind = ItemKind.NC
@@ -798,6 +808,8 @@ class Item(Object):
             ("name", self.name),
             ("kind", self.kind),
             ("rarity", self.rarity),
+            ("users_seeking", self.users_seeking),
+            ("users_offering", self.users_offering),
         )
 
         inner = " ".join("{}={!r}".format(*t) for t in attrs)
